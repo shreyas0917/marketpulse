@@ -1,0 +1,39 @@
+{{- if .Values.api.rollout.enabled }}
+{{- $a := .Values.api.rollout.analysis }}
+# Canary health (spec section 8). Queries only role="canary" series (copied from the pod label by
+# the PodMonitor relabelling). "No data" fails the measurement, so an untested canary is never
+# promoted.
+apiVersion: argoproj.io/v1alpha1
+kind: AnalysisTemplate
+metadata:
+  name: api-canary-health
+  labels:
+    {{- include "mp.labels" . | nindent 4 }}
+    app.kubernetes.io/component: api
+spec:
+  metrics:
+    - name: canary-error-ratio
+      interval: {{ $a.interval }}
+      count: {{ $a.count }}
+      failureLimit: {{ $a.failureLimit }}
+      successCondition: len(result) > 0 && !isNaN(result[0]) && result[0] < {{ $a.maxErrorRatio }}
+      provider:
+        prometheus:
+          address: {{ $a.prometheusAddress }}
+          query: |
+            (sum(rate(http_requests_total{namespace="{{ .Release.Namespace }}", route="/v1/quotes/{symbol}", role="canary", status=~"5.."}[2m])) or vector(0))
+            /
+            sum(rate(http_requests_total{namespace="{{ .Release.Namespace }}", route="/v1/quotes/{symbol}", role="canary"}[2m]))
+    - name: canary-latency-good-ratio
+      interval: {{ $a.interval }}
+      count: {{ $a.count }}
+      failureLimit: {{ $a.failureLimit }}
+      successCondition: len(result) > 0 && !isNaN(result[0]) && result[0] >= {{ $a.minLatencyGoodRatio }}
+      provider:
+        prometheus:
+          address: {{ $a.prometheusAddress }}
+          query: |
+            sum(rate(http_request_duration_seconds_bucket{namespace="{{ .Release.Namespace }}", route="/v1/quotes/{symbol}", role="canary", le="0.25"}[2m]))
+            /
+            sum(rate(http_request_duration_seconds_count{namespace="{{ .Release.Namespace }}", route="/v1/quotes/{symbol}", role="canary"}[2m]))
+{{- end }}

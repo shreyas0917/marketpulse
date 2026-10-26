@@ -7,3 +7,11 @@ image:
 
 ingress:
   host: marketpulse.localtest.me
+
+api:
+  # Pod-template environment for the API. Changing a value here and pushing to main is a release:
+  # Argo CD syncs it and Argo Rollouts runs the canary. scripts/canary.sh edits this block.
+  env:
+    RELEASE_NOTE: "initial"
+  rollout:
+    enabled: true
