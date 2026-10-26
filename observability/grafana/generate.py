@@ -426,7 +426,252 @@ def ingestion_dashboard() -> dict[str, Any]:
     return dashboard("marketpulse-ingestion", "MarketPulse / Ingestion", p, ["ingestion"])
 
 
+# (sli, title, target, good expr, total expr) - must match scripts/gen-slo-rules.py
+SLO_PANELS = (
+    (
+        "availability",
+        "Availability",
+        0.999,
+        f'sum(rate(http_requests_total{{{Q}, status!~"5.."}}[$__range]))',
+        f"sum(rate(http_requests_total{{{Q}}}[$__range]))",
+    ),
+    (
+        "latency",
+        "Latency < 250 ms",
+        0.99,
+        f'sum(rate(http_request_duration_seconds_bucket{{{Q}, le="0.25"}}[$__range]))',
+        f"sum(rate(http_request_duration_seconds_count{{{Q}}}[$__range]))",
+    ),
+    (
+        "freshness",
+        "Freshness < 2 s",
+        0.99,
+        'sum(rate(quote_age_seconds_bucket{le="2.0"}[$__range]))',
+        "sum(rate(quote_age_seconds_count[$__range]))",
+    ),
+    (
+        "ingestion_lag",
+        "Ingestion lag < 1 s",
+        0.99,
+        'sum(rate(ingestion_lag_seconds_bucket{le="1.0"}[$__range]))',
+        "(sum(rate(ingestion_lag_seconds_count[$__range])) + "
+        'sum(rate(events_processed_total{result="dead_lettered"}[$__range])))',
+    ),
+)
+
+
+def slo_dashboard() -> dict[str, Any]:
+    lay = Layout()
+    p: list[Panel] = [lay.row("Alerts")]
+    p.append(
+        lay.place(
+            stat(
+                "Paging alerts firing",
+                'count(ALERTS{alertstate="firing", severity="page"}) or vector(0)',
+                "none",
+                [(1, "red")],
+            ),
+            12,
+            4,
+        )
+    )
+    p.append(
+        lay.place(
+            stat(
+                "Ticket/warning alerts firing",
+                'count(ALERTS{alertstate="firing", severity=~"ticket|warning"}) or vector(0)',
+                "none",
+                [(1, "orange")],
+            ),
+            12,
+            4,
+        )
+    )
+    for sli, title, target, good, total in SLO_PANELS:
+        budget = round(1 - target, 6)
+        p.append(lay.row(f"{title} - target {target * 100:g}% (budget {budget * 100:g}%)"))
+        p.append(
+            lay.place(
+                stat(
+                    "SLI over selected range",
+                    f"{good} / {total}",
+                    "percentunit",
+                    [(target, "green")],
+                    base_color="red",
+                    decimals=3,
+                    description="Good events / all events over the dashboard time range. "
+                    "Set the range to 30d for the real SLO window.",
+                ),
+                6,
+                6,
+            )
+        )
+        p.append(
+            lay.place(
+                stat(
+                    "Error budget remaining (selected range)",
+                    f"1 - ((1 - ({good} / {total})) / {budget})",
+                    "percentunit",
+                    [(0.25, "orange"), (0.5, "green")],
+                    base_color="red",
+                    decimals=1,
+                    description="1 - (error ratio / budget). Below 0 the budget is exhausted.",
+                ),
+                6,
+                6,
+            )
+        )
+        p.append(
+            lay.place(
+                timeseries(
+                    "Burn rate (error ratio / budget)",
+                    [
+                        (f"sli:{sli}:error_ratio_rate5m / {budget}", "5m"),
+                        (f"sli:{sli}:error_ratio_rate1h / {budget}", "1h"),
+                        (f"sli:{sli}:error_ratio_rate6h / {budget}", "6h"),
+                    ],
+                    "none",
+                    thresholds=[(1, "orange"), (6, "red"), (14.4, "purple")],
+                    description="1 = budget used exactly by the end of 30 days; "
+                    "14.4 and 6 are the paging thresholds.",
+                ),
+                12,
+                6,
+            )
+        )
+    return dashboard("marketpulse-slo", "MarketPulse / SLO overview", p, ["slo"])
+
+
+NS = 'namespace="marketpulse"'
+
+
+def platform_dashboard() -> dict[str, Any]:
+    """Kubernetes view (kind/EKS only): needs kube-state-metrics and cAdvisor metrics."""
+    lay = Layout()
+    p: list[Panel] = [lay.row("Workloads")]
+    p.append(
+        lay.place(
+            stat(
+                "Pod restarts (1h)",
+                f"sum(increase(kube_pod_container_status_restarts_total{{{NS}}}[1h])) or vector(0)",
+                "none",
+                [(1, "orange"), (5, "red")],
+            ),
+            8,
+            4,
+        )
+    )
+    p.append(
+        lay.place(
+            stat(
+                "Unavailable replicas",
+                f"(sum(kube_deployment_status_replicas_unavailable{{{NS}}}) or vector(0))",
+                "none",
+                [(1, "red")],
+            ),
+            8,
+            4,
+        )
+    )
+    p.append(
+        lay.place(
+            stat(
+                "Pods not ready",
+                f'(sum(kube_pod_status_ready{{{NS}, condition="false"}}) or vector(0))',
+                "none",
+                [(1, "red")],
+            ),
+            8,
+            4,
+        )
+    )
+    p.append(
+        lay.place(
+            timeseries(
+                "HPA desired vs current replicas",
+                [
+                    (
+                        f"kube_horizontalpodautoscaler_status_desired_replicas{{{NS}}}",
+                        "{{horizontalpodautoscaler}} desired",
+                    ),
+                    (
+                        f"kube_horizontalpodautoscaler_status_current_replicas{{{NS}}}",
+                        "{{horizontalpodautoscaler}} current",
+                    ),
+                ],
+                "none",
+            ),
+            12,
+            8,
+        )
+    )
+    p.append(
+        lay.place(
+            timeseries(
+                "Pod restarts",
+                [
+                    (
+                        f"sum by (pod) ("
+                        f"increase(kube_pod_container_status_restarts_total{{{NS}}}[5m]))",
+                        "{{pod}}",
+                    )
+                ],
+                "none",
+            ),
+            12,
+            8,
+        )
+    )
+    p.append(lay.row("Resources"))
+    p.append(
+        lay.place(
+            timeseries(
+                "CPU usage vs limit by pod",
+                [
+                    (
+                        f"sum by (pod) ("
+                        f'rate(container_cpu_usage_seconds_total{{{NS}, container!=""}}[2m]))',
+                        "{{pod}} used",
+                    ),
+                    (
+                        f"sum by (pod) ("
+                        f'kube_pod_container_resource_limits{{{NS}, resource="cpu"}})',
+                        "{{pod}} limit",
+                    ),
+                ],
+                "short",
+            ),
+            12,
+            8,
+        )
+    )
+    p.append(
+        lay.place(
+            timeseries(
+                "Memory working set vs limit by pod",
+                [
+                    (
+                        f'sum by (pod) (container_memory_working_set_bytes{{{NS}, container!=""}})',
+                        "{{pod}} used",
+                    ),
+                    (
+                        f"sum by (pod) ("
+                        f'kube_pod_container_resource_limits{{{NS}, resource="memory"}})',
+                        "{{pod}} limit",
+                    ),
+                ],
+                "bytes",
+            ),
+            12,
+            8,
+        )
+    )
+    return dashboard("marketpulse-platform", "MarketPulse / Platform", p, ["platform"])
+
+
 DASHBOARDS = {
+    "platform.json": platform_dashboard,
+    "slo-overview.json": slo_dashboard,
     "api.json": api_dashboard,
     "ingestion.json": ingestion_dashboard,
 }
