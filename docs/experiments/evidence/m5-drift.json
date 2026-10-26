@@ -1,0 +1,5 @@
+{"test": "argocd-drift-detection", "resource": "deploy/marketpulse-redis",
+ "manual_change": "kubectl scale --replicas=2 at 2026-10-26T07:36:46Z",
+ "argocd_operation": {"phase": "Succeeded", "startedAt": "2026-10-26T07:40:47Z"},
+ "result": "self-heal reverted spec.replicas to 1 (ready=1); extra pod terminated",
+ "note": "reconciliation interval 60s + selfHeal backoff; reverted within ~4 min"}

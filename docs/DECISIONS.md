@@ -238,3 +238,41 @@ Pinned in `deploy/kind/versions.env` and `deploy/kind/cluster.yaml`.
   `observability/prometheus/rules/*.yml` and `observability/grafana/dashboards/*.json` into
   `deploy/helm/marketpulse/files/`. `make lint` fails if the copies differ from the originals, so
   compose and kind always load the same rules and dashboards.
+
+## D29 — Argo CD diffs server-side (`ServerSideDiff`)
+
+- **Problem:** after the helm → Argo CD handover, 15 resources stayed `OutOfSync` although every
+  sync "succeeded". The diffs were all API-server defaulting: Service `clusterIP`/`ipFamilies`,
+  `protocol: TCP` on ports, Deployment `progressDeadlineSeconds`/`strategy`, pod-template defaults,
+  HPA `scaleUp` behaviour, PodMonitor `action: replace`. Argo CD's client-side diff compared the
+  rendered chart with the live object and saw every default as drift.
+- **Options:** (a) template every default into the chart (impossible for pod-template defaults);
+  (b) long `ignoreDifferences` lists per kind; (c) server-side diff.
+- **Choice:** (c): `controller.diff.server.side: "true"` on the controller plus
+  `ServerSideApply=true`, `ServerSideDiff=true`, `RespectIgnoreDifferences=true` on the Application.
+  The diff is computed from a server-side-apply dry run, so fields owned by the API server are not
+  drift. The app went `Synced/Healthy` immediately; drift detection (D-check in PROGRESS) still works.
+- **Note:** the sync option alone was not enough in chart 10.11.1; the controller flag was required.
+
+## D30 — Orphaned pre-Rollout Deployment removed by hand
+
+- **Found:** the M4 `helm install` created `Deployment/marketpulse-api` and `Service/marketpulse-api`.
+  When M5 switched the API to a `Rollout`, Argo CD did not prune them: it never created them, so
+  they carried no `argocd.argoproj.io/tracking-id` and were treated as unmanaged, not as stale.
+  Their 2 pods matched the stable Service's label selector and had no `role` label, so they took a
+  share of "stable" traffic that was invisible to the role-filtered canary queries.
+- **Choice:** delete both by hand; `scripts/gitops-up.sh` already removes the helm release secret
+  but should also delete the superseded Deployment/Service (follow-up in the final report).
+- **Lesson:** a GitOps handover must either adopt or delete every object the previous tool created;
+  "not in the manifest" is not the same as "pruned".
+
+## D31 — First good-canary run discarded (no-data abort during a host outage)
+
+- **What happened:** the first `canary.sh good` run passed the first analysis and reached 50 %
+  weight; then Docker Desktop stopped (host-level, outside the cluster), the k6 load died, and the
+  second analysis saw **no canary requests**. `successCondition` requires `len(result) > 0`, so both
+  metrics failed with empty values and Rollouts aborted.
+- **Decision:** this is the no-data guard working exactly as specified (an untested canary is never
+  promoted), but it is not evidence that a good release is promoted. The run is recorded here, the
+  commit was reverted so Git matches the running stable version, and the good canary was re-run
+  with sustained traffic for the acceptance check. Only the re-run's numbers appear in PROGRESS.

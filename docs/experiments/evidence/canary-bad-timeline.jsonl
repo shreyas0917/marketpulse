@@ -1,0 +1,18 @@
+{"ts": "2026-10-26T07:46:36.694Z", "epoch": 1793000796, "event": "pushed 10d5b1cf8cf139e9ac37a068f3b9bf40ca124065 to main"}
+{"ts": "2026-10-26T07:46:39.341Z", "epoch": 1793000799, "event": "rollout phase|step|weight|abort|stableRS|currentHash = Healthy|6|0||56c4fb6458|56c4fb6458"}
+{"ts": "2026-10-26T07:46:39.604Z", "epoch": 1793000799, "event": "canary ingress weight = 0"}
+{"ts": "2026-10-26T07:46:46.804Z", "epoch": 1793000806, "event": "rollout phase|step|weight|abort|stableRS|currentHash = Progressing|6|0||56c4fb6458|56c4fb6458"}
+{"ts": "2026-10-26T07:47:26.630Z", "epoch": 1793000846, "event": "rollout phase|step|weight|abort|stableRS|currentHash = Healthy|6|0||56c4fb6458|56c4fb6458"}
+{"ts": "2026-10-26T07:47:40.407Z", "epoch": 1793000860, "event": "rollout phase|step|weight|abort|stableRS|currentHash = Progressing|0|0||56c4fb6458|57cbbb97cc"}
+{"ts": "2026-10-26T07:48:11.087Z", "epoch": 1793000891, "event": "canary ingress weight = 10"}
+{"ts": "2026-10-26T07:48:14.437Z", "epoch": 1793000894, "event": "rollout phase|step|weight|abort|stableRS|currentHash = Progressing|1|10||56c4fb6458|57cbbb97cc"}
+{"ts": "2026-10-26T07:48:17.923Z", "epoch": 1793000897, "event": "rollout phase|step|weight|abort|stableRS|currentHash = Paused|1|10||56c4fb6458|57cbbb97cc"}
+{"ts": "2026-10-26T07:53:14.699Z", "epoch": 1793001194, "event": "rollout phase|step|weight|abort|stableRS|currentHash = Progressing|2|10||56c4fb6458|57cbbb97cc"}
+{"ts": "2026-10-26T07:53:17.195Z", "epoch": 1793001197, "event": "analysisrun marketpulse-api-57cbbb97cc-2-2|Running"}
+{"ts": "2026-10-26T07:54:16.610Z", "epoch": 1793001256, "event": "analysisrun marketpulse-api-57cbbb97cc-2-2|Failed"}
+{"ts": "2026-10-26T07:54:16.927Z", "epoch": 1793001256, "event": "analysis failed"}
+{"ts": "2026-10-26T07:54:19.665Z", "epoch": 1793001259, "event": "rollout phase|step|weight|abort|stableRS|currentHash = Degraded|0|0|true|56c4fb6458|57cbbb97cc"}
+{"ts": "2026-10-26T07:54:19.926Z", "epoch": 1793001259, "event": "canary ingress weight = 0"}
+{"ts": "2026-10-26T07:54:20.201Z", "epoch": 1793001260, "event": "100% stable (canary weight 0)"}
+{"ts": "2026-10-26T07:54:32.331Z", "epoch": 1793001272, "event": "pushed revert c82c426b24a5073c4f2b2cc6a32aab6936071da5"}
+{"ts": "2026-10-26T07:55:14.579Z", "epoch": 1793001314, "event": "rollout after revert: Healthy|6|0||56c4fb6458|56c4fb6458"}
