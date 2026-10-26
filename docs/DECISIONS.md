@@ -126,3 +126,61 @@ Argo CD, Argo Rollouts) are recorded when they are added in M4/M5.
 - **Choice:** `SYMBOLS` includes `SMOKETEST`; `PRODUCER_SYMBOLS` leaves it out.
 - **Reason:** the smoke test must prove *its* event became the quote. With a symbol the producer
   never publishes, the returned `event_id` is unambiguous.
+
+## D16 — The producer may reach Redis (NetworkPolicy)
+
+- **Spec:** "only the API and worker may reach Redis".
+- **Problem:** locally the queue *is* Redis (Redis Streams), and the producer must publish to it.
+- **Options:** (a) route producer events through the API; (b) run a second Redis just for the
+  queue; (c) allow the producer on the Redis port.
+- **Choice:** (c). The Redis NetworkPolicy allows exactly `api`, `worker` and `producer` pods;
+  everything else (verified with an intruder pod) is blocked.
+- **Reason:** simplest option that keeps the spec's data flow. On AWS the producer only talks to
+  SQS, so the rule "only API and worker reach the store" holds there as written.
+
+## D17 — Histogram `le` selectors use Prometheus 3's normalised form
+
+- **Problem:** the spec writes `le="2"` and `le="1"`. Prometheus 3 normalises classic-histogram
+  `le` labels to float form on ingestion (`"2.0"`, `"1.0"`; `"0.25"` is unchanged), so those
+  selectors matched nothing: the freshness and ingestion-lag SLIs, burn alerts and dashboard panels
+  were silently empty. Found during the M3 dashboard check (`make verify-stack`).
+- **Choice:** use `le="0.25"`, `le="2.0"`, `le="1.0"` everywhere; `tests/unit/test_slo_buckets.py`
+  fails if any rule, dashboard or canary query uses an `le` that is not a bucket boundary in that
+  exact form.
+- **Reason:** the bucket boundaries in the spec are unchanged; only their string form differs.
+
+## D18 — One runbook per SLI for burn alerts, anchored per severity
+
+- **Choice:** `AvailabilityFastBurn` and `AvailabilitySlowBurn` share
+  `docs/runbooks/availability-burn.md`, with `#fast-burn` / `#slow-burn` anchors (same for the other
+  SLIs). Gap alerts each have their own runbook. `make rules-test` checks every alert's
+  `runbook_url` file **and** anchor exist.
+- **Reason:** the spec's own example points `AvailabilityFastBurn` at `availability-burn.md`; the
+  diagnosis for fast and slow burn of the same SLI is the same.
+- `runbook_url` is a full GitHub URL so it is clickable from Alertmanager and Grafana.
+
+## D19 — Extra gap alerts
+
+- **Choice:** besides the three gap alerts in the spec, `DeadLetterQueueNotEmpty` (the spec says DLQ
+  depth "is alerted on separately") and `TargetDown` (a scrape failure hides SLI data).
+- `QuoteTrafficAbsent` uses `(sum(rate(...[5m])) or vector(0)) == 0` rather than plain `absent()`,
+  because a counter series keeps existing after traffic stops.
+
+## D20 — Fast-burn alerts have no `for:` clause
+
+- **Reason:** follows the SRE Workbook: the short window already guards against blips and gives fast
+  reset. Gap alerts use the `for` durations from the spec.
+
+## D21 — Liveness of the worker means "the loop is turning"
+
+- **Found while designing drill 4:** the heartbeat was only refreshed after a successful poll, so a
+  Redis outage would fail `/health/live` after 30 s and Kubernetes would restart healthy workers;
+  and a slow batch (50 events with injected latency) could look hung.
+- **Choice:** refresh the heartbeat per message and after a handled dependency error. A dependency
+  outage is not a hung process (same reasoning as API readiness ignoring Redis).
+
+## D22 — Recreate the consumer group after a Redis restart
+
+- **Found while designing drill 4:** dev Redis has no persistence, so a restart loses the stream and
+  the `workers` group. The worker cached "group exists" and would fail with `NOGROUP` forever.
+- **Choice:** on `NOGROUP`, recreate the group and retry once. Covered by a unit test.

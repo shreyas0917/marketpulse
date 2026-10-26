@@ -33,9 +33,21 @@ Machine: Windows 11, Docker Desktop 29.6.1 (8 CPU, 10 GB), Git Bash.
 | Grafana API lists API and Ingestion dashboards; their queries return data | ✅ 2 dashboards, 30/30 queries with data | 2026-10-26 | `make verify-stack` (`/api/search`, `/api/dashboards/uid/*`, `/api/v1/query`) |
 | `make down` removes everything; second `make up` works | ✅ 0 containers/networks/volumes left; second up healthy, smoke passed | 2026-10-26 | `make down && docker ps -a --filter name=marketpulse-`, `make up && make smoke` |
 
-## M3 — SLOs and alerting
+## M3 — SLOs and alerting ✅ (tag `m3-done`)
 
-Not started.
+| Check | Status | Date | Verified with |
+|---|---|---|---|
+| `make rules-test` passes (`promtool check rules` + `promtool test rules`) | ✅ 37 rules, 3 test files | 2026-10-26 | `make rules-test` |
+| Rule tests cover a must-fire and a must-not-fire case for each SLI | ✅ availability, latency, freshness, ingestion lag (+ slow-burn-only and recovery cases, and every gap alert) | 2026-10-26 | `observability/prometheus/tests/*.yml` |
+| Every alert has a `runbook_url` pointing to an existing file | ✅ 17/17 (file and anchor) | 2026-10-26 | `uv run python scripts/check_runbooks.py` (part of `make rules-test`) |
+| Live: under load, `FAULT_API_ERROR_RATE=0.2` fires `AvailabilityFastBurn` (Alertmanager API); clearing resolves it | ✅ fault on 03:32:32Z → `startsAt` 03:32:47Z (15 s), seen in Alertmanager 03:32:58Z; cleared 03:34:07Z → resolved 04:03:21Z (29 m 14 s, held by the 6h/30m pair) | 2026-10-26 | `scripts/m3-live-check.sh` (50 req/s k6); evidence `docs/experiments/evidence/m3-*.json` |
+| Live: stopping the worker fires the stall alert | ✅ worker stopped 04:03:23Z → `IngestionStalled` `startsAt` 04:05:42Z (2 m 19 s; `for: 2m`); worker started 04:05:55Z → resolved 04:06:16Z | 2026-10-26 | `scripts/m3-live-check.sh` |
+| SLO overview dashboard provisioned; every query returns data | ✅ after fixing `le` selectors (DECISIONS D17) | 2026-10-26 | `make verify-stack VERIFY_ARGS="--dashboards marketpulse-slo,marketpulse-api,marketpulse-ingestion"` |
+
+Note on the 15 s detection: the stack had been up only ~2 minutes under load, so the 1 h and 6 h
+windows contained ~2 minutes of history. With a full hour of clean traffic, 20 % errors need about
+4.3 minutes to push the 1 h ratio over 14.4 × 0.1 % (0.2 × t / 60 > 0.0144). Measured, not
+modelled, numbers come from the kind drills in M6.
 
 ## M4 — Local Kubernetes
 
