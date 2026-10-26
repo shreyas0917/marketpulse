@@ -81,6 +81,16 @@ class RedisStreamQueue:
         return {_s(e["message_id"]): int(e["times_delivered"]) for e in entries}
 
     def receive(self, max_messages: int, wait_ms: int) -> list[Message]:
+        try:
+            return self._receive(max_messages, wait_ms)
+        except redis.ResponseError as exc:
+            # Redis restarted without persistence: the stream and consumer group are gone.
+            if "NOGROUP" not in str(exc):
+                raise
+            self._group_ready = False
+            return self._receive(max_messages, wait_ms)
+
+    def _receive(self, max_messages: int, wait_ms: int) -> list[Message]:
         self.ensure_group()
         messages: list[Message] = []
 

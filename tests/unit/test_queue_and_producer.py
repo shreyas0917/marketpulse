@@ -52,6 +52,19 @@ def test_redis_queue_respects_min_idle(sync_redis: object) -> None:
     assert q.receive(10, 0) == []  # still pending, not idle long enough to reclaim
 
 
+def test_receive_recovers_after_redis_loses_group(
+    queue: RedisStreamQueue, sync_redis: object
+) -> None:
+    queue.publish([event("AAA")])
+    assert len(queue.receive(10, 0)) == 1
+    # Redis restarts without persistence; the next XADD recreates the stream but not the group,
+    # while the long-running worker still believes the group exists.
+    sync_redis.flushall()  # type: ignore[attr-defined]
+    sync_redis.xadd("events", {"data": event("BBB").to_json()})  # type: ignore[attr-defined]
+    messages = queue.receive(10, 0)
+    assert [m.attempts for m in messages] == [1]
+
+
 def test_ensure_group_idempotent(queue: RedisStreamQueue) -> None:
     queue.ensure_group()
     other = RedisStreamQueue(queue._client, consumer="other")
