@@ -1,0 +1,190 @@
+# promtool unit tests: ingestion-lag SLI (le=1, dead-letters count as bad) and the gap alerts.
+rule_files:
+  - ../rules/slo-recording.yml
+  - ../rules/slo-alerts.yml
+  - ../rules/gap-alerts.yml
+evaluation_interval: 1m
+
+
+tests:
+  # INGESTION LAG MUST FIRE: every written event is on time, but 1 in 4 events is dead-lettered.
+  - interval: 1m
+    input_series:
+      - series: 'ingestion_lag_seconds_bucket{le="1.0"}'
+        values: '0+600x60'
+      - series: 'ingestion_lag_seconds_count'
+        values: '0+600x60'
+      - series: 'events_processed_total{result="dead_lettered"}'
+        values: '0+200x60'
+    promql_expr_test:
+      - expr: round(sli:ingestion_lag:error_ratio_rate5m, 0.000001)
+        eval_time: 30m
+        exp_samples:
+          - labels: '{slo="ingestion_lag", slo_target="0.99"}'
+            value: 0.25
+    alert_rule_test:
+      - eval_time: 30m
+        alertname: IngestionLagFastBurn
+        exp_alerts:
+          - exp_labels: {severity: page, slo: ingestion_lag, slo_target: "0.99", window: 1h/5m}
+            exp_annotations: &lag1h
+              summary: "Too many events take longer than 1 s to ingest (14.4x burn over 1h/5m)"
+              description: "At this rate 2% of the 30-day ingestion_lag error budget is used within 1h."
+              runbook_url: https://github.com/shreyas0917/marketpulse/blob/main/docs/runbooks/ingestion-lag-burn.md#fast-burn
+          - exp_labels: {severity: page, slo: ingestion_lag, slo_target: "0.99", window: 6h/30m}
+            exp_annotations: &lag6h
+              summary: "Too many events take longer than 1 s to ingest (6x burn over 6h/30m)"
+              description: "At this rate 5% of the 30-day ingestion_lag error budget is used within 6h."
+              runbook_url: https://github.com/shreyas0917/marketpulse/blob/main/docs/runbooks/ingestion-lag-burn.md#fast-burn
+
+  # INGESTION LAG MUST FIRE: slow worker, 30 % of events take longer than 1 s.
+  - interval: 1m
+    input_series:
+      - series: 'ingestion_lag_seconds_bucket{le="1.0"}'
+        values: '0+420x60'
+      - series: 'ingestion_lag_seconds_count'
+        values: '0+600x60'
+      - series: 'events_processed_total{result="dead_lettered"}'
+        values: '0+0x60'
+    alert_rule_test:
+      - eval_time: 10m
+        alertname: IngestionLagFastBurn
+        exp_alerts:
+          - exp_labels: {severity: page, slo: ingestion_lag, slo_target: "0.99", window: 1h/5m}
+            exp_annotations: *lag1h
+          - exp_labels: {severity: page, slo: ingestion_lag, slo_target: "0.99", window: 6h/30m}
+            exp_annotations: *lag6h
+
+  # INGESTION LAG MUST NOT FIRE: on time, nothing dead-lettered.
+  - interval: 1m
+    input_series:
+      - series: 'ingestion_lag_seconds_bucket{le="1.0"}'
+        values: '0+600x60'
+      - series: 'ingestion_lag_seconds_count'
+        values: '0+600x60'
+      - series: 'events_processed_total{result="dead_lettered"}'
+        values: '0+0x60'
+    alert_rule_test:
+      - eval_time: 30m
+        alertname: IngestionLagFastBurn
+        exp_alerts: []
+      - eval_time: 30m
+        alertname: IngestionLagSlowBurn
+        exp_alerts: []
+
+  # IngestionStalled fires after 2 m with old events waiting (exported by the producer
+  # while the worker is down) and not before; a healthy queue does not fire.
+  - interval: 1m
+    input_series:
+      - series: 'queue_oldest_event_age_seconds{job="producer"}'
+        values: '0 30 90 150 210 270'
+      - series: 'queue_oldest_event_age_seconds{job="other-env"}'
+        values: '0x5'
+    alert_rule_test:
+      - eval_time: 2m
+        alertname: IngestionStalled
+        exp_alerts: []
+      - eval_time: 4m
+        alertname: IngestionStalled
+        exp_alerts:
+          - exp_labels: {severity: page, slo: ingestion_lag}
+            exp_annotations: &stalled
+              summary: "Oldest queued event is more than 10 s old: ingestion has stalled"
+              description: "No ingestion-lag ratio is computed while nothing is processed, so this alert covers a stalled or stopped worker."
+              runbook_url: https://github.com/shreyas0917/marketpulse/blob/main/docs/runbooks/ingestion-stalled.md
+  - interval: 1m
+    input_series:
+      - series: 'queue_oldest_event_age_seconds{job="worker"}'
+        values: '0.3 0.2 0.5 0.1 0.4 0.2'
+    alert_rule_test:
+      - eval_time: 5m
+        alertname: IngestionStalled
+        exp_alerts: []
+
+  # QuoteStoreDown fires after 1 m of failed store calls on any pod; healthy store does not.
+  - interval: 1m
+    input_series:
+      - series: 'quote_store_up{instance="api-1"}'
+        values: '1 0 0 0 0'
+      - series: 'quote_store_up{instance="api-2"}'
+        values: '1 1 1 1 1'
+    alert_rule_test:
+      - eval_time: 3m
+        alertname: QuoteStoreDown
+        exp_alerts:
+          - exp_labels: {severity: warning, slo: freshness}
+            exp_annotations: &storedown
+              summary: "An API pod cannot reach Redis; quotes are served from the local cache or as 503"
+              description: "Degraded mode only lasts STALE_QUOTE_MAX_AGE_SECONDS (30 s); after that every quote is 503."
+              runbook_url: https://github.com/shreyas0917/marketpulse/blob/main/docs/runbooks/quote-store-down.md
+  - interval: 1m
+    input_series:
+      - series: 'quote_store_up{instance="api-1"}'
+        values: '1x5'
+    alert_rule_test:
+      - eval_time: 4m
+        alertname: QuoteStoreDown
+        exp_alerts: []
+
+  # DeadLetterQueueNotEmpty fires on any DLQ backlog; an empty DLQ does not.
+  - interval: 1m
+    input_series:
+      - series: 'dlq_depth{job="worker"}'
+        values: '0 3 3 3 3'
+    alert_rule_test:
+      - eval_time: 3m
+        alertname: DeadLetterQueueNotEmpty
+        exp_alerts:
+          - exp_labels: {severity: ticket, slo: ingestion_lag}
+            exp_annotations: &dlq
+              summary: "Events are waiting in the dead-letter queue"
+              description: "Dead-lettered events never became quotes. Inspect, fix the cause, then redrive."
+              runbook_url: https://github.com/shreyas0917/marketpulse/blob/main/docs/runbooks/dead-letter-queue.md
+  - interval: 1m
+    input_series:
+      - series: 'dlq_depth{job="worker"}'
+        values: '0x5'
+    alert_rule_test:
+      - eval_time: 4m
+        alertname: DeadLetterQueueNotEmpty
+        exp_alerts: []
+
+  # QuoteTrafficAbsent fires when there is no quote traffic at all, not when there is.
+  - interval: 1m
+    input_series:
+      - series: 'up{job="api"}'
+        values: '1x10'
+    alert_rule_test:
+      - eval_time: 6m
+        alertname: QuoteTrafficAbsent
+        exp_alerts:
+          - exp_labels: {severity: ticket, slo: availability}
+            exp_annotations: &absent
+              summary: "No quote requests for 5 minutes: the SLIs have no data"
+              description: "Either nobody is calling the API or requests are not reaching it."
+              runbook_url: https://github.com/shreyas0917/marketpulse/blob/main/docs/runbooks/quote-traffic-absent.md
+  - interval: 1m
+    input_series:
+      - series: 'http_requests_total{route="/v1/quotes/{symbol}", method="GET", status="200"}'
+        values: '0+600x10'
+    alert_rule_test:
+      - eval_time: 8m
+        alertname: QuoteTrafficAbsent
+        exp_alerts: []
+
+  # TargetDown fires for a MarketPulse job that cannot be scraped for 2 m.
+  - interval: 1m
+    input_series:
+      - series: 'up{job="worker", instance="worker:9100"}'
+        values: '1 0 0 0 0'
+      - series: 'up{job="api", instance="api:8000"}'
+        values: '1x4'
+    alert_rule_test:
+      - eval_time: 4m
+        alertname: TargetDown
+        exp_alerts:
+          - exp_labels: {severity: ticket, job: worker, instance: "worker:9100"}
+            exp_annotations: &target
+              summary: "A MarketPulse scrape target is down"
+              description: "Prometheus cannot scrape one of the MarketPulse services."
+              runbook_url: https://github.com/shreyas0917/marketpulse/blob/main/docs/runbooks/target-down.md

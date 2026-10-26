@@ -1,0 +1,94 @@
+# promtool unit tests: availability SLI (target 99.9 %, budget 0.001).
+rule_files:
+  - ../rules/slo-recording.yml
+  - ../rules/slo-alerts.yml
+evaluation_interval: 1m
+
+
+tests:
+  # MUST FIRE: 20 % of quote requests fail (the canary demo's bad version).
+  - interval: 1m
+    input_series:
+      - series: 'http_requests_total{route="/v1/quotes/{symbol}", method="GET", status="200"}'
+        values: '0+480x60'
+      - series: 'http_requests_total{route="/v1/quotes/{symbol}", method="GET", status="500"}'
+        values: '0+120x60'
+      - series: 'http_requests_total{route="/health/ready", method="GET", status="200"}'
+        values: '0+10000x60'
+    promql_expr_test:
+      - expr: round(sli:availability:error_ratio_rate5m, 0.000001)
+        eval_time: 30m
+        exp_samples:
+          - labels: '{slo="availability", slo_target="0.999"}'
+            value: 0.2
+    alert_rule_test:
+      - eval_time: 30m
+        alertname: AvailabilityFastBurn
+        exp_alerts:
+          - exp_labels: {severity: page, slo: availability, slo_target: "0.999", window: 1h/5m}
+            exp_annotations: &fast1h
+              summary: "Quote API is returning too many 5xx responses (14.4x burn over 1h/5m)"
+              description: "At this rate 2% of the 30-day availability error budget is used within 1h."
+              runbook_url: https://github.com/shreyas0917/marketpulse/blob/main/docs/runbooks/availability-burn.md#fast-burn
+          - exp_labels: {severity: page, slo: availability, slo_target: "0.999", window: 6h/30m}
+            exp_annotations: &fast6h
+              summary: "Quote API is returning too many 5xx responses (6x burn over 6h/30m)"
+              description: "At this rate 5% of the 30-day availability error budget is used within 6h."
+              runbook_url: https://github.com/shreyas0917/marketpulse/blob/main/docs/runbooks/availability-burn.md#fast-burn
+      - eval_time: 30m
+        alertname: AvailabilitySlowBurn
+        exp_alerts:
+          - exp_labels: {severity: ticket, slo: availability, slo_target: "0.999", window: 3d/6h}
+            exp_annotations: &slow
+              summary: "Quote API is returning too many 5xx responses (1x burn over 3d/6h)"
+              description: "At this rate 10% of the 30-day availability error budget is used within 3d."
+              runbook_url: https://github.com/shreyas0917/marketpulse/blob/main/docs/runbooks/availability-burn.md#slow-burn
+
+  # MUST NOT FIRE: 0.05 % errors is inside budget. 4xx and health checks are never errors.
+  - interval: 1m
+    input_series:
+      - series: 'http_requests_total{route="/v1/quotes/{symbol}", method="GET", status="200"}'
+        values: '0+1999x60'
+      - series: 'http_requests_total{route="/v1/quotes/{symbol}", method="GET", status="404"}'
+        values: '0+500x60'
+      - series: 'http_requests_total{route="/v1/quotes/{symbol}", method="GET", status="503"}'
+        values: '0+1x60'
+      - series: 'http_requests_total{route="/health/ready", method="GET", status="503"}'
+        values: '0+10000x60'
+    alert_rule_test:
+      - eval_time: 30m
+        alertname: AvailabilityFastBurn
+        exp_alerts: []
+      - eval_time: 30m
+        alertname: AvailabilitySlowBurn
+        exp_alerts: []
+
+  # SLOW BURN ONLY: 0.5 % errors burns budget 5x - a ticket, not a page.
+  - interval: 1m
+    input_series:
+      - series: 'http_requests_total{route="/v1/quotes/{symbol}", method="GET", status="200"}'
+        values: '0+995x420'
+      - series: 'http_requests_total{route="/v1/quotes/{symbol}", method="GET", status="500"}'
+        values: '0+5x420'
+    alert_rule_test:
+      - eval_time: 7h
+        alertname: AvailabilityFastBurn
+        exp_alerts: []
+      - eval_time: 7h
+        alertname: AvailabilitySlowBurn
+        exp_alerts:
+          - exp_labels: {severity: ticket, slo: availability, slo_target: "0.999", window: 3d/6h}
+            exp_annotations: *slow
+
+  # MUST NOT FIRE once recovered: errors stopped 30 m ago, so the short windows reset the page
+  # even though the 1 h window still holds the errors.
+  - interval: 1m
+    input_series:
+      - series: 'http_requests_total{route="/v1/quotes/{symbol}", method="GET", status="200"}'
+        values: '0+480x60'
+      - series: 'http_requests_total{route="/v1/quotes/{symbol}", method="GET", status="500"}'
+        values: '0+120x30 3600+0x30'
+    alert_rule_test:
+      - eval_time: 60m
+        alertname: AvailabilityFastBurn
+        exp_alerts: []
