@@ -1,0 +1,9 @@
+{
+ "api_replicas_max": 6,
+ "api_replicas_start": 2,
+ "worker_replicas_max": 4,
+ "queue_depth_baseline": 0.0,
+ "queue_depth_peak": 347.0,
+ "ingestion_lag_p99_peak_s": 1.904614647912632,
+ "queue_drain_seconds_after_burst": 7.0
+}
