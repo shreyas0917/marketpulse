@@ -216,5 +216,24 @@ def test_run_loop_survives_queue_errors(
         return original()
 
     worker.run_once = once  # type: ignore[method-assign]
+    worker.last_heartbeat -= 100
     worker.run()
     assert calls["n"] == 1
+    assert worker.is_live()  # a Redis outage must not fail liveness
+
+
+def test_heartbeat_advances_per_message(queue: RedisStreamQueue, writer: QuoteWriter) -> None:
+    worker = make_worker(queue, writer, worker_block_ms=0)
+    beats: list[float] = []
+    original = worker.handle
+
+    def handle(message):  # type: ignore[no-untyped-def]
+        beats.append(worker.last_heartbeat)
+        return original(message)
+
+    worker.handle = handle  # type: ignore[method-assign]
+    queue.publish([event("AAA"), event("BBB"), event("CCC")])
+    worker.run_once()
+    assert len(beats) == 3
+    assert beats == sorted(beats)
+    assert worker.last_heartbeat >= beats[-1]

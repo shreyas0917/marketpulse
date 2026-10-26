@@ -102,9 +102,10 @@ class Worker:
         messages = self.queue.receive(
             self.settings.worker_batch_size, self.settings.worker_block_ms
         )
+        self.last_heartbeat = time.monotonic()
         for message in messages:
             self.handle(message)
-        self.last_heartbeat = time.monotonic()
+            self.last_heartbeat = time.monotonic()
         return len(messages)
 
     def is_live(self) -> bool:
@@ -120,7 +121,10 @@ class Worker:
             try:
                 self.run_once()
             except (redis.RedisError, OSError):
+                # A dependency outage is not a hung process: keep liveness passing so Kubernetes
+                # does not restart workers that will recover on their own when Redis returns.
                 log.warning("worker_queue_error", exc_info=True)
+                self.last_heartbeat = time.monotonic()
                 self._stop.wait(1.0)
         log.info("worker_stopped")
 
