@@ -113,3 +113,16 @@ Argo CD, Argo Rollouts) are recorded when they are added in M4/M5.
 
 - **Choice:** commits are authored with the owner's git identity only, with no co-author trailers.
 - **Reason:** owner's instruction.
+
+## D14 — Host ports for the compose stack
+
+- **Problem:** ports 3000 and 8000 were already taken on the build machine by unrelated projects.
+- **Choice:** publish on a dedicated range: API 18000, worker 19100, producer 19200, Prometheus
+  19090, Alertmanager 19093, Grafana 13000. Each can be overridden with `MP_*_PORT`.
+- **Reason:** avoids conflicts without touching other containers; container ports stay standard.
+
+## D15 — Reserved smoke-test symbol
+
+- **Choice:** `SYMBOLS` includes `SMOKETEST`; `PRODUCER_SYMBOLS` leaves it out.
+- **Reason:** the smoke test must prove *its* event became the quote. With a symbol the producer
+  never publishes, the returned `event_id` is unambiguous.

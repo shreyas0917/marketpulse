@@ -23,9 +23,15 @@ Machine: Windows 11, Docker Desktop 29.6.1 (8 CPU, 10 GB), Git Bash.
 | `docker build` succeeds; container runs non-root | ✅ uid 10001 | 2026-10-26 | `make image && docker run --rm --entrypoint id marketpulse:dev` |
 | CI workflow passes on GitHub for pushed `main` | ✅ run 40260646828 | 2026-10-26 | `gh run list --branch main`, `gh run watch` |
 
-## M2 — Local stack
+## M2 — Local stack ✅ (tag `m2-done`)
 
-Not started.
+| Check | Status | Date | Verified with |
+|---|---|---|---|
+| `make up` brings every container to healthy within 2 minutes | ✅ 49 s (7/7 healthy) | 2026-10-26 | `time make up` (`docker compose up --wait --wait-timeout 120`). An earlier run took 154 s while an unrelated 7 GB process left the host with 0.8 GB free RAM; re-measured once memory was available. |
+| `make smoke` passes (health 200, produced event served within 5 s, `/metrics` reachable) | ✅ 10 passed | 2026-10-26 | `make smoke` |
+| Every Prometheus target `up == 1` (Prometheus HTTP API) | ✅ 5/5 targets up | 2026-10-26 | `make verify-stack` (`/api/v1/targets`, `up == 0` query) |
+| Grafana API lists API and Ingestion dashboards; their queries return data | ✅ 2 dashboards, 30/30 queries with data | 2026-10-26 | `make verify-stack` (`/api/search`, `/api/dashboards/uid/*`, `/api/v1/query`) |
+| `make down` removes everything; second `make up` works | ✅ 0 containers/networks/volumes left; second up healthy, smoke passed | 2026-10-26 | `make down && docker ps -a --filter name=marketpulse-`, `make up && make smoke` |
 
 ## M3 — SLOs and alerting
 
