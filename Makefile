@@ -91,5 +91,7 @@ deploy-local: ## Build + kind-load the image and helm upgrade --install onto kin
 gitops-up: ## Install Argo CD + Argo Rollouts on kind and register the Application (M5)
 	scripts/gitops-up.sh
 
-drill:
-	@echo "target '$@' is added in a later milestone" >&2; exit 1
+N ?=
+drill: ## Run reliability experiment N from spec section 9 on kind (1-6, 8): make drill N=4
+	@test -n "$(N)" || { echo "usage: make drill N=<1-6|8>" >&2; exit 2; }
+	scripts/drills/run.sh $(N)

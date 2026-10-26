@@ -1,0 +1,1 @@
+{"alert": "QuoteStoreDown", "state": "firing", "observed_at": "2026-10-26T09:23:35+00:00", "waited_since": "2026-10-26T09:22:50+00:00", "starts_at": ["2026-10-26T09:23:29.992Z"], "labels": [{"alertname": "QuoteStoreDown", "prometheus": "monitoring/kps", "severity": "warning", "slo": "freshness"}]}

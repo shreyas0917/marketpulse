@@ -1,0 +1,778 @@
+{
+ "exported_at": "2026-10-26T09:20:00+00:00",
+ "start": "2026-10-26T09:18:11Z",
+ "end": "2026-10-26T09:19:59Z",
+ "step": "10s",
+ "queries": {
+  "sum by (result) (rate(events_processed_total[1m]))": {
+   "resultType": "matrix",
+   "result": [
+    {
+     "metric": {
+      "result": "dead_lettered"
+     },
+     "values": [
+      [
+       1793006291,
+       "0"
+      ],
+      [
+       1793006301,
+       "0"
+      ],
+      [
+       1793006311,
+       "0.37352241134468067"
+      ],
+      [
+       1793006321,
+       "0.3735290784113713"
+      ],
+      [
+       1793006331,
+       "0.37352827446431197"
+      ],
+      [
+       1793006341,
+       "0.373534941397656"
+      ],
+      [
+       1793006351,
+       "0.3735365495906339"
+      ],
+      [
+       1793006361,
+       "0"
+      ],
+      [
+       1793006371,
+       "0"
+      ],
+      [
+       1793006381,
+       "0"
+      ],
+      [
+       1793006391,
+       "0"
+      ]
+     ]
+    },
+    {
+     "metric": {
+      "result": "ok"
+     },
+     "values": [
+      [
+       1793006291,
+       "19.981598527882227"
+      ],
+      [
+       1793006301,
+       "20.04019960399208"
+      ],
+      [
+       1793006311,
+       "19.981000452090807"
+      ],
+      [
+       1793006321,
+       "19.981397299711254"
+      ],
+      [
+       1793006331,
+       "19.980402416096645"
+      ],
+      [
+       1793006341,
+       "20.00099885188279"
+      ],
+      [
+       1793006351,
+       "19.961399300087294"
+      ],
+      [
+       1793006361,
+       "20.02080083203328"
+      ],
+      [
+       1793006371,
+       "20.02160172813825"
+      ],
+      [
+       1793006381,
+       "20.00139849978326"
+      ],
+      [
+       1793006391,
+       "20.00080003200128"
+      ]
+     ]
+    },
+    {
+     "metric": {
+      "result": "retried"
+     },
+     "values": [
+      [
+       1793006291,
+       "0"
+      ],
+      [
+       1793006301,
+       "0.3727623586205057"
+      ],
+      [
+       1793006311,
+       "1.4933449087335124"
+      ],
+      [
+       1793006321,
+       "1.4933716275996798"
+      ],
+      [
+       1793006331,
+       "1.4933680174673656"
+      ],
+      [
+       1793006341,
+       "1.4933950944452965"
+      ],
+      [
+       1793006351,
+       "1.2000960076806144"
+      ],
+      [
+       1793006361,
+       "0"
+      ],
+      [
+       1793006371,
+       "0"
+      ],
+      [
+       1793006381,
+       "0"
+      ],
+      [
+       1793006391,
+       "0"
+      ]
+     ]
+    }
+   ]
+  },
+  "max(dlq_depth)": {
+   "resultType": "matrix",
+   "result": [
+    {
+     "metric": {},
+     "values": [
+      [
+       1793006291,
+       "0"
+      ],
+      [
+       1793006301,
+       "0"
+      ],
+      [
+       1793006311,
+       "20"
+      ],
+      [
+       1793006321,
+       "20"
+      ],
+      [
+       1793006331,
+       "20"
+      ],
+      [
+       1793006341,
+       "20"
+      ],
+      [
+       1793006351,
+       "20"
+      ],
+      [
+       1793006361,
+       "20"
+      ],
+      [
+       1793006371,
+       "20"
+      ],
+      [
+       1793006381,
+       "20"
+      ],
+      [
+       1793006391,
+       "20"
+      ]
+     ]
+    }
+   ]
+  },
+  "max(queue_depth)": {
+   "resultType": "matrix",
+   "result": [
+    {
+     "metric": {},
+     "values": [
+      [
+       1793006291,
+       "0"
+      ],
+      [
+       1793006301,
+       "20"
+      ],
+      [
+       1793006311,
+       "20"
+      ],
+      [
+       1793006321,
+       "0"
+      ],
+      [
+       1793006331,
+       "0"
+      ],
+      [
+       1793006341,
+       "0"
+      ],
+      [
+       1793006351,
+       "0"
+      ],
+      [
+       1793006361,
+       "0"
+      ],
+      [
+       1793006371,
+       "0"
+      ],
+      [
+       1793006381,
+       "0"
+      ],
+      [
+       1793006391,
+       "0"
+      ]
+     ]
+    }
+   ]
+  },
+  "sli:ingestion_lag:error_ratio_rate5m": {
+   "resultType": "matrix",
+   "result": [
+    {
+     "metric": {
+      "__name__": "sli:ingestion_lag:error_ratio_rate5m",
+      "slo": "ingestion_lag",
+      "slo_target": "0.99"
+     },
+     "values": [
+      [
+       1793006291,
+       "0"
+      ],
+      [
+       1793006301,
+       "0"
+      ],
+      [
+       1793006311,
+       "0"
+      ],
+      [
+       1793006321,
+       "0.003493377939506881"
+      ],
+      [
+       1793006331,
+       "0.0034927687009019825"
+      ],
+      [
+       1793006341,
+       "0.0034921656684829827"
+      ],
+      [
+       1793006351,
+       "0.0034896972395574988"
+      ],
+      [
+       1793006361,
+       "0.0034903170871614098"
+      ],
+      [
+       1793006371,
+       "0.0034909542548063888"
+      ],
+      [
+       1793006381,
+       "0.0034860479276963563"
+      ],
+      [
+       1793006391,
+       "0.0034848174571755486"
+      ]
+     ]
+    }
+   ]
+  }
+ },
+ "alerts_series": {
+  "resultType": "matrix",
+  "result": [
+   {
+    "metric": {
+     "__name__": "ALERTS",
+     "alertname": "AvailabilitySlowBurn",
+     "alertstate": "firing",
+     "severity": "ticket",
+     "slo": "availability",
+     "slo_target": "0.999",
+     "window": "3d/6h"
+    },
+    "values": [
+     [
+      1793006291,
+      "1"
+     ],
+     [
+      1793006301,
+      "1"
+     ],
+     [
+      1793006311,
+      "1"
+     ],
+     [
+      1793006321,
+      "1"
+     ],
+     [
+      1793006331,
+      "1"
+     ],
+     [
+      1793006341,
+      "1"
+     ],
+     [
+      1793006351,
+      "1"
+     ],
+     [
+      1793006361,
+      "1"
+     ],
+     [
+      1793006371,
+      "1"
+     ],
+     [
+      1793006381,
+      "1"
+     ],
+     [
+      1793006391,
+      "1"
+     ]
+    ]
+   },
+   {
+    "metric": {
+     "__name__": "ALERTS",
+     "alertname": "DeadLetterQueueNotEmpty",
+     "alertstate": "firing",
+     "severity": "ticket",
+     "slo": "ingestion_lag"
+    },
+    "values": [
+     [
+      1793006371,
+      "1"
+     ],
+     [
+      1793006381,
+      "1"
+     ],
+     [
+      1793006391,
+      "1"
+     ]
+    ]
+   },
+   {
+    "metric": {
+     "__name__": "ALERTS",
+     "alertname": "DeadLetterQueueNotEmpty",
+     "alertstate": "pending",
+     "severity": "ticket",
+     "slo": "ingestion_lag"
+    },
+    "values": [
+     [
+      1793006311,
+      "1"
+     ],
+     [
+      1793006321,
+      "1"
+     ],
+     [
+      1793006331,
+      "1"
+     ],
+     [
+      1793006341,
+      "1"
+     ],
+     [
+      1793006351,
+      "1"
+     ],
+     [
+      1793006361,
+      "1"
+     ]
+    ]
+   },
+   {
+    "metric": {
+     "__name__": "ALERTS",
+     "alertname": "FreshnessSlowBurn",
+     "alertstate": "firing",
+     "severity": "ticket",
+     "slo": "freshness",
+     "slo_target": "0.99",
+     "window": "3d/6h"
+    },
+    "values": [
+     [
+      1793006291,
+      "1"
+     ],
+     [
+      1793006301,
+      "1"
+     ],
+     [
+      1793006311,
+      "1"
+     ],
+     [
+      1793006321,
+      "1"
+     ],
+     [
+      1793006331,
+      "1"
+     ],
+     [
+      1793006341,
+      "1"
+     ],
+     [
+      1793006351,
+      "1"
+     ],
+     [
+      1793006361,
+      "1"
+     ],
+     [
+      1793006371,
+      "1"
+     ],
+     [
+      1793006381,
+      "1"
+     ],
+     [
+      1793006391,
+      "1"
+     ]
+    ]
+   },
+   {
+    "metric": {
+     "__name__": "ALERTS",
+     "alertname": "IngestionLagSlowBurn",
+     "alertstate": "firing",
+     "severity": "ticket",
+     "slo": "ingestion_lag",
+     "slo_target": "0.99",
+     "window": "3d/6h"
+    },
+    "values": [
+     [
+      1793006291,
+      "1"
+     ],
+     [
+      1793006301,
+      "1"
+     ],
+     [
+      1793006311,
+      "1"
+     ],
+     [
+      1793006321,
+      "1"
+     ],
+     [
+      1793006331,
+      "1"
+     ],
+     [
+      1793006341,
+      "1"
+     ],
+     [
+      1793006351,
+      "1"
+     ],
+     [
+      1793006361,
+      "1"
+     ],
+     [
+      1793006371,
+      "1"
+     ],
+     [
+      1793006381,
+      "1"
+     ],
+     [
+      1793006391,
+      "1"
+     ]
+    ]
+   },
+   {
+    "metric": {
+     "__name__": "ALERTS",
+     "alertname": "LatencySlowBurn",
+     "alertstate": "firing",
+     "severity": "ticket",
+     "slo": "latency",
+     "slo_target": "0.99",
+     "window": "3d/6h"
+    },
+    "values": [
+     [
+      1793006291,
+      "1"
+     ],
+     [
+      1793006301,
+      "1"
+     ],
+     [
+      1793006311,
+      "1"
+     ],
+     [
+      1793006321,
+      "1"
+     ],
+     [
+      1793006331,
+      "1"
+     ],
+     [
+      1793006341,
+      "1"
+     ],
+     [
+      1793006351,
+      "1"
+     ],
+     [
+      1793006361,
+      "1"
+     ],
+     [
+      1793006371,
+      "1"
+     ],
+     [
+      1793006381,
+      "1"
+     ],
+     [
+      1793006391,
+      "1"
+     ]
+    ]
+   }
+  ]
+ },
+ "alertmanager_active": [
+  {
+   "annotations": {
+    "description": "Dead-lettered events never became quotes. Inspect, fix the cause, then redrive.",
+    "runbook_url": "https://github.com/shreyas0917/marketpulse/blob/main/docs/runbooks/dead-letter-queue.md",
+    "summary": "Events are waiting in the dead-letter queue"
+   },
+   "endsAt": "2026-10-26T09:23:29.992Z",
+   "fingerprint": "5726f7364cc45290",
+   "receivers": [
+    {
+     "name": "local"
+    }
+   ],
+   "startsAt": "2026-10-26T09:19:29.992Z",
+   "status": {
+    "inhibitedBy": [],
+    "mutedBy": [],
+    "silencedBy": [],
+    "state": "active"
+   },
+   "updatedAt": "2026-10-26T09:19:35.063Z",
+   "generatorURL": "http://kps-prometheus.monitoring:9090/graph?g0.expr=max%28dlq_depth%29+%3E+0&g0.tab=1",
+   "labels": {
+    "alertname": "DeadLetterQueueNotEmpty",
+    "prometheus": "monitoring/kps",
+    "severity": "ticket",
+    "slo": "ingestion_lag"
+   }
+  },
+  {
+   "annotations": {
+    "description": "At this rate 10% of the 30-day freshness error budget is used within 3d.",
+    "runbook_url": "https://github.com/shreyas0917/marketpulse/blob/main/docs/runbooks/freshness-burn.md#slow-burn",
+    "summary": "Too many served quotes are older than 2 s (1x burn over 3d/6h)"
+   },
+   "endsAt": "2026-10-26T09:23:24.529Z",
+   "fingerprint": "77b0cf44ad607ca6",
+   "receivers": [
+    {
+     "name": "local"
+    }
+   ],
+   "startsAt": "2026-10-26T08:29:14.529Z",
+   "status": {
+    "inhibitedBy": [],
+    "mutedBy": [],
+    "silencedBy": [],
+    "state": "active"
+   },
+   "updatedAt": "2026-10-26T09:19:29.604Z",
+   "generatorURL": "http://kps-prometheus.monitoring:9090/graph?g0.expr=sli%3Afreshness%3Aerror_ratio_rate3d+%3E+%281+%2A+0.01%29+and+sli%3Afreshness%3Aerror_ratio_rate6h+%3E+%281+%2A+0.01%29&g0.tab=1",
+   "labels": {
+    "alertname": "FreshnessSlowBurn",
+    "prometheus": "monitoring/kps",
+    "severity": "ticket",
+    "slo": "freshness",
+    "slo_target": "0.99",
+    "window": "3d/6h"
+   }
+  },
+  {
+   "annotations": {
+    "description": "At this rate 10% of the 30-day latency error budget is used within 3d.",
+    "runbook_url": "https://github.com/shreyas0917/marketpulse/blob/main/docs/runbooks/latency-burn.md#slow-burn",
+    "summary": "Too many quote requests take longer than 250 ms (1x burn over 3d/6h)"
+   },
+   "endsAt": "2026-10-26T09:23:24.529Z",
+   "fingerprint": "aca26a88ec69496e",
+   "receivers": [
+    {
+     "name": "local"
+    }
+   ],
+   "startsAt": "2026-10-26T08:29:14.529Z",
+   "status": {
+    "inhibitedBy": [],
+    "mutedBy": [],
+    "silencedBy": [],
+    "state": "active"
+   },
+   "updatedAt": "2026-10-26T09:19:29.602Z",
+   "generatorURL": "http://kps-prometheus.monitoring:9090/graph?g0.expr=sli%3Alatency%3Aerror_ratio_rate3d+%3E+%281+%2A+0.01%29+and+sli%3Alatency%3Aerror_ratio_rate6h+%3E+%281+%2A+0.01%29&g0.tab=1",
+   "labels": {
+    "alertname": "LatencySlowBurn",
+    "prometheus": "monitoring/kps",
+    "severity": "ticket",
+    "slo": "latency",
+    "slo_target": "0.99",
+    "window": "3d/6h"
+   }
+  },
+  {
+   "annotations": {
+    "description": "At this rate 10% of the 30-day ingestion_lag error budget is used within 3d.",
+    "runbook_url": "https://github.com/shreyas0917/marketpulse/blob/main/docs/runbooks/ingestion-lag-burn.md#slow-burn",
+    "summary": "Too many events take longer than 1 s to ingest (1x burn over 3d/6h)"
+   },
+   "endsAt": "2026-10-26T09:23:24.529Z",
+   "fingerprint": "dce1b0f402c3045b",
+   "receivers": [
+    {
+     "name": "local"
+    }
+   ],
+   "startsAt": "2026-10-26T08:29:14.529Z",
+   "status": {
+    "inhibitedBy": [],
+    "mutedBy": [],
+    "silencedBy": [],
+    "state": "active"
+   },
+   "updatedAt": "2026-10-26T09:19:29.604Z",
+   "generatorURL": "http://kps-prometheus.monitoring:9090/graph?g0.expr=sli%3Aingestion_lag%3Aerror_ratio_rate3d+%3E+%281+%2A+0.01%29+and+sli%3Aingestion_lag%3Aerror_ratio_rate6h+%3E+%281+%2A+0.01%29&g0.tab=1",
+   "labels": {
+    "alertname": "IngestionLagSlowBurn",
+    "prometheus": "monitoring/kps",
+    "severity": "ticket",
+    "slo": "ingestion_lag",
+    "slo_target": "0.99",
+    "window": "3d/6h"
+   }
+  },
+  {
+   "annotations": {
+    "description": "At this rate 10% of the 30-day availability error budget is used within 3d.",
+    "runbook_url": "https://github.com/shreyas0917/marketpulse/blob/main/docs/runbooks/availability-burn.md#slow-burn",
+    "summary": "Quote API is returning too many 5xx responses (1x burn over 3d/6h)"
+   },
+   "endsAt": "2026-10-26T09:23:24.529Z",
+   "fingerprint": "f45952c68e90fe21",
+   "receivers": [
+    {
+     "name": "local"
+    }
+   ],
+   "startsAt": "2026-10-26T08:29:14.529Z",
+   "status": {
+    "inhibitedBy": [],
+    "mutedBy": [],
+    "silencedBy": [],
+    "state": "active"
+   },
+   "updatedAt": "2026-10-26T09:19:29.601Z",
+   "generatorURL": "http://kps-prometheus.monitoring:9090/graph?g0.expr=sli%3Aavailability%3Aerror_ratio_rate3d+%3E+%281+%2A+0.001%29+and+sli%3Aavailability%3Aerror_ratio_rate6h+%3E+%281+%2A+0.001%29&g0.tab=1",
+   "labels": {
+    "alertname": "AvailabilitySlowBurn",
+    "prometheus": "monitoring/kps",
+    "severity": "ticket",
+    "slo": "availability",
+    "slo_target": "0.999",
+    "window": "3d/6h"
+   }
+  }
+ ]
+}

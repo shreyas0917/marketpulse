@@ -276,3 +276,23 @@ Pinned in `deploy/kind/versions.env` and `deploy/kind/cluster.yaml`.
   promoted), but it is not evidence that a good release is promoted. The run is recorded here, the
   commit was reverted so Git matches the running stable version, and the good canary was re-run
   with sustained traffic for the acceptance check. Only the re-run's numbers appear in PROGRESS.
+
+## D32 — How drill 8's outcome is recorded
+
+- **Spec expectation:** "Slow worker (injected latency) → ingestion-lag burn-rate alert fires within
+  target."
+- **Measured:** with 500 ms per event the two workers wrote 1.99 events/s against 20/s arriving.
+  Every written event was late (5 m error ratio 1.00), but the 1 h ratio stayed at 0.02–0.10 and the
+  30 m ratio under 0.06 for the whole 15-minute fault, so neither fast-burn pair could fire: burn
+  rate is weighted by the rate of bad events, and a throttled worker *defers* the burn into a backlog
+  (16,279 events, oldest 814 s) instead of spending it. `IngestionStalled` — the gap alert the spec
+  defines for exactly this — fired 2 min 18 s in. The burn page fired only during the 34-second
+  drain after restore, when the deferred lateness was written out in bulk.
+- **Choice:** record the drill as **not met by the burn-rate alert, met by the gap alert**, keep both
+  alerts unchanged, and list queue-depth-based worker scaling (the spec's KEDA extension) and wider
+  `ingestion_lag_seconds` buckets as follow-ups. Lowering the burn thresholds to make this case page
+  would make the alerts noisy for every other case and was rejected.
+- **Script defect fixed:** the drill treated a timed-out wait for the burn alert as a failure and
+  exited (`set -e`), skipping its own stall check and drain measurement; the cleanup trap still
+  restored the system. The script now records a non-firing alert as a result and continues. The
+  run's evidence was exported from Prometheus immediately afterwards and is used unchanged.

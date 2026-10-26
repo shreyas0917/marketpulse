@@ -1,0 +1,8 @@
+{"observed_at": "2026-10-26T09:56:47Z", "note": "live instant queries 12 min into the slow-worker fault (FAULT_WORKER_EXTRA_LATENCY_MS=500), via the drill's Prometheus port-forward",
+ "sli_ingestion_lag_error_ratio": {"5m": 1.0000, "30m": 0.0340, "1h": 0.0238, "6h": 0.1610},
+ "fast_burn_thresholds": {"1h_and_5m": 0.144, "6h_and_30m": 0.06},
+ "events_written_per_s_5m": 1.9932, "producer_events_per_s": 20,
+ "queue_depth": 14102, "queue_oldest_event_age_seconds": 705.0,
+ "worker_hpa_current_replicas": 2,
+ "alerts_firing": ["IngestionStalled", "IngestionLagSlowBurn (pre-existing ticket)"],
+ "IngestionStalled_active_for_seconds": 769.9}

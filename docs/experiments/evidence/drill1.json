@@ -1,0 +1,1092 @@
+{
+ "exported_at": "2026-10-26T09:12:14+00:00",
+ "start": "2026-10-26T09:07:59Z",
+ "end": "2026-10-26T09:12:14Z",
+ "step": "10s",
+ "queries": {
+  "sli:availability:error_ratio_rate5m": {
+   "resultType": "matrix",
+   "result": [
+    {
+     "metric": {
+      "__name__": "sli:availability:error_ratio_rate5m",
+      "slo": "availability",
+      "slo_target": "0.999"
+     },
+     "values": [
+      [
+       1793005679,
+       "NaN"
+      ],
+      [
+       1793005689,
+       "NaN"
+      ],
+      [
+       1793005699,
+       "0"
+      ],
+      [
+       1793005709,
+       "0"
+      ],
+      [
+       1793005719,
+       "0"
+      ],
+      [
+       1793005729,
+       "0"
+      ],
+      [
+       1793005739,
+       "0"
+      ],
+      [
+       1793005749,
+       "0"
+      ],
+      [
+       1793005759,
+       "0"
+      ],
+      [
+       1793005769,
+       "0"
+      ],
+      [
+       1793005779,
+       "0"
+      ],
+      [
+       1793005789,
+       "0"
+      ],
+      [
+       1793005799,
+       "0"
+      ],
+      [
+       1793005809,
+       "0"
+      ],
+      [
+       1793005819,
+       "0"
+      ],
+      [
+       1793005829,
+       "0"
+      ],
+      [
+       1793005839,
+       "0"
+      ],
+      [
+       1793005849,
+       "0"
+      ],
+      [
+       1793005859,
+       "0"
+      ],
+      [
+       1793005869,
+       "0"
+      ],
+      [
+       1793005879,
+       "0"
+      ],
+      [
+       1793005889,
+       "0"
+      ],
+      [
+       1793005899,
+       "0"
+      ],
+      [
+       1793005909,
+       "0"
+      ],
+      [
+       1793005919,
+       "0"
+      ],
+      [
+       1793005929,
+       "0"
+      ]
+     ]
+    }
+   ]
+  },
+  "sum by (status) (rate(http_requests_total{route=\"/v1/quotes/{symbol}\"}[1m]))": {
+   "resultType": "matrix",
+   "result": [
+    {
+     "metric": {
+      "status": "200"
+     },
+     "values": [
+      [
+       1793005679,
+       "0"
+      ],
+      [
+       1793005689,
+       "0"
+      ],
+      [
+       1793005699,
+       "2.580183213264978"
+      ],
+      [
+       1793005709,
+       "8.580514830889854"
+      ],
+      [
+       1793005719,
+       "14.397238965129805"
+      ],
+      [
+       1793005729,
+       "20.08274533333333"
+      ],
+      [
+       1793005739,
+       "25.76909938198764"
+      ],
+      [
+       1793005749,
+       "27.738461984045053"
+      ],
+      [
+       1793005759,
+       "26.64694084767754"
+      ],
+      [
+       1793005769,
+       "29.202295186783765"
+      ],
+      [
+       1793005779,
+       "29.18280751167516"
+      ],
+      [
+       1793005789,
+       "26.175856799530823"
+      ],
+      [
+       1793005799,
+       "26.93116399945859"
+      ],
+      [
+       1793005809,
+       "27.287920713653527"
+      ],
+      [
+       1793005819,
+       "29.01438912801435"
+      ],
+      [
+       1793005829,
+       "29.08443242729709"
+      ],
+      [
+       1793005839,
+       "26.215338782884647"
+      ],
+      [
+       1793005849,
+       "28.675"
+      ],
+      [
+       1793005859,
+       "29.705017767022007"
+      ],
+      [
+       1793005869,
+       "30.02030000600012"
+      ],
+      [
+       1793005879,
+       "29.980599611992247"
+      ],
+      [
+       1793005889,
+       "29.980899229969083"
+      ],
+      [
+       1793005899,
+       "29.961498077900195"
+      ],
+      [
+       1793005909,
+       "30.00090003000108"
+      ],
+      [
+       1793005919,
+       "29.981798907934483"
+      ],
+      [
+       1793005929,
+       "30.021501278076208"
+      ]
+     ]
+    }
+   ]
+  },
+  "count(up{job=\"api\"} == 1)": {
+   "resultType": "matrix",
+   "result": [
+    {
+     "metric": {},
+     "values": [
+      [
+       1793005679,
+       "2"
+      ],
+      [
+       1793005689,
+       "2"
+      ],
+      [
+       1793005699,
+       "2"
+      ],
+      [
+       1793005709,
+       "2"
+      ],
+      [
+       1793005719,
+       "2"
+      ],
+      [
+       1793005729,
+       "2"
+      ],
+      [
+       1793005739,
+       "2"
+      ],
+      [
+       1793005749,
+       "1"
+      ],
+      [
+       1793005759,
+       "2"
+      ],
+      [
+       1793005769,
+       "2"
+      ],
+      [
+       1793005779,
+       "2"
+      ],
+      [
+       1793005789,
+       "2"
+      ],
+      [
+       1793005799,
+       "2"
+      ],
+      [
+       1793005809,
+       "2"
+      ],
+      [
+       1793005819,
+       "2"
+      ],
+      [
+       1793005829,
+       "2"
+      ],
+      [
+       1793005839,
+       "2"
+      ],
+      [
+       1793005849,
+       "2"
+      ],
+      [
+       1793005859,
+       "2"
+      ],
+      [
+       1793005869,
+       "2"
+      ],
+      [
+       1793005879,
+       "2"
+      ],
+      [
+       1793005889,
+       "2"
+      ],
+      [
+       1793005899,
+       "2"
+      ],
+      [
+       1793005909,
+       "2"
+      ],
+      [
+       1793005919,
+       "2"
+      ],
+      [
+       1793005929,
+       "2"
+      ]
+     ]
+    }
+   ]
+  },
+  "sum(kube_pod_status_ready{namespace=\"marketpulse\", condition=\"true\", pod=~\"marketpulse-api.*\"})": {
+   "resultType": "matrix",
+   "result": [
+    {
+     "metric": {},
+     "values": [
+      [
+       1793005679,
+       "2"
+      ],
+      [
+       1793005689,
+       "2"
+      ],
+      [
+       1793005699,
+       "2"
+      ],
+      [
+       1793005709,
+       "2"
+      ],
+      [
+       1793005719,
+       "2"
+      ],
+      [
+       1793005729,
+       "2"
+      ],
+      [
+       1793005739,
+       "2"
+      ],
+      [
+       1793005749,
+       "2"
+      ],
+      [
+       1793005759,
+       "2"
+      ],
+      [
+       1793005769,
+       "2"
+      ],
+      [
+       1793005779,
+       "2"
+      ],
+      [
+       1793005789,
+       "2"
+      ],
+      [
+       1793005799,
+       "2"
+      ],
+      [
+       1793005809,
+       "2"
+      ],
+      [
+       1793005819,
+       "2"
+      ],
+      [
+       1793005829,
+       "2"
+      ],
+      [
+       1793005839,
+       "2"
+      ],
+      [
+       1793005849,
+       "2"
+      ],
+      [
+       1793005859,
+       "2"
+      ],
+      [
+       1793005869,
+       "2"
+      ],
+      [
+       1793005879,
+       "2"
+      ],
+      [
+       1793005889,
+       "2"
+      ],
+      [
+       1793005899,
+       "2"
+      ],
+      [
+       1793005909,
+       "2"
+      ],
+      [
+       1793005919,
+       "2"
+      ],
+      [
+       1793005929,
+       "2"
+      ]
+     ]
+    }
+   ]
+  }
+ },
+ "alerts_series": {
+  "resultType": "matrix",
+  "result": [
+   {
+    "metric": {
+     "__name__": "ALERTS",
+     "alertname": "AvailabilitySlowBurn",
+     "alertstate": "firing",
+     "severity": "ticket",
+     "slo": "availability",
+     "slo_target": "0.999",
+     "window": "3d/6h"
+    },
+    "values": [
+     [
+      1793005679,
+      "1"
+     ],
+     [
+      1793005689,
+      "1"
+     ],
+     [
+      1793005699,
+      "1"
+     ],
+     [
+      1793005709,
+      "1"
+     ],
+     [
+      1793005719,
+      "1"
+     ],
+     [
+      1793005729,
+      "1"
+     ],
+     [
+      1793005739,
+      "1"
+     ],
+     [
+      1793005749,
+      "1"
+     ],
+     [
+      1793005759,
+      "1"
+     ],
+     [
+      1793005769,
+      "1"
+     ],
+     [
+      1793005779,
+      "1"
+     ],
+     [
+      1793005789,
+      "1"
+     ],
+     [
+      1793005799,
+      "1"
+     ],
+     [
+      1793005809,
+      "1"
+     ],
+     [
+      1793005819,
+      "1"
+     ],
+     [
+      1793005829,
+      "1"
+     ],
+     [
+      1793005839,
+      "1"
+     ],
+     [
+      1793005849,
+      "1"
+     ],
+     [
+      1793005859,
+      "1"
+     ],
+     [
+      1793005869,
+      "1"
+     ],
+     [
+      1793005879,
+      "1"
+     ],
+     [
+      1793005889,
+      "1"
+     ],
+     [
+      1793005899,
+      "1"
+     ],
+     [
+      1793005909,
+      "1"
+     ],
+     [
+      1793005919,
+      "1"
+     ],
+     [
+      1793005929,
+      "1"
+     ]
+    ]
+   },
+   {
+    "metric": {
+     "__name__": "ALERTS",
+     "alertname": "FreshnessSlowBurn",
+     "alertstate": "firing",
+     "severity": "ticket",
+     "slo": "freshness",
+     "slo_target": "0.99",
+     "window": "3d/6h"
+    },
+    "values": [
+     [
+      1793005679,
+      "1"
+     ],
+     [
+      1793005689,
+      "1"
+     ],
+     [
+      1793005699,
+      "1"
+     ],
+     [
+      1793005709,
+      "1"
+     ],
+     [
+      1793005719,
+      "1"
+     ],
+     [
+      1793005729,
+      "1"
+     ],
+     [
+      1793005739,
+      "1"
+     ],
+     [
+      1793005749,
+      "1"
+     ],
+     [
+      1793005759,
+      "1"
+     ],
+     [
+      1793005769,
+      "1"
+     ],
+     [
+      1793005779,
+      "1"
+     ],
+     [
+      1793005789,
+      "1"
+     ],
+     [
+      1793005799,
+      "1"
+     ],
+     [
+      1793005809,
+      "1"
+     ],
+     [
+      1793005819,
+      "1"
+     ],
+     [
+      1793005829,
+      "1"
+     ],
+     [
+      1793005839,
+      "1"
+     ],
+     [
+      1793005849,
+      "1"
+     ],
+     [
+      1793005859,
+      "1"
+     ],
+     [
+      1793005869,
+      "1"
+     ],
+     [
+      1793005879,
+      "1"
+     ],
+     [
+      1793005889,
+      "1"
+     ],
+     [
+      1793005899,
+      "1"
+     ],
+     [
+      1793005909,
+      "1"
+     ],
+     [
+      1793005919,
+      "1"
+     ],
+     [
+      1793005929,
+      "1"
+     ]
+    ]
+   },
+   {
+    "metric": {
+     "__name__": "ALERTS",
+     "alertname": "IngestionLagSlowBurn",
+     "alertstate": "firing",
+     "severity": "ticket",
+     "slo": "ingestion_lag",
+     "slo_target": "0.99",
+     "window": "3d/6h"
+    },
+    "values": [
+     [
+      1793005679,
+      "1"
+     ],
+     [
+      1793005689,
+      "1"
+     ],
+     [
+      1793005699,
+      "1"
+     ],
+     [
+      1793005709,
+      "1"
+     ],
+     [
+      1793005719,
+      "1"
+     ],
+     [
+      1793005729,
+      "1"
+     ],
+     [
+      1793005739,
+      "1"
+     ],
+     [
+      1793005749,
+      "1"
+     ],
+     [
+      1793005759,
+      "1"
+     ],
+     [
+      1793005769,
+      "1"
+     ],
+     [
+      1793005779,
+      "1"
+     ],
+     [
+      1793005789,
+      "1"
+     ],
+     [
+      1793005799,
+      "1"
+     ],
+     [
+      1793005809,
+      "1"
+     ],
+     [
+      1793005819,
+      "1"
+     ],
+     [
+      1793005829,
+      "1"
+     ],
+     [
+      1793005839,
+      "1"
+     ],
+     [
+      1793005849,
+      "1"
+     ],
+     [
+      1793005859,
+      "1"
+     ],
+     [
+      1793005869,
+      "1"
+     ],
+     [
+      1793005879,
+      "1"
+     ],
+     [
+      1793005889,
+      "1"
+     ],
+     [
+      1793005899,
+      "1"
+     ],
+     [
+      1793005909,
+      "1"
+     ],
+     [
+      1793005919,
+      "1"
+     ],
+     [
+      1793005929,
+      "1"
+     ]
+    ]
+   },
+   {
+    "metric": {
+     "__name__": "ALERTS",
+     "alertname": "LatencySlowBurn",
+     "alertstate": "firing",
+     "severity": "ticket",
+     "slo": "latency",
+     "slo_target": "0.99",
+     "window": "3d/6h"
+    },
+    "values": [
+     [
+      1793005679,
+      "1"
+     ],
+     [
+      1793005689,
+      "1"
+     ],
+     [
+      1793005699,
+      "1"
+     ],
+     [
+      1793005709,
+      "1"
+     ],
+     [
+      1793005719,
+      "1"
+     ],
+     [
+      1793005729,
+      "1"
+     ],
+     [
+      1793005739,
+      "1"
+     ],
+     [
+      1793005749,
+      "1"
+     ],
+     [
+      1793005759,
+      "1"
+     ],
+     [
+      1793005769,
+      "1"
+     ],
+     [
+      1793005779,
+      "1"
+     ],
+     [
+      1793005789,
+      "1"
+     ],
+     [
+      1793005799,
+      "1"
+     ],
+     [
+      1793005809,
+      "1"
+     ],
+     [
+      1793005819,
+      "1"
+     ],
+     [
+      1793005829,
+      "1"
+     ],
+     [
+      1793005839,
+      "1"
+     ],
+     [
+      1793005849,
+      "1"
+     ],
+     [
+      1793005859,
+      "1"
+     ],
+     [
+      1793005869,
+      "1"
+     ],
+     [
+      1793005879,
+      "1"
+     ],
+     [
+      1793005889,
+      "1"
+     ],
+     [
+      1793005899,
+      "1"
+     ],
+     [
+      1793005909,
+      "1"
+     ],
+     [
+      1793005919,
+      "1"
+     ],
+     [
+      1793005929,
+      "1"
+     ]
+    ]
+   },
+   {
+    "metric": {
+     "__name__": "ALERTS",
+     "alertname": "QuoteTrafficAbsent",
+     "alertstate": "firing",
+     "severity": "ticket",
+     "slo": "availability"
+    },
+    "values": [
+     [
+      1793005679,
+      "1"
+     ],
+     [
+      1793005689,
+      "1"
+     ],
+     [
+      1793005699,
+      "1"
+     ]
+    ]
+   }
+  ]
+ },
+ "alertmanager_active": [
+  {
+   "annotations": {
+    "description": "At this rate 10% of the 30-day freshness error budget is used within 3d.",
+    "runbook_url": "https://github.com/shreyas0917/marketpulse/blob/main/docs/runbooks/freshness-burn.md#slow-burn",
+    "summary": "Too many served quotes are older than 2 s (1x burn over 3d/6h)"
+   },
+   "endsAt": "2026-10-26T09:15:14.529Z",
+   "fingerprint": "77b0cf44ad607ca6",
+   "receivers": [
+    {
+     "name": "local"
+    }
+   ],
+   "startsAt": "2026-10-26T08:29:14.529Z",
+   "status": {
+    "inhibitedBy": [],
+    "mutedBy": [],
+    "silencedBy": [],
+    "state": "active"
+   },
+   "updatedAt": "2026-10-26T09:11:19.627Z",
+   "generatorURL": "http://kps-prometheus.monitoring:9090/graph?g0.expr=sli%3Afreshness%3Aerror_ratio_rate3d+%3E+%281+%2A+0.01%29+and+sli%3Afreshness%3Aerror_ratio_rate6h+%3E+%281+%2A+0.01%29&g0.tab=1",
+   "labels": {
+    "alertname": "FreshnessSlowBurn",
+    "prometheus": "monitoring/kps",
+    "severity": "ticket",
+    "slo": "freshness",
+    "slo_target": "0.99",
+    "window": "3d/6h"
+   }
+  },
+  {
+   "annotations": {
+    "description": "At this rate 10% of the 30-day latency error budget is used within 3d.",
+    "runbook_url": "https://github.com/shreyas0917/marketpulse/blob/main/docs/runbooks/latency-burn.md#slow-burn",
+    "summary": "Too many quote requests take longer than 250 ms (1x burn over 3d/6h)"
+   },
+   "endsAt": "2026-10-26T09:15:14.529Z",
+   "fingerprint": "aca26a88ec69496e",
+   "receivers": [
+    {
+     "name": "local"
+    }
+   ],
+   "startsAt": "2026-10-26T08:29:14.529Z",
+   "status": {
+    "inhibitedBy": [],
+    "mutedBy": [],
+    "silencedBy": [],
+    "state": "active"
+   },
+   "updatedAt": "2026-10-26T09:11:19.627Z",
+   "generatorURL": "http://kps-prometheus.monitoring:9090/graph?g0.expr=sli%3Alatency%3Aerror_ratio_rate3d+%3E+%281+%2A+0.01%29+and+sli%3Alatency%3Aerror_ratio_rate6h+%3E+%281+%2A+0.01%29&g0.tab=1",
+   "labels": {
+    "alertname": "LatencySlowBurn",
+    "prometheus": "monitoring/kps",
+    "severity": "ticket",
+    "slo": "latency",
+    "slo_target": "0.99",
+    "window": "3d/6h"
+   }
+  },
+  {
+   "annotations": {
+    "description": "At this rate 10% of the 30-day ingestion_lag error budget is used within 3d.",
+    "runbook_url": "https://github.com/shreyas0917/marketpulse/blob/main/docs/runbooks/ingestion-lag-burn.md#slow-burn",
+    "summary": "Too many events take longer than 1 s to ingest (1x burn over 3d/6h)"
+   },
+   "endsAt": "2026-10-26T09:15:14.529Z",
+   "fingerprint": "dce1b0f402c3045b",
+   "receivers": [
+    {
+     "name": "local"
+    }
+   ],
+   "startsAt": "2026-10-26T08:29:14.529Z",
+   "status": {
+    "inhibitedBy": [],
+    "mutedBy": [],
+    "silencedBy": [],
+    "state": "active"
+   },
+   "updatedAt": "2026-10-26T09:11:19.628Z",
+   "generatorURL": "http://kps-prometheus.monitoring:9090/graph?g0.expr=sli%3Aingestion_lag%3Aerror_ratio_rate3d+%3E+%281+%2A+0.01%29+and+sli%3Aingestion_lag%3Aerror_ratio_rate6h+%3E+%281+%2A+0.01%29&g0.tab=1",
+   "labels": {
+    "alertname": "IngestionLagSlowBurn",
+    "prometheus": "monitoring/kps",
+    "severity": "ticket",
+    "slo": "ingestion_lag",
+    "slo_target": "0.99",
+    "window": "3d/6h"
+   }
+  },
+  {
+   "annotations": {
+    "description": "At this rate 10% of the 30-day availability error budget is used within 3d.",
+    "runbook_url": "https://github.com/shreyas0917/marketpulse/blob/main/docs/runbooks/availability-burn.md#slow-burn",
+    "summary": "Quote API is returning too many 5xx responses (1x burn over 3d/6h)"
+   },
+   "endsAt": "2026-10-26T09:15:14.529Z",
+   "fingerprint": "f45952c68e90fe21",
+   "receivers": [
+    {
+     "name": "local"
+    }
+   ],
+   "startsAt": "2026-10-26T08:29:14.529Z",
+   "status": {
+    "inhibitedBy": [],
+    "mutedBy": [],
+    "silencedBy": [],
+    "state": "active"
+   },
+   "updatedAt": "2026-10-26T09:11:19.626Z",
+   "generatorURL": "http://kps-prometheus.monitoring:9090/graph?g0.expr=sli%3Aavailability%3Aerror_ratio_rate3d+%3E+%281+%2A+0.001%29+and+sli%3Aavailability%3Aerror_ratio_rate6h+%3E+%281+%2A+0.001%29&g0.tab=1",
+   "labels": {
+    "alertname": "AvailabilitySlowBurn",
+    "prometheus": "monitoring/kps",
+    "severity": "ticket",
+    "slo": "availability",
+    "slo_target": "0.999",
+    "window": "3d/6h"
+   }
+  }
+ ]
+}

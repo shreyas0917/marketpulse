@@ -1,0 +1,39 @@
+1793006301464-0
+data
+{not json
+reason
+JSONDecodeError: Expecting property name enclosed in double quotes: line 1 column 2 (char 1)
+attempts
+5
+original_id
+1793006293332-0
+1793006301466-0
+data
+{"symbol": "", "price": -1}
+reason
+ValidationError: 2 validation errors for MarketEvent
+symbol
+  String should have at least 1 character [type=string_too_short, input_value='', input_type=str]
+    For further information visit https://errors.pydantic.dev/2.14/v/string_too_short
+price
+  Input should be greater than 0 [type=greater_than, input_value=-1, input_type=int]
+    For further information visit https://errors.pydantic.dev/2.14/v/greater_than
+attempts
+5
+original_id
+1793006293332-1
+1793006301466-1
+data
+{"event_id": "x"}
+reason
+ValidationError: 2 validation errors for MarketEvent
+symbol
+  Field required [type=missing, input_value={'event_id': 'x'}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.14/v/missing
+price
+  Field required [type=missing, input_value={'event_id': 'x'}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.14/v/missing
+attempts
+5
+original_id
+1793006293332-2
