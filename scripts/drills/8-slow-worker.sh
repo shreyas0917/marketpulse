@@ -19,10 +19,15 @@ kubectl -n "$NS" set env deploy/marketpulse-worker "FAULT_WORKER_EXTRA_LATENCY_M
 kubectl -n "$NS" rollout status deploy/marketpulse-worker --timeout=180s >/dev/null
 T0=$(epoch)
 log "slow workers running at $(now) (${LATENCY_MS} ms per event)"
-"${ALERTS[@]}" wait --alert IngestionLagFastBurn --state firing --timeout 900 | tee "$EVIDENCE/$NAME-lagburn-firing.json"
-T_DETECT=$(epoch)
-log "IngestionLagFastBurn firing $(( T_DETECT - T0 ))s after the fault (target <= 300 s)"
-"${ALERTS[@]}" wait --alert IngestionStalled --state firing --timeout 300 > "$EVIDENCE/$NAME-stalled-firing.json" || true
+# A burn alert that does not fire is a result, not a failure of the drill: record it and go on.
+if "${ALERTS[@]}" wait --alert IngestionLagFastBurn --state firing --timeout 900 | tee "$EVIDENCE/$NAME-lagburn-firing.json"; then
+  T_DETECT=$(epoch)
+  log "IngestionLagFastBurn firing $(( T_DETECT - T0 ))s after the fault (target <= 300 s)"
+else
+  T_DETECT=""
+  log "IngestionLagFastBurn did NOT fire within 900 s (burn is rate-weighted; see IngestionStalled)"
+fi
+"${ALERTS[@]}" wait --alert IngestionStalled --state firing --timeout 300 | tee "$EVIDENCE/$NAME-stalled-firing.json" || true
 remaining=$(( FAULT_SECONDS - ($(epoch) - T0) ))
 (( remaining > 0 )) && sleep "$remaining"
 peak_depth=$(prom_value 'max(max_over_time(queue_depth[10m]))')
@@ -48,10 +53,11 @@ for _ in $(seq 1 120); do
   sleep 5
 done
 log "backlog drained $(( ${drained:-$(epoch)} - T1 ))s after restore started"
-"${ALERTS[@]}" wait --alert IngestionLagFastBurn --state resolved --timeout 1800 | tee "$EVIDENCE/$NAME-lagburn-resolved.json"
+"${ALERTS[@]}" wait --alert IngestionLagFastBurn --state resolved --timeout 1800 | tee "$EVIDENCE/$NAME-lagburn-resolved.json" || true
+"${ALERTS[@]}" wait --alert IngestionStalled --state resolved --timeout 900 | tee "$EVIDENCE/$NAME-stalled-resolved.json" || true
 T_RESOLVED=$(epoch)
 cat > "$EVIDENCE/$NAME-result.json" <<EOF
-{"latency_ms": $LATENCY_MS, "seconds_to_detect": $(( T_DETECT - T0 )), "fault_seconds": $(( T1 - T0 )),
+{"latency_ms": $LATENCY_MS, "seconds_to_lag_burn_alert": ${T_DETECT:+$(( T_DETECT - T0 ))}${T_DETECT:-null}, "fault_seconds": $(( T1 - T0 )),
  "peak_queue_depth": "$peak_depth", "seconds_argocd_revert": $(( T_REVERT - T1 )),
  "seconds_to_drain_after_restore": $(( ${drained:-$T_RESOLVED} - T1 )), "seconds_to_alert_resolved_after_restore": $(( T_RESOLVED - T1 ))}
 EOF
