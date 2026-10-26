@@ -49,9 +49,18 @@ windows contained ~2 minutes of history. With a full hour of clean traffic, 20 %
 4.3 minutes to push the 1 h ratio over 14.4 × 0.1 % (0.2 × t / 60 > 0.0144). Measured, not
 modelled, numbers come from the kind drills in M6.
 
-## M4 — Local Kubernetes
+## M4 — Local Kubernetes ✅ (tag `m4-done`)
 
-Not started.
+| Check | Status | Date | Verified with |
+|---|---|---|---|
+| `helm lint` and `helm template \| kubeconform -strict` pass | ✅ 28 resources valid (29 with the Rollout variant) | 2026-10-26 | `make chart-lint` (part of `make lint`) |
+| `make kind-up && make deploy-local` deploys everything; all pods Ready | ✅ 3 nodes Ready, 30/30 pods Ready across all namespaces | 2026-10-26 | `make kind-up` (1098 s, mostly first-time image pulls), `make deploy-local`, `kubectl get pods -A` |
+| `make smoke` passes against the kind ingress | ✅ 10 passed | 2026-10-26 | `make smoke TARGET=kind` (API via 127.0.0.1:18080 + Host header; worker/producer via port-forward) |
+| Containers non-root with requests and limits | ✅ uid 10001 (redis 999), `runAsNonRoot`, read-only root FS, requests + limits on every container | 2026-10-26 | `scripts/m4-checks.sh security` (`kubectl get pod -o jsonpath`) |
+| Pod outside the allowed set cannot reach Redis; API and worker can | ✅ intruder probe timed out (exit 143); positive control with worker labels got `PONG`; API and worker pods `PING` OK | 2026-10-26 | `scripts/m4-checks.sh netpol` |
+| Under `make load` the API HPA scales up, and back down after load stops | ✅ 400 req/s: 2→3 replicas 42 s after load start, 6 at 53 s (CPU 351–486m/pod); back to 2 113 s after load stopped | 2026-10-26 | `scripts/m4-checks.sh hpa`; log `docs/experiments/evidence/m4-hpa.txt` |
+| Deleting one API pod causes no failed requests in a concurrent k6 run (2+ replicas) | ✅ 1901 requests, 0 failed checks, 0 `http_req_failed` | 2026-10-26 | `scripts/m4-checks.sh pod-delete` (k6 `STRICT=1` threshold); `docs/experiments/evidence/m4-pod-delete-k6-summary.json` |
+| kube-prometheus-stack loads the same rules and dashboards | ✅ 6 groups / 37 rules; 4 dashboards listed; every query returns data; 27/27 targets up | 2026-10-26 | `scripts/verify_stack.py --prometheus <pf> --grafana <pf> --dashboards marketpulse-slo,marketpulse-api,marketpulse-ingestion,marketpulse-platform` |
 
 ## M5 — GitOps and progressive delivery
 

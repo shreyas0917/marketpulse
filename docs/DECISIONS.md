@@ -184,3 +184,57 @@ Argo CD, Argo Rollouts) are recorded when they are added in M4/M5.
 - **Found while designing drill 4:** dev Redis has no persistence, so a restart loses the stream and
   the `workers` group. The worker cached "group exists" and would fail with `NOGROUP` forever.
 - **Choice:** on `NOGROUP`, recreate the group and retry once. Covered by a unit test.
+
+## D23 — Kubernetes platform versions (looked up 2026-10-26)
+
+| Component | Version |
+|---|---|
+| kind node image | `kindest/node:v1.37.0@sha256:a1ed56cfb0e7b93589bdf97c8cd566405a265939e3620fc4f5de89adff580ae5` |
+| Calico (manifest) | v3.33.0 |
+| ingress-nginx chart | 4.15.1 (controller 1.15.1) |
+| metrics-server chart | 3.14.0 (app 0.9.0) |
+| kube-prometheus-stack chart | 92.13.1 (operator 0.94.1) |
+| Argo CD chart | 10.11.1 (app v3.5.6) |
+| Argo Rollouts chart | 2.43.8 (app v1.10.1) |
+
+Pinned in `deploy/kind/versions.env` and `deploy/kind/cluster.yaml`.
+
+## D24 — ingress-nginx despite its retirement
+
+- **Context:** the community ingress-nginx project stopped receiving releases in March 2026
+  (last release 1.15.1).
+- **Choice:** still use it locally.
+- **Reason:** the spec requires `trafficRouting.nginx` for the kind canary, the cluster is local
+  and disposable, and the AWS phase uses the ALB controller instead. Revisit (e.g. Gateway API
+  traffic routing in Argo Rollouts) before any long-lived environment.
+
+## D25 — kind networking details
+
+- Ingress is published on `127.0.0.1:18080` (host ports 80 and 8000 were in use) and the API is
+  addressed with `Host: marketpulse.localtest.me`; tools send the Host header instead of relying on
+  public DNS for `localtest.me`.
+- Calico is installed from its manifest with pod CIDR `192.168.0.0/16` (`disableDefaultCNI: true`)
+  because kindnet does not enforce NetworkPolicies. Kubelet probes keep working under the
+  default-deny ingress policy.
+
+## D26 — Images on kind
+
+- The MarketPulse image is built locally and loaded with `kind load docker-image`; its tag comes
+  from `values-kind.yaml` (`0.1.0`), so Helm and later Argo CD deploy the same image. Bump the tag
+  when the code changes.
+- Pre-loading the digest-pinned Redis image fails with Docker Desktop's containerd image store
+  ("content digest not found" for other platforms), so it is best effort and the nodes pull Redis.
+
+## D27 — Grafana on kind: one provider-level folder
+
+- Folders generated from the dashboard sidecar's file structure were not visible to the anonymous
+  Viewer role in Grafana 13, so dashboards are provisioned into one provider-level `MarketPulse`
+  folder, matching the compose setup.
+- No Grafana admin password is committed; the chart generates one into the `kps-grafana` Secret.
+
+## D28 — Chart copies of rules and dashboards
+
+- Helm can only read files inside the chart, so `make chart-assets` copies
+  `observability/prometheus/rules/*.yml` and `observability/grafana/dashboards/*.json` into
+  `deploy/helm/marketpulse/files/`. `make lint` fails if the copies differ from the originals, so
+  compose and kind always load the same rules and dashboards.
