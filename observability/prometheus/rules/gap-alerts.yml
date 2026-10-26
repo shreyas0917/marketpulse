@@ -1,0 +1,59 @@
+# Alerts for failure modes a ratio SLI cannot see (spec section 6, "Gaps").
+groups:
+  - name: slo-gaps
+    rules:
+      - alert: IngestionStalled
+        # Exported by both worker and producer (DECISIONS D7), so this still fires when the
+        # worker is stopped. On SQS the gauge comes from CloudWatch with ~1 min delay.
+        expr: max(queue_oldest_event_age_seconds) > 10
+        for: 2m
+        labels:
+          severity: page
+          slo: ingestion_lag
+        annotations:
+          summary: "Oldest queued event is more than 10 s old: ingestion has stalled"
+          description: "No ingestion-lag ratio is computed while nothing is processed, so this alert covers a stalled or stopped worker."
+          runbook_url: https://github.com/shreyas0917/marketpulse/blob/main/docs/runbooks/ingestion-stalled.md
+
+      - alert: QuoteTrafficAbsent
+        expr: (sum(rate(http_requests_total{route="/v1/quotes/{symbol}"}[5m])) or vector(0)) == 0
+        for: 5m
+        labels:
+          severity: ticket
+          slo: availability
+        annotations:
+          summary: "No quote requests for 5 minutes: the SLIs have no data"
+          description: "Either nobody is calling the API or requests are not reaching it."
+          runbook_url: https://github.com/shreyas0917/marketpulse/blob/main/docs/runbooks/quote-traffic-absent.md
+
+      - alert: QuoteStoreDown
+        expr: min(quote_store_up) == 0
+        for: 1m
+        labels:
+          severity: warning
+          slo: freshness
+        annotations:
+          summary: "An API pod cannot reach Redis; quotes are served from the local cache or as 503"
+          description: "Degraded mode only lasts STALE_QUOTE_MAX_AGE_SECONDS (30 s); after that every quote is 503."
+          runbook_url: https://github.com/shreyas0917/marketpulse/blob/main/docs/runbooks/quote-store-down.md
+
+      - alert: DeadLetterQueueNotEmpty
+        expr: max(dlq_depth) > 0
+        for: 1m
+        labels:
+          severity: ticket
+          slo: ingestion_lag
+        annotations:
+          summary: "Events are waiting in the dead-letter queue"
+          description: "Dead-lettered events never became quotes. Inspect, fix the cause, then redrive."
+          runbook_url: https://github.com/shreyas0917/marketpulse/blob/main/docs/runbooks/dead-letter-queue.md
+
+      - alert: TargetDown
+        expr: up{job=~".*(api|worker|producer).*"} == 0
+        for: 2m
+        labels:
+          severity: ticket
+        annotations:
+          summary: "A MarketPulse scrape target is down"
+          description: "Prometheus cannot scrape one of the MarketPulse services."
+          runbook_url: https://github.com/shreyas0917/marketpulse/blob/main/docs/runbooks/target-down.md
