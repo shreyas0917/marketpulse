@@ -1,0 +1,1 @@
+{"alert": "IngestionLagFastBurn", "state": "firing", "timeout": true, "waited_since": "2026-10-26T09:44:33+00:00", "gave_up_at": "2026-10-26T09:59:35+00:00"}
