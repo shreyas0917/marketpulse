@@ -1,0 +1,9 @@
+{
+ "probe_rows": 1518,
+ "stale_200_count": 99,
+ "stale_200_last_seen_s_after_stop": 29.9,
+ "max_stale_age_seconds": 29.791504,
+ "first_503_s_after_stop": 15.1,
+ "all_503_from_s": 30.0,
+ "first_fresh_200_s_after_restore": 4.6
+}
