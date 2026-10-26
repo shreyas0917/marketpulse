@@ -6,7 +6,7 @@ IMAGE ?= marketpulse:dev
 TOOL := scripts/lib/tool.sh
 SHELL_SCRIPTS = $(shell git ls-files '*.sh')
 
-.PHONY: help setup lint test image up down smoke rules-test kind-up kind-down deploy-local load burst drill
+.PHONY: help setup lint test image dashboards up down smoke verify-stack rules-test kind-up kind-down deploy-local load burst drill
 
 help: ## Show available targets
 	@grep -E '^[a-z-]+:.*## ' $(MAKEFILE_LIST) | awk -F':.*## ' '{printf "  %-14s %s\n", $$1, $$2}'
@@ -27,5 +27,20 @@ test: ## Unit tests with coverage (fails under 80%)
 image: ## Build the service image
 	docker build -t $(IMAGE) .
 
-up down smoke rules-test kind-up kind-down deploy-local load burst drill:
+dashboards: ## Regenerate Grafana dashboard JSON from observability/grafana/generate.py
+	uv run python observability/grafana/generate.py
+
+up: ## Start the docker compose stack and wait until every container is healthy
+	docker compose up -d --build --wait --wait-timeout 120
+
+down: ## Stop the compose stack and remove containers, networks and volumes
+	docker compose down -v --remove-orphans
+
+smoke: ## Smoke tests against the running stack (SMOKE_* env vars select the target)
+	uv run pytest tests/smoke -p no:cacheprovider
+
+verify-stack: ## Check Prometheus targets and Grafana dashboard queries via their HTTP APIs
+	uv run python scripts/verify_stack.py $(VERIFY_ARGS)
+
+rules-test kind-up kind-down deploy-local load burst drill:
 	@echo "target '$@' is added in a later milestone" >&2; exit 1
