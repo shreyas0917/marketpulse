@@ -1,0 +1,128 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AnalysisRun
+metadata:
+  annotations:
+    rollout.argoproj.io/revision: "6"
+  creationTimestamp: "2026-10-26T08:53:24Z"
+  generation: 6
+  labels:
+    app.kubernetes.io/component: api
+    app.kubernetes.io/instance: marketpulse
+    app.kubernetes.io/name: marketpulse
+    rollout-type: Step
+    rollouts-pod-template-hash: 9884c6f64
+    step-index: "5"
+  name: marketpulse-api-9884c6f64-6-5
+  namespace: marketpulse
+  ownerReferences:
+  - apiVersion: argoproj.io/v1alpha1
+    blockOwnerDeletion: true
+    controller: true
+    kind: Rollout
+    name: marketpulse-api
+    uid: 20f28dce-aecc-4f74-a1f4-78bd3b919207
+  resourceVersion: "35799"
+  uid: 74558636-0c24-4bc6-aea3-e0016c68096e
+spec:
+  metrics:
+  - count: 5
+    failureLimit: 1
+    interval: 1m
+    name: canary-error-ratio
+    provider:
+      prometheus:
+        address: http://kps-prometheus.monitoring.svc:9090
+        authentication:
+          oauth2: {}
+          sigv4: {}
+        query: |
+          (sum(rate(http_requests_total{namespace="marketpulse", route="/v1/quotes/{symbol}", role="canary", status=~"5.."}[2m])) or vector(0))
+          /
+          sum(rate(http_requests_total{namespace="marketpulse", route="/v1/quotes/{symbol}", role="canary"}[2m]))
+    successCondition: len(result) > 0 && !isNaN(result[0]) && result[0] < 0.01
+  - count: 5
+    failureLimit: 1
+    interval: 1m
+    name: canary-latency-good-ratio
+    provider:
+      prometheus:
+        address: http://kps-prometheus.monitoring.svc:9090
+        authentication:
+          oauth2: {}
+          sigv4: {}
+        query: |
+          sum(rate(http_request_duration_seconds_bucket{namespace="marketpulse", route="/v1/quotes/{symbol}", role="canary", le="0.25"}[2m]))
+          /
+          sum(rate(http_request_duration_seconds_count{namespace="marketpulse", route="/v1/quotes/{symbol}", role="canary"}[2m]))
+    successCondition: len(result) > 0 && !isNaN(result[0]) && result[0] >= 0.99
+status:
+  completedAt: "2026-10-26T08:57:29Z"
+  dryRunSummary: {}
+  metricResults:
+  - consecutiveSuccess: 5
+    count: 5
+    measurements:
+    - finishedAt: "2026-10-26T08:53:24Z"
+      phase: Successful
+      startedAt: "2026-10-26T08:53:24Z"
+      value: '[1]'
+    - finishedAt: "2026-10-26T08:54:24Z"
+      phase: Successful
+      startedAt: "2026-10-26T08:54:24Z"
+      value: '[1]'
+    - finishedAt: "2026-10-26T08:55:29Z"
+      phase: Successful
+      startedAt: "2026-10-26T08:55:29Z"
+      value: '[0.9993425378040763]'
+    - finishedAt: "2026-10-26T08:56:29Z"
+      phase: Successful
+      startedAt: "2026-10-26T08:56:29Z"
+      value: '[0.9993270524899057]'
+    - finishedAt: "2026-10-26T08:57:29Z"
+      phase: Successful
+      startedAt: "2026-10-26T08:57:29Z"
+      value: '[1]'
+    metadata:
+      ResolvedPrometheusQuery: |
+        sum(rate(http_request_duration_seconds_bucket{namespace="marketpulse", route="/v1/quotes/{symbol}", role="canary", le="0.25"}[2m]))
+        /
+        sum(rate(http_request_duration_seconds_count{namespace="marketpulse", route="/v1/quotes/{symbol}", role="canary"}[2m]))
+    name: canary-latency-good-ratio
+    phase: Successful
+    successful: 5
+  - consecutiveSuccess: 5
+    count: 5
+    measurements:
+    - finishedAt: "2026-10-26T08:53:24Z"
+      phase: Successful
+      startedAt: "2026-10-26T08:53:24Z"
+      value: '[0]'
+    - finishedAt: "2026-10-26T08:54:24Z"
+      phase: Successful
+      startedAt: "2026-10-26T08:54:24Z"
+      value: '[0]'
+    - finishedAt: "2026-10-26T08:55:29Z"
+      phase: Successful
+      startedAt: "2026-10-26T08:55:29Z"
+      value: '[0]'
+    - finishedAt: "2026-10-26T08:56:29Z"
+      phase: Successful
+      startedAt: "2026-10-26T08:56:29Z"
+      value: '[0]'
+    - finishedAt: "2026-10-26T08:57:29Z"
+      phase: Successful
+      startedAt: "2026-10-26T08:57:29Z"
+      value: '[0]'
+    metadata:
+      ResolvedPrometheusQuery: |
+        (sum(rate(http_requests_total{namespace="marketpulse", route="/v1/quotes/{symbol}", role="canary", status=~"5.."}[2m])) or vector(0))
+        /
+        sum(rate(http_requests_total{namespace="marketpulse", route="/v1/quotes/{symbol}", role="canary"}[2m]))
+    name: canary-error-ratio
+    phase: Successful
+    successful: 5
+  phase: Successful
+  runSummary:
+    count: 2
+    successful: 2
+  startedAt: "2026-10-26T08:53:24Z"

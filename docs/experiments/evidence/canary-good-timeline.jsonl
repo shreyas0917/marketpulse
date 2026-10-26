@@ -1,0 +1,20 @@
+{"ts": "2026-10-26T08:39:11.693Z", "epoch": 1793003951, "event": "pushed fa3d726ad40510f7b58ac143331207f06d3176f8 to main"}
+{"ts": "2026-10-26T08:39:12.552Z", "epoch": 1793003952, "event": "rollout phase|step|weight|abort|stableRS|currentHash = Healthy|6|0||56c4fb6458|56c4fb6458"}
+{"ts": "2026-10-26T08:39:12.683Z", "epoch": 1793003952, "event": "canary ingress weight = 0"}
+{"ts": "2026-10-26T08:39:19.913Z", "epoch": 1793003959, "event": "rollout phase|step|weight|abort|stableRS|currentHash = Progressing|0|0||56c4fb6458|9884c6f64"}
+{"ts": "2026-10-26T08:39:25.353Z", "epoch": 1793003965, "event": "canary ingress weight = 10"}
+{"ts": "2026-10-26T08:39:27.188Z", "epoch": 1793003967, "event": "rollout phase|step|weight|abort|stableRS|currentHash = Paused|1|10||56c4fb6458|9884c6f64"}
+{"ts": "2026-10-26T08:44:25.649Z", "epoch": 1793004265, "event": "rollout phase|step|weight|abort|stableRS|currentHash = Progressing|2|10||56c4fb6458|9884c6f64"}
+{"ts": "2026-10-26T08:44:25.994Z", "epoch": 1793004266, "event": "analysisrun marketpulse-api-9884c6f64-6-2|Running"}
+{"ts": "2026-10-26T08:48:25.179Z", "epoch": 1793004505, "event": "rollout phase|step|weight|abort|stableRS|currentHash = Progressing|3|10||56c4fb6458|9884c6f64"}
+{"ts": "2026-10-26T08:48:25.447Z", "epoch": 1793004505, "event": "analysisrun marketpulse-api-9884c6f64-6-2|Successful"}
+{"ts": "2026-10-26T08:48:25.747Z", "epoch": 1793004505, "event": "canary ingress weight = 50"}
+{"ts": "2026-10-26T08:48:27.741Z", "epoch": 1793004507, "event": "rollout phase|step|weight|abort|stableRS|currentHash = Paused|4|50||56c4fb6458|9884c6f64"}
+{"ts": "2026-10-26T08:53:25.749Z", "epoch": 1793004805, "event": "rollout phase|step|weight|abort|stableRS|currentHash = Progressing|5|50||56c4fb6458|9884c6f64"}
+{"ts": "2026-10-26T08:53:25.887Z", "epoch": 1793004805, "event": "analysisrun marketpulse-api-9884c6f64-6-5|Running"}
+{"ts": "2026-10-26T08:57:30.481Z", "epoch": 1793005050, "event": "rollout phase|step|weight|abort|stableRS|currentHash = Progressing|6|50||56c4fb6458|9884c6f64"}
+{"ts": "2026-10-26T08:57:30.653Z", "epoch": 1793005050, "event": "analysisrun marketpulse-api-9884c6f64-6-5|Successful"}
+{"ts": "2026-10-26T08:57:35.643Z", "epoch": 1793005055, "event": "canary ingress weight = 100"}
+{"ts": "2026-10-26T08:57:37.406Z", "epoch": 1793005057, "event": "rollout phase|step|weight|abort|stableRS|currentHash = Healthy|6|0||9884c6f64|9884c6f64"}
+{"ts": "2026-10-26T08:57:37.550Z", "epoch": 1793005057, "event": "canary ingress weight = 0"}
+{"ts": "2026-10-26T08:57:37.684Z", "epoch": 1793005057, "event": "promoted: new stable 9884c6f64"}
