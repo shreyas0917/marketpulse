@@ -81,15 +81,15 @@ case "$MODE" in
   good)
     start_load; sleep 60
     set_api_env RELEASE_NOTE "canary-good-$(date -u +%Y%m%dT%H%M%SZ)"
-    git commit -qam "release(api): harmless RELEASE_NOTE change (canary demo: good)" ;;
+    git commit -q -m "release(api): harmless RELEASE_NOTE change (canary demo: good)" -- "$VALUES" ;;
   bad)
     start_load; sleep 60
     set_api_env FAULT_API_ERROR_RATE "0.2"
-    git commit -qam "release(api): enable FAULT_API_ERROR_RATE=0.2 (canary demo: bad version)" ;;
+    git commit -q -m "release(api): enable FAULT_API_ERROR_RATE=0.2 (canary demo: bad version)" -- "$VALUES" ;;
   no-traffic)
     if pgrep -f "k6 run" >/dev/null 2>&1; then echo "stop all k6 runs first" >&2; exit 1; fi
     set_api_env RELEASE_NOTE "canary-no-traffic-$(date -u +%Y%m%dT%H%M%SZ)"
-    git commit -qam "release(api): harmless RELEASE_NOTE change with no traffic (canary demo)" ;;
+    git commit -q -m "release(api): harmless RELEASE_NOTE change with no traffic (canary demo)" -- "$VALUES" ;;
   *) echo "unknown mode $MODE" >&2; exit 2 ;;
 esac
 CHANGE_SHA="$(git rev-parse HEAD)"
