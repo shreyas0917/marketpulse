@@ -1,0 +1,59 @@
+{{- /*
+PodMonitors (with the `role` pod label copied onto every series for canary analysis),
+the SLO PrometheusRules and the Grafana dashboards. Rules and dashboards are copies of
+observability/ kept in sync by `make chart-assets` (checked in `make lint`).
+*/ -}}
+{{- $mp := include "mp.name" . -}}
+{{- if .Values.monitoring.podMonitors }}
+{{- range $component := list "api" "worker" "producer" }}
+apiVersion: monitoring.coreos.com/v1
+kind: PodMonitor
+metadata:
+  name: {{ $mp }}-{{ $component }}
+  labels:
+    {{- include "mp.labels" $ | nindent 4 }}
+    app.kubernetes.io/component: {{ $component }}
+spec:
+  selector:
+    matchLabels:
+      {{- include "mp.selector" (dict "root" $ "component" $component) | nindent 6 }}
+  podMetricsEndpoints:
+    - port: http
+      path: /metrics
+      interval: 10s
+      relabelings:
+        - sourceLabels: [__meta_kubernetes_pod_label_role]
+          targetLabel: role
+        - targetLabel: job
+          replacement: {{ $component }}
+---
+{{- end }}
+{{- end }}
+{{- if .Values.monitoring.rules }}
+{{- range $path, $_ := .Files.Glob "files/rules/*.yml" }}
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: {{ $mp }}-{{ base $path | trimSuffix ".yml" }}
+  labels:
+    {{- include "mp.labels" $ | nindent 4 }}
+spec:
+  {{- $.Files.Get $path | nindent 2 }}
+---
+{{- end }}
+{{- end }}
+{{- if .Values.monitoring.dashboards }}
+{{- range $path, $_ := .Files.Glob "files/dashboards/*.json" }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ $mp }}-dashboard-{{ base $path | trimSuffix ".json" }}
+  labels:
+    {{- include "mp.labels" $ | nindent 4 }}
+    grafana_dashboard: "1"
+data:
+  {{ base $path }}: |-
+    {{- $.Files.Get $path | nindent 4 }}
+---
+{{- end }}
+{{- end }}
