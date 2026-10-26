@@ -8,6 +8,10 @@ applicationSet:
 configs:
   params:
     server.insecure: true
+    # Diff via a server-side apply dry-run so API-server-defaulted fields (clusterIP,
+    # protocol, progressDeadlineSeconds, pod-template defaults, HPA scaleUp) do not show
+    # as drift. Paired with ServerSideApply=true + ServerSideDiff=true on the Application.
+    controller.diff.server.side: "true"
   cm:
     # Poll GitHub every 60 s instead of the default 180 s (no webhook on a local cluster).
     timeout.reconciliation: 60s

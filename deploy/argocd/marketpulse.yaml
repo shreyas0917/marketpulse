@@ -24,7 +24,11 @@ spec:
       selfHeal: true
     syncOptions:
       - CreateNamespace=true
+      # Apply and diff server-side so the diff ignores fields the API server defaults
+      # (clusterIP, protocol, progressDeadlineSeconds, HPA scaleUp, PodMonitor action).
       - ServerSideApply=true
+      - ServerSideDiff=true
+      - RespectIgnoreDifferences=true
   # The HPAs own the API and worker replica counts; everything else must match Git.
   ignoreDifferences:
     - group: apps
