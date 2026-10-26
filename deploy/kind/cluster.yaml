@@ -1,0 +1,27 @@
+# kind cluster for MarketPulse: 1 control plane + 2 workers, Calico instead of kindnet
+# (kindnet does not enforce NetworkPolicies). Ingress is published on host port 18080
+# (80 and 8000 are commonly taken on developer machines).
+kind: Cluster
+apiVersion: kind.x-k8s.io/v1alpha4
+name: marketpulse
+networking:
+  disableDefaultCNI: true
+  podSubnet: 192.168.0.0/16
+nodes:
+  - role: control-plane
+    image: kindest/node:v1.37.0@sha256:a1ed56cfb0e7b93589bdf97c8cd566405a265939e3620fc4f5de89adff580ae5
+    kubeadmConfigPatches:
+      - |
+        kind: InitConfiguration
+        nodeRegistration:
+          kubeletExtraArgs:
+            node-labels: "ingress-ready=true"
+    extraPortMappings:
+      - containerPort: 80
+        hostPort: 18080
+        listenAddress: "127.0.0.1"
+        protocol: TCP
+  - role: worker
+    image: kindest/node:v1.37.0@sha256:a1ed56cfb0e7b93589bdf97c8cd566405a265939e3620fc4f5de89adff580ae5
+  - role: worker
+    image: kindest/node:v1.37.0@sha256:a1ed56cfb0e7b93589bdf97c8cd566405a265939e3620fc4f5de89adff580ae5

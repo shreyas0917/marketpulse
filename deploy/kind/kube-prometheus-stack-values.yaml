@@ -1,0 +1,89 @@
+# kube-prometheus-stack for kind. MarketPulse rules (PrometheusRule), scrape configs (PodMonitor)
+# and dashboards (ConfigMaps) come from the marketpulse Helm chart, so the stack picks up
+# resources from every namespace.
+fullnameOverride: kps
+cleanPrometheusOperatorObjectNames: true
+
+# Upstream Kubernetes alerting rules are noisy on kind (no etcd/scheduler metrics); only the
+# MarketPulse rules are loaded.
+defaultRules:
+  create: false
+
+kubeEtcd: { enabled: false }
+kubeScheduler: { enabled: false }
+kubeControllerManager: { enabled: false }
+kubeProxy: { enabled: false }
+
+prometheus:
+  prometheusSpec:
+    scrapeInterval: 10s
+    evaluationInterval: 10s
+    retention: 2d
+    serviceMonitorSelectorNilUsesHelmValues: false
+    podMonitorSelectorNilUsesHelmValues: false
+    ruleSelectorNilUsesHelmValues: false
+    probeSelectorNilUsesHelmValues: false
+    resources:
+      requests: { cpu: 100m, memory: 400Mi }
+      limits: { memory: 1Gi }
+
+alertmanager:
+  config:
+    route:
+      receiver: local
+      group_by: ["alertname", "severity"]
+      group_wait: 10s
+      group_interval: 1m
+      repeat_interval: 4h
+      routes:
+        - receiver: local
+          matchers: ['severity="page"']
+          group_wait: 0s
+    receivers:
+      - name: local
+    inhibit_rules:
+      - source_matchers: ['severity="page"']
+        target_matchers: ['severity="ticket"']
+        equal: ["slo"]
+  alertmanagerSpec:
+    resources:
+      requests: { cpu: 10m, memory: 32Mi }
+      limits: { memory: 128Mi }
+
+grafana:
+  defaultDashboardsEnabled: false
+  grafana.ini:
+    auth.anonymous:
+      enabled: true
+      org_role: Viewer
+    analytics:
+      reporting_enabled: false
+      check_for_updates: false
+  sidecar:
+    dashboards:
+      enabled: true
+      label: grafana_dashboard
+      searchNamespace: ALL
+      # One provider-level folder (as in compose). Folders created from the sidecar's file
+      # structure were not visible to the anonymous Viewer role in Grafana 13.
+      provider:
+        folder: MarketPulse
+        foldersFromFilesStructure: false
+  resources:
+    requests: { cpu: 50m, memory: 128Mi }
+    limits: { memory: 384Mi }
+
+kube-state-metrics:
+  resources:
+    requests: { cpu: 10m, memory: 32Mi }
+    limits: { memory: 128Mi }
+
+prometheus-node-exporter:
+  resources:
+    requests: { cpu: 10m, memory: 16Mi }
+    limits: { memory: 64Mi }
+
+prometheusOperator:
+  resources:
+    requests: { cpu: 20m, memory: 64Mi }
+    limits: { memory: 256Mi }

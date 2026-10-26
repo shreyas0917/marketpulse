@@ -1,0 +1,20 @@
+# ingress-nginx on kind: bind host ports on the control-plane node (published as 127.0.0.1:18080).
+controller:
+  hostPort:
+    enabled: true
+  service:
+    type: ClusterIP
+  nodeSelector:
+    ingress-ready: "true"
+  tolerations:
+    - key: node-role.kubernetes.io/control-plane
+      operator: Exists
+      effect: NoSchedule
+  watchIngressWithoutClass: true
+  ingressClassResource:
+    default: true
+  admissionWebhooks:
+    enabled: false
+  resources:
+    requests: { cpu: 50m, memory: 90Mi }
+    limits: { memory: 256Mi }
