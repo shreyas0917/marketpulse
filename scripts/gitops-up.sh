@@ -27,6 +27,16 @@ if helm -n marketpulse status marketpulse >/dev/null 2>&1; then
   log "handing marketpulse over from helm to Argo CD"
   kubectl -n marketpulse delete secret -l owner=helm,name=marketpulse >/dev/null
 fi
+# The M4 chart ran the API as a Deployment; the GitOps chart runs it as a Rollout. Argo CD never
+# created the old Deployment/Service, so it treats them as unmanaged and will not prune them,
+# yet their pods match the stable Service's selector. Remove them explicitly (DECISIONS D30).
+if grep -A3 '^api:' "$ROOT/deploy/helm/marketpulse/values-kind.yaml" | grep -q 'rollout:'    || grep -q '^  rollout:' "$ROOT/deploy/helm/marketpulse/values-kind.yaml"; then
+  if kubectl -n marketpulse get deploy marketpulse-api >/dev/null 2>&1; then
+    log "removing pre-Rollout Deployment/Service marketpulse-api superseded by the Rollout"
+    kubectl -n marketpulse delete deploy marketpulse-api --ignore-not-found >/dev/null
+    kubectl -n marketpulse delete svc marketpulse-api --ignore-not-found >/dev/null
+  fi
+fi
 
 log "registering Application marketpulse"
 kubectl apply -f "$ROOT/deploy/argocd/" >/dev/null
