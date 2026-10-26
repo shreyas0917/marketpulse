@@ -1,0 +1,23 @@
+# Local Alertmanager: alerts are inspected through the UI/API (http://localhost:9093).
+# No external receivers are configured, so nothing leaves the machine.
+route:
+  receiver: local
+  group_by: ["alertname", "severity"]
+  group_wait: 10s
+  group_interval: 1m
+  repeat_interval: 4h
+  routes:
+    - receiver: local
+      matchers: ['severity="page"']
+      group_wait: 0s
+    - receiver: local
+      matchers: ['severity=~"ticket|warning"']
+
+receivers:
+  - name: local
+
+inhibit_rules:
+  # A paging burn alert makes the matching ticket-level alert redundant.
+  - source_matchers: ['severity="page"']
+    target_matchers: ['severity="ticket"']
+    equal: ["slo"]
