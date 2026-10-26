@@ -6,7 +6,7 @@ IMAGE ?= marketpulse:dev
 TOOL := scripts/lib/tool.sh
 SHELL_SCRIPTS = $(shell git ls-files '*.sh')
 
-.PHONY: help setup lint test image dashboards up down smoke verify-stack rules-test kind-up kind-down deploy-local load burst drill
+.PHONY: help setup lint test image dashboards up down smoke verify-stack rules-test slo-rules kind-up kind-down deploy-local gitops-up load burst drill
 
 help: ## Show available targets
 	@grep -E '^[a-z-]+:.*## ' $(MAKEFILE_LIST) | awk -F':.*## ' '{printf "  %-14s %s\n", $$1, $$2}'
@@ -15,7 +15,7 @@ setup: ## Install Python deps and check required tools
 	uv sync --frozen
 	@for t in docker kubectl helm kind k6; do command -v $$t >/dev/null || echo "WARN: $$t not found on PATH"; done
 
-lint: ## ruff, mypy --strict, shellcheck (+ helm lint once the chart exists)
+lint: ## ruff, mypy --strict, shellcheck
 	uv run ruff check .
 	uv run ruff format --check .
 	uv run mypy
@@ -36,11 +36,26 @@ up: ## Start the docker compose stack and wait until every container is healthy
 down: ## Stop the compose stack and remove containers, networks and volumes
 	docker compose down -v --remove-orphans
 
-smoke: ## Smoke tests against the running stack (SMOKE_* env vars select the target)
+smoke: ## Smoke tests against the running compose stack
 	uv run pytest tests/smoke -p no:cacheprovider
 
 verify-stack: ## Check Prometheus targets and Grafana dashboard queries via their HTTP APIs
 	uv run python scripts/verify_stack.py $(VERIFY_ARGS)
 
-rules-test kind-up kind-down deploy-local load burst drill:
+rules-test: ## promtool check + unit tests for all rules, and runbook links
+	$(TOOL) promtool check rules observability/prometheus/rules/*.yml
+	$(TOOL) promtool test rules observability/prometheus/tests/*.yml
+	uv run python scripts/check_runbooks.py
+
+slo-rules: ## Regenerate SLO recording and burn-rate rules from scripts/gen-slo-rules.py
+	uv run python scripts/gen-slo-rules.py
+
+LOAD_ENV ?=
+load: ## k6 steady quote load (override with LOAD_ENV="-e RATE=50 -e DURATION=10m -e BASE_URL=...")
+	k6 run $(LOAD_ENV) load-tests/steady.js
+
+burst: ## k6 market-open burst; set LOAD_ENV="-e PRODUCER_URL=..." to burst the producer too
+	k6 run $(LOAD_ENV) load-tests/burst.js
+
+kind-up kind-down deploy-local gitops-up drill:
 	@echo "target '$@' is added in a later milestone" >&2; exit 1

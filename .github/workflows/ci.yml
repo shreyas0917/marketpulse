@@ -18,6 +18,10 @@ jobs:
           curl -LsSf https://astral.sh/uv/0.13.5/install.sh | sh
           echo "$HOME/.local/bin" >> "$GITHUB_PATH"
 
+      - name: Install kubeconform
+        run: |
+          curl -fsSL https://github.com/yannh/kubeconform/releases/download/v0.8.0/kubeconform-linux-amd64.tar.gz             | sudo tar -xz -C /usr/local/bin kubeconform
+
       - name: Install dependencies
         run: make setup
 
@@ -26,6 +30,9 @@ jobs:
 
       - name: Unit tests
         run: make test
+
+      - name: Prometheus rule tests
+        run: make rules-test
 
       - name: Build image
         run: make image
