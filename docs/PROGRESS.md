@@ -77,10 +77,34 @@ mid-run and the load died (DECISIONS D31); it was reverted and re-run, and only 
 recorded above. An orphaned pre-Rollout `Deployment`/`Service` from M4's helm install was removed
 by hand and `scripts/gitops-up.sh` now does this on handover (D30).
 
-## M6 — Local drills
+## M6 — Local drills ✅ (tag `m6-done`)
 
-Not started.
+| Check | Status | Date | Verified with |
+|---|---|---|---|
+| Each drill script prints start and end timestamps and restores the system when it finishes, even if interrupted (`trap`) | ✅ all 7 scripts source `scripts/drills/lib.sh` (`trap _run_cleanup EXIT`, `INT`/`TERM`, `START`/`END` lines, background k6/port-forwards killed); 2, 4, 6, 8 register explicit restore hooks (4 and 8 re-enable Argo CD auto-sync); drill 8's abort proved it: the trap re-enabled auto-sync and self-heal reverted the fault within seconds | 2026-10-26 | static check over `scripts/drills/*.sh`; drill 8 log |
+| Each drill doc contains numbers from an actual run; evidence as JSON/CSV in `docs/experiments/evidence/` | ✅ `1-kill-api-pods.md`, `2-fail-readiness.md`, `3-bad-deploy.md`, `4-redis-outage.md`, `5-market-open-burst.md`, `6-poison-messages.md`, `8-slow-worker.md` — every figure from a run on this machine; Prometheus range exports `drill<n>.json`, Alertmanager waits `drill<n>-*-firing/resolved.json`, k6 summaries, probe CSVs | 2026-10-26 | `make drill N=<n>` for 1, 2, 4, 5, 6, 8; `make drill N=3` run 10:03:34–10:11:17Z: aborted, 247 ms failure → stable, reverted `94811bb`, export `drill3.json` |
+| Drill 4 confirms both degraded-mode phases (stale `200`, then `503`) and the cold-cache limitation | ✅ stale `200`s until 29.9 s after the stop (max age 29.79 s); first `503` at 15.1 s from the cold replacement pod; all `503` from 30.0 s; cold pod answered 65/65 `503`; both pods stayed Ready; `AvailabilityFastBurn` at +42 s, `QuoteStoreDown` at +67 s; fresh quotes 4.6 s after restore | 2026-10-26 | `docs/experiments/evidence/drill4-phases.json`, `drill4-probe-*.csv` |
+| At least two full postmortems from real drill data, marked "Draft — for owner review" | ✅ `docs/incidents/2026-10-26-bad-release-canary-abort.md`, `docs/incidents/2026-10-26-redis-outage.md` | 2026-10-26 | files exist; both headed "Status: Draft — for owner review" |
+| Short `README.md`: summary, architecture diagram, quick start, results table with measured numbers only, links to SLOs, runbooks, drills, postmortems | ✅ | 2026-10-26 | `README.md`; link check over README + docs: 0 missing targets |
+
+Drill outcomes vs the spec's expected outcome (section 9):
+
+| # | Expected | Result |
+|---|---|---|
+| 1 | Replaced; no SLO breach with ≥ 2 replicas | ✅ replaced in 6 s / 7 s, 0 5xx, no alert — **but** 51/7,277 client requests hit connection resets from the SIGKILL that the API-side SLI cannot see (documented blind spot) |
+| 2 | Traffic stops reaching it; no user errors | ✅ 0 endpoints, 0 requests served, 0 restarts, 0 failed k6 checks |
+| 3 | Canary analysis fails; automatic rollback | ✅ analysis failed on its first sample; 3.265 s from failure to 100 % stable; Git reverted |
+| 4 | Store alert; stale ≤ 30 s then 503; burn; pods stay in LB; recovery; cold-cache limitation | ✅ all observed; freshness burned (peak 0.29) without paging because the stale phase is capped at 30 s |
+| 5 | HPA scales; lag spike and drain measured | ✅ API 2→6 (37 s / 89 s), worker 2→4; lag p99 1.90 s; drain 7 s; cost: p99 1.34 s, 1,310 `503`s from cold-cache pods, latency page 2 min |
+| 6 | Bounded retries; DLQ; worker healthy | ✅ 20/20 in the DLQ after 5 attempts (9 s); alert 76 s; 0 restarts; 2,200 good events during the drill |
+| 8 | Ingestion-lag burn-rate alert fires within target | ❌ **burn alert did not fire while the fault was active** (rate-weighted: 1.99 events/s written vs 20/s arriving) — ✅ `IngestionStalled` gap alert fired in 2 m 18 s, inside the 5-min target; CPU HPA stayed at 2; the burn page fired only during the drain after restore. Recorded as not met by the burn alert, met by the gap alert (DECISIONS D32). |
 
 ## Manual steps for the owner
 
-None yet.
+- Review and sign off the two postmortem drafts in `docs/incidents/`.
+- Optionally add dashboard screenshots to `docs/experiments/evidence/` (Grafana on kind: `kubectl -n monitoring port-forward svc/kps-grafana 3000:80`, dashboards in the *MarketPulse* folder; compose: http://localhost:13000).
+- Record the demo video: `make kind-up && make deploy-local && make gitops-up`, then `make load LOAD_ENV="-e BASE_URL=http://127.0.0.1:18080 -e HOST_HEADER=marketpulse.localtest.me"` in one terminal and `scripts/canary.sh bad` in another; watch `kubectl -n marketpulse get rollout marketpulse-api -w`.
+- Decide the product trade-off for `STALE_QUOTE_MAX_AGE_SECONDS` (drill 4) and whether to pre-warm caches on scale-out (drill 5).
+- Install the Argo Rollouts kubectl plugin if wanted for the runbook commands (`kubectl krew install argo-rollouts`); the build's download of it was corrupt and was removed.
+- The kind cluster `marketpulse` is left running for inspection; `make kind-down` removes it.
+
