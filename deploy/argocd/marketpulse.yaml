@@ -1,0 +1,37 @@
+# Argo CD Application: deploys the marketpulse chart from this repo's main branch onto kind.
+# Pushing a values change to main is the release; Argo Rollouts runs the canary.
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: marketpulse
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/shreyas0917/marketpulse.git
+    targetRevision: main
+    path: deploy/helm/marketpulse
+    helm:
+      releaseName: marketpulse
+      valueFiles:
+        - values-kind.yaml
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: marketpulse
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true
+  # The HPAs own the API and worker replica counts; everything else must match Git.
+  ignoreDifferences:
+    - group: apps
+      kind: Deployment
+      name: marketpulse-worker
+      jsonPointers: ["/spec/replicas"]
+    - group: argoproj.io
+      kind: Rollout
+      name: marketpulse-api
+      jsonPointers: ["/spec/replicas"]

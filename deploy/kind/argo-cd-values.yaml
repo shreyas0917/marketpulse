@@ -1,0 +1,29 @@
+# Argo CD on kind: single replica of everything, no Dex, no notifications.
+dex:
+  enabled: false
+notifications:
+  enabled: false
+applicationSet:
+  replicas: 1
+configs:
+  params:
+    server.insecure: true
+  cm:
+    # Poll GitHub every 60 s instead of the default 180 s (no webhook on a local cluster).
+    timeout.reconciliation: 60s
+controller:
+  resources:
+    requests: { cpu: 100m, memory: 256Mi }
+    limits: { memory: 1Gi }
+repoServer:
+  resources:
+    requests: { cpu: 50m, memory: 128Mi }
+    limits: { memory: 512Mi }
+server:
+  resources:
+    requests: { cpu: 20m, memory: 64Mi }
+    limits: { memory: 256Mi }
+redis:
+  resources:
+    requests: { cpu: 10m, memory: 32Mi }
+    limits: { memory: 128Mi }
