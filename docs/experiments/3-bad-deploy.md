@@ -55,8 +55,11 @@ returned to `Healthy` / `Synced` without starting a new canary.
 In [`evidence/`](evidence/): `canary-bad-timeline.jsonl` (every state transition with timestamps),
 `canary-bad-result.json` (measured abort time), `canary-bad-rollout.yaml`,
 `canary-bad-analysisrun.yaml` (the failed `AnalysisRun`), `canary-bad-argocd-status.txt`.
-This run was executed through `scripts/canary.sh bad`, which `make drill N=3` wraps; the drill
-wrapper additionally exports per-`role` request and 5xx rates from Prometheus as `drill3-*.json`.
+The run above was executed through `scripts/canary.sh bad`, which `make drill N=3` wraps. The
+wrapper was then run as well (10:03:34 → 10:11:17 UTC, bad commit `bc1401c`, revert `94811bb`) with
+the same outcome: analysis failed on its first sample and traffic was back to 100 % stable **247 ms**
+after the failure. Its files are `drill3.json` (per-`role` request and 5xx rates across the window),
+`drill3-timeline.jsonl`, `drill3-result.json`, `drill3-rollout.yaml`, `drill3-analysisrun.yaml`.
 
 ## Follow-ups
 
