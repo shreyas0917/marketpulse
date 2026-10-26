@@ -62,9 +62,20 @@ modelled, numbers come from the kind drills in M6.
 | Deleting one API pod causes no failed requests in a concurrent k6 run (2+ replicas) | ✅ 1901 requests, 0 failed checks, 0 `http_req_failed` | 2026-10-26 | `scripts/m4-checks.sh pod-delete` (k6 `STRICT=1` threshold); `docs/experiments/evidence/m4-pod-delete-k6-summary.json` |
 | kube-prometheus-stack loads the same rules and dashboards | ✅ 6 groups / 37 rules; 4 dashboards listed; every query returns data; 27/27 targets up | 2026-10-26 | `scripts/verify_stack.py --prometheus <pf> --grafana <pf> --dashboards marketpulse-slo,marketpulse-api,marketpulse-ingestion,marketpulse-platform` |
 
-## M5 — GitOps and progressive delivery
+## M5 — GitOps and progressive delivery ✅ (tag `m5-done`)
 
-Not started.
+| Check | Status | Date | Verified with |
+|---|---|---|---|
+| Argo CD shows the app `Synced` and `Healthy` from GitHub `main` | ✅ `Synced/Healthy` (`deploy/argocd/marketpulse.yaml` → `shreyas0917/marketpulse` `main`, path `deploy/helm/marketpulse`) | 2026-10-26 | `kubectl -n argocd get application marketpulse -o jsonpath='{.status.sync.status}/{.status.health.status}'`. Needed server-side diff (DECISIONS D29): with client-side diff 15 resources stayed `OutOfSync` on API-defaulted fields. |
+| Manual `kubectl edit` of a managed resource is reverted (drift detection) | ✅ `kubectl scale deploy/marketpulse-redis --replicas=2` at 07:36:46Z; Argo CD self-heal operation `Succeeded` at 07:40:47Z; `spec.replicas` back to 1, extra pod terminated | 2026-10-26 | `kubectl -n marketpulse scale …` then `kubectl -n argocd get application … -o jsonpath='{.status.operationState}'`; `docs/experiments/evidence/m5-drift.json` |
+| A good change pushed to `main` completes all canary steps and is promoted | ✅ `RELEASE_NOTE` change `fa3d726`: pushed 08:39:11Z → 10 % weight 08:39:25Z → analysis 1 `Successful` 08:48:25Z → 50 % → analysis 2 `Successful` 08:57:30Z → 100 % → **promoted 08:57:37Z** (18 m 26 s push → promote), new stable `9884c6f64`, under k6 30 req/s | 2026-10-26 | `scripts/canary.sh good`; `docs/experiments/evidence/canary-good-timeline.jsonl`, `canary-good-result.json`, `canary-good-analysisrun.yaml` |
+| A bad change (`FAULT_API_ERROR_RATE=0.2`) pushed to `main` under `make load` fails analysis and is aborted automatically; traffic returns to stable; time from analysis failure to 100 % stable recorded; bad commit reverted | ✅ commit `10d5b1c`: analysis `Failed` 07:54:16Z (canary 5xx ratio ≈ 0.20 > 0.01) → `abort=true`, canary weight 0 at 07:54:20Z — **3.265 s** failure → 100 % stable; stable RS unchanged; revert `c82c426` pushed 07:54:32Z; rollout `Healthy` 07:55:14Z | 2026-10-26 | `scripts/canary.sh bad`; `docs/experiments/evidence/canary-bad-*`; write-up `docs/experiments/3-bad-deploy.md` |
+| With no traffic, the canary is **not** promoted (no data counts as failure); reverted afterwards | ✅ commit `8c3481d` with **no load**: canary at 10 % 09:00:34Z; analysis 09:05:34Z → `Failed` 09:06:34Z with **empty results** (`len(result) > 0` false for both metrics) → `abort=true`, weight 0 — 314 ms failure → stable; not promoted; revert `53f3f52` pushed 09:06:42Z; rollout `Healthy` 09:06:52Z | 2026-10-26 | `scripts/canary.sh no-traffic`; `docs/experiments/evidence/canary-no-traffic-*` |
+
+Notes: the first good-canary attempt was aborted by the no-data guard when Docker Desktop stopped
+mid-run and the load died (DECISIONS D31); it was reverted and re-run, and only the re-run is
+recorded above. An orphaned pre-Rollout `Deployment`/`Service` from M4's helm install was removed
+by hand and `scripts/gitops-up.sh` now does this on handover (D30).
 
 ## M6 — Local drills
 

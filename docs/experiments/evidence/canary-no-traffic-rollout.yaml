@@ -1,0 +1,204 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Rollout
+metadata:
+  annotations:
+    argocd.argoproj.io/tracking-id: marketpulse:argoproj.io/Rollout:marketpulse/marketpulse-api
+    rollout.argoproj.io/revision: "7"
+  creationTimestamp: "2026-10-26T06:42:01Z"
+  generation: 27
+  labels:
+    app.kubernetes.io/component: api
+    app.kubernetes.io/instance: marketpulse
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: marketpulse
+    helm.sh/chart: marketpulse-0.1.0
+  name: marketpulse-api
+  namespace: marketpulse
+  resourceVersion: "37309"
+  uid: 20f28dce-aecc-4f74-a1f4-78bd3b919207
+spec:
+  replicas: 2
+  revisionHistoryLimit: 5
+  selector:
+    matchLabels:
+      app.kubernetes.io/component: api
+      app.kubernetes.io/instance: marketpulse
+      app.kubernetes.io/name: marketpulse
+  strategy:
+    canary:
+      abortScaleDownDelaySeconds: 30
+      canaryMetadata:
+        labels:
+          role: canary
+      canaryService: marketpulse-api-canary
+      stableMetadata:
+        labels:
+          role: stable
+      stableService: marketpulse-api-stable
+      steps:
+      - setWeight: 10
+      - pause:
+          duration: 5m
+      - analysis:
+          templates:
+          - templateName: api-canary-health
+      - setWeight: 50
+      - pause:
+          duration: 5m
+      - analysis:
+          templates:
+          - templateName: api-canary-health
+      trafficRouting:
+        nginx:
+          stableIngress: marketpulse-api
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/component: api
+        app.kubernetes.io/instance: marketpulse
+        app.kubernetes.io/name: marketpulse
+    spec:
+      automountServiceAccountToken: false
+      containers:
+      - args:
+        - api
+        env:
+        - name: LOG_LEVEL
+          value: INFO
+        - name: REDIS_URL
+          value: redis://marketpulse-redis:6379/0
+        - name: SYMBOLS
+          value: RELIANCE,TCS,INFY,HDFCBANK,ICICIBANK,SBIN,BHARTIARTL,ITC,LT,KOTAKBANK,SMOKETEST
+        - name: QUEUE_BACKEND
+          value: redis
+        - name: QUEUE_METRICS_INTERVAL_SECONDS
+          value: "5"
+        - name: API_PORT
+          value: "8000"
+        - name: RELEASE_NOTE
+          value: canary-no-traffic-20261026T090014Z
+        image: marketpulse:0.1.0
+        imagePullPolicy: Never
+        lifecycle:
+          preStop:
+            exec:
+              command:
+              - python
+              - -c
+              - import time; time.sleep(5)
+        livenessProbe:
+          failureThreshold: 3
+          httpGet:
+            path: /health/live
+            port: http
+          periodSeconds: 10
+        name: api
+        ports:
+        - containerPort: 8000
+          name: http
+          protocol: TCP
+        readinessProbe:
+          failureThreshold: 2
+          httpGet:
+            path: /health/ready
+            port: http
+          periodSeconds: 5
+        resources:
+          limits:
+            cpu: 500m
+            memory: 256Mi
+          requests:
+            cpu: 100m
+            memory: 96Mi
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+          readOnlyRootFilesystem: true
+        startupProbe:
+          failureThreshold: 30
+          httpGet:
+            path: /health/live
+            port: http
+          periodSeconds: 2
+      securityContext:
+        fsGroup: 10001
+        runAsGroup: 10001
+        runAsNonRoot: true
+        runAsUser: 10001
+        seccompProfile:
+          type: RuntimeDefault
+      serviceAccountName: marketpulse-api
+      terminationGracePeriodSeconds: 20
+      topologySpreadConstraints:
+      - labelSelector:
+          matchLabels:
+            app.kubernetes.io/component: api
+            app.kubernetes.io/instance: marketpulse
+            app.kubernetes.io/name: marketpulse
+        maxSkew: 1
+        topologyKey: kubernetes.io/hostname
+        whenUnsatisfiable: ScheduleAnyway
+status:
+  HPAReplicas: 3
+  abort: true
+  abortedAt: "2026-10-26T09:06:33Z"
+  availableReplicas: 3
+  blueGreen: {}
+  canary:
+    weights:
+      canary:
+        podTemplateHash: 66cbcd8954
+        serviceName: marketpulse-api-canary
+        weight: 0
+      stable:
+        podTemplateHash: 9884c6f64
+        serviceName: marketpulse-api-stable
+        weight: 100
+  conditions:
+  - lastTransitionTime: "2026-10-26T08:41:28Z"
+    lastUpdateTime: "2026-10-26T08:41:28Z"
+    message: Rollout has minimum availability
+    reason: AvailableReason
+    status: "True"
+    type: Available
+  - lastTransitionTime: "2026-10-26T09:00:27Z"
+    lastUpdateTime: "2026-10-26T09:00:27Z"
+    message: Rollout is not healthy
+    reason: RolloutHealthy
+    status: "False"
+    type: Healthy
+  - lastTransitionTime: "2026-10-26T09:00:27Z"
+    lastUpdateTime: "2026-10-26T09:00:27Z"
+    message: RolloutCompleted
+    reason: RolloutCompleted
+    status: "False"
+    type: Completed
+  - lastTransitionTime: "2026-10-26T09:05:33Z"
+    lastUpdateTime: "2026-10-26T09:05:33Z"
+    message: Rollout is paused
+    reason: RolloutPaused
+    status: "False"
+    type: Paused
+  - lastTransitionTime: "2026-10-26T09:06:33Z"
+    lastUpdateTime: "2026-10-26T09:06:33Z"
+    message: 'Rollout aborted update to revision 7: Step-based analysis phase error/failed:
+      Metric "canary-error-ratio" assessed Failed due to failed (2) > failureLimit
+      (1)'
+    reason: RolloutAborted
+    status: "False"
+    type: Progressing
+  currentPodHash: 66cbcd8954
+  currentStepHash: 8fcd5fb4c
+  currentStepIndex: 0
+  message: 'RolloutAborted: Rollout aborted update to revision 7: Step-based analysis
+    phase error/failed: Metric "canary-error-ratio" assessed Failed due to failed
+    (2) > failureLimit (1)'
+  observedGeneration: "27"
+  phase: Degraded
+  readyReplicas: 3
+  replicas: 3
+  selector: app.kubernetes.io/component=api,app.kubernetes.io/instance=marketpulse,app.kubernetes.io/name=marketpulse
+  stableRS: 9884c6f64
+  updatedReplicas: 1
