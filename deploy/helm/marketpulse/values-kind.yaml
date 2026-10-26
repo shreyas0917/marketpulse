@@ -12,6 +12,6 @@ api:
   # Pod-template environment for the API. Changing a value here and pushing to main is a release:
   # Argo CD syncs it and Argo Rollouts runs the canary. scripts/canary.sh edits this block.
   env:
-    RELEASE_NOTE: "canary-good-20261026T083906Z"
+    RELEASE_NOTE: "canary-no-traffic-20261026T090014Z"
   rollout:
     enabled: true
