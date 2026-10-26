@@ -4,7 +4,7 @@ Tracks every milestone and acceptance check from [SPEC.md](SPEC.md) section 15.
 ✅ = verified on the build machine with the listed command. ❌ = failed or not yet run.
 Machine: Windows 11, Docker Desktop 29.6.1 (8 CPU, 10 GB), Git Bash.
 
-## M1 — Application (branch `m1-application`)
+## M1 — Application ✅ (tag `m1-done`)
 
 | Check | Status | Date | Verified with |
 |---|---|---|---|
@@ -21,7 +21,7 @@ Machine: Windows 11, Docker Desktop 29.6.1 (8 CPU, 10 GB), Git Bash.
 | Unit test: each fault variable changes behaviour and sets `fault_injection_active` | ✅ | 2026-10-26 | `test_api_fault_gauge[*]`, `test_fault_api_error_rate_returns_500`, `test_fault_api_extra_latency_delays_quotes`, `test_fault_readiness_fail`, `test_fault_worker_fail_rate`, `test_fault_worker_extra_latency` |
 | Unit test: `/metrics` exposes every metric; buckets `0.25`, `2`, `1` on the right metrics | ✅ | 2026-10-26 | `test_metrics_endpoint_exposes_required_metrics_and_buckets`, `test_worker_metrics_exposed_with_buckets` |
 | `docker build` succeeds; container runs non-root | ✅ uid 10001 | 2026-10-26 | `make image && docker run --rm --entrypoint id marketpulse:dev` |
-| CI workflow passes on GitHub for pushed `main` | ❌ not yet run | | `gh run list --branch main` |
+| CI workflow passes on GitHub for pushed `main` | ✅ run 40260646828 | 2026-10-26 | `gh run list --branch main`, `gh run watch` |
 
 ## M2 — Local stack
 
