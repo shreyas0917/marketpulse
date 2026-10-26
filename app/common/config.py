@@ -53,6 +53,7 @@ class Settings(BaseSettings):
     # Producer
     producer_port: int = 9200
     producer_rate: float = Field(default=20.0, ge=0)
+    producer_symbols: str = ""
     producer_burst_multiplier: float = Field(default=10.0, ge=1)
     producer_burst_duration_seconds: float = Field(default=300.0, gt=0)
     producer_burst_on_start: bool = False
@@ -67,6 +68,12 @@ class Settings(BaseSettings):
     @property
     def symbol_list(self) -> list[str]:
         return [s.strip().upper() for s in self.symbols.split(",") if s.strip()]
+
+    @property
+    def producer_symbol_list(self) -> list[str]:
+        """Symbols the producer publishes; defaults to every served symbol."""
+        own = [s.strip().upper() for s in self.producer_symbols.split(",") if s.strip()]
+        return own or self.symbol_list
 
     @property
     def redis_timeout_seconds(self) -> float:

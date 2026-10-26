@@ -180,6 +180,8 @@ def test_settings_symbol_list() -> None:
     s = Settings(symbols=" aaa, bbb ,,ccc ")
     assert s.symbol_list == ["AAA", "BBB", "CCC"]
     assert s.redis_timeout_seconds == 0.05
+    assert s.producer_symbol_list == ["AAA", "BBB", "CCC"]
+    assert Settings(symbols="A,B", producer_symbols="b").producer_symbol_list == ["B"]
 
 
 def test_cli_usage() -> None:

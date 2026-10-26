@@ -44,7 +44,7 @@ class Producer:
         self.settings = settings
         self.queue = queue
         self.registry = registry or new_registry()
-        self.symbols = settings.symbol_list
+        self.symbols = settings.producer_symbol_list
         self._rng = random.Random(seed)
         self.prices = {s: round(self._rng.uniform(100, 3000), 2) for s in self.symbols}
         self._lock = threading.Lock()

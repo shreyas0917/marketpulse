@@ -54,6 +54,7 @@ All services share one settings model, so a variable that does not apply to a se
 |---|---|---|
 | `PRODUCER_PORT` | `9200` | Port for `/metrics`, health probes, `POST /burst` and `POST /poison`. |
 | `PRODUCER_RATE` | `20` | Events per second across all symbols. |
+| `PRODUCER_SYMBOLS` | _(empty)_ | Comma-separated subset of `SYMBOLS` to publish. Empty publishes every symbol. Compose and kind leave `SMOKETEST` out so smoke tests own that symbol. |
 | `PRODUCER_BURST_MULTIPLIER` | `10` | Rate multiplier during market-open burst mode. |
 | `PRODUCER_BURST_DURATION_SECONDS` | `300` | Length of a burst. |
 | `PRODUCER_BURST_ON_START` | `false` | Start in burst mode. |
