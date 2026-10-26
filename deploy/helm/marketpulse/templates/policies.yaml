@@ -1,0 +1,148 @@
+{{- /* ServiceAccounts, HPAs, PDBs and NetworkPolicies. */ -}}
+{{- $mp := include "mp.name" . -}}
+{{- range list "api" "worker" "producer" "redis" }}
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: {{ $mp }}-{{ . }}
+  labels:
+    {{- include "mp.labels" $ | nindent 4 }}
+    app.kubernetes.io/component: {{ . }}
+automountServiceAccountToken: false
+---
+{{- end }}
+{{- range $component := list "api" "worker" }}
+{{- $v := index $.Values $component }}
+{{- if $v.hpa.enabled }}
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: {{ $mp }}-{{ $component }}
+  labels:
+    {{- include "mp.labels" $ | nindent 4 }}
+    app.kubernetes.io/component: {{ $component }}
+spec:
+  scaleTargetRef:
+    {{- if and (eq $component "api") $.Values.api.rollout.enabled }}
+    apiVersion: argoproj.io/v1alpha1
+    kind: Rollout
+    {{- else }}
+    apiVersion: apps/v1
+    kind: Deployment
+    {{- end }}
+    name: {{ $mp }}-{{ $component }}
+  minReplicas: {{ $v.hpa.minReplicas }}
+  maxReplicas: {{ $v.hpa.maxReplicas }}
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: {{ $v.hpa.targetCPUUtilizationPercentage }}
+  behavior:
+    scaleDown:
+      stabilizationWindowSeconds: 60
+      policies:
+        - type: Percent
+          value: 50
+          periodSeconds: 30
+---
+{{- end }}
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ $mp }}-{{ $component }}
+  labels:
+    {{- include "mp.labels" $ | nindent 4 }}
+    app.kubernetes.io/component: {{ $component }}
+spec:
+  minAvailable: {{ $v.pdb.minAvailable }}
+  selector:
+    matchLabels:
+      {{- include "mp.selector" (dict "root" $ "component" $component) | nindent 6 }}
+---
+{{- end }}
+{{- if .Values.networkPolicy.enabled }}
+{{- $np := .Values.networkPolicy }}
+# Baseline: nothing may connect to MarketPulse pods unless a policy below allows it.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ $mp }}-default-deny-ingress
+  labels:
+    {{- include "mp.labels" . | nindent 4 }}
+spec:
+  podSelector: {}
+  policyTypes: ["Ingress"]
+---
+# Redis: only the API and worker (store) and the producer (queue, see DECISIONS D16).
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ $mp }}-redis
+  labels:
+    {{- include "mp.labels" . | nindent 4 }}
+spec:
+  podSelector:
+    matchLabels:
+      {{- include "mp.selector" (dict "root" . "component" "redis") | nindent 6 }}
+  policyTypes: ["Ingress"]
+  ingress:
+    - from:
+        - podSelector:
+            matchExpressions:
+              - key: app.kubernetes.io/name
+                operator: In
+                values: [{{ $mp }}]
+              - key: app.kubernetes.io/component
+                operator: In
+                values: [api, worker, producer]
+      ports:
+        - port: redis
+---
+# API: from the ingress controller and Prometheus.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ $mp }}-api
+  labels:
+    {{- include "mp.labels" . | nindent 4 }}
+spec:
+  podSelector:
+    matchLabels:
+      {{- include "mp.selector" (dict "root" . "component" "api") | nindent 6 }}
+  policyTypes: ["Ingress"]
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: {{ $np.ingressNamespace }}
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: {{ $np.monitoringNamespace }}
+      ports:
+        - port: http
+---
+# Worker and producer: metrics scraping from Prometheus only.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ $mp }}-metrics
+  labels:
+    {{- include "mp.labels" . | nindent 4 }}
+spec:
+  podSelector:
+    matchExpressions:
+      - key: app.kubernetes.io/component
+        operator: In
+        values: [worker, producer]
+  policyTypes: ["Ingress"]
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: {{ $np.monitoringNamespace }}
+      ports:
+        - port: http
+{{- end }}

@@ -1,0 +1,118 @@
+# Default values for the marketpulse chart. Environment overrides live in values-<env>.yaml.
+
+image:
+  repository: marketpulse
+  tag: dev
+  pullPolicy: IfNotPresent
+
+# Served symbols; the producer publishes producerSymbols (SMOKETEST is reserved for smoke tests).
+symbols: RELIANCE,TCS,INFY,HDFCBANK,ICICIBANK,SBIN,BHARTIARTL,ITC,LT,KOTAKBANK,SMOKETEST
+producerSymbols: RELIANCE,TCS,INFY,HDFCBANK,ICICIBANK,SBIN,BHARTIARTL,ITC,LT,KOTAKBANK
+logLevel: INFO
+
+queue:
+  backend: redis
+  metricsIntervalSeconds: 5
+
+podSecurityContext:
+  runAsNonRoot: true
+  runAsUser: 10001
+  runAsGroup: 10001
+  fsGroup: 10001
+  seccompProfile:
+    type: RuntimeDefault
+
+containerSecurityContext:
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: true
+  capabilities:
+    drop: ["ALL"]
+
+topologySpread:
+  enabled: true
+  topologyKey: kubernetes.io/hostname
+  maxSkew: 1
+
+api:
+  replicas: 2
+  port: 8000
+  resources:
+    requests: { cpu: 100m, memory: 96Mi }
+    limits: { cpu: 500m, memory: 256Mi }
+  hpa:
+    enabled: true
+    minReplicas: 2
+    maxReplicas: 6
+    targetCPUUtilizationPercentage: 60
+  pdb:
+    minAvailable: 1
+  # Extra environment, e.g. fault injection: { FAULT_API_ERROR_RATE: "0.2" }
+  env: {}
+  # Argo Rollouts canary (M5). When false the API is a plain Deployment.
+  rollout:
+    enabled: false
+    trafficRouting: nginx
+    steps:
+      - setWeight: 10
+      - pause: { duration: 5m }
+      - analysis: { templates: [{ templateName: api-canary-health }] }
+      - setWeight: 50
+      - pause: { duration: 5m }
+      - analysis: { templates: [{ templateName: api-canary-health }] }
+    abortScaleDownDelaySeconds: 30
+    analysis:
+      prometheusAddress: http://kps-prometheus.monitoring.svc:9090
+      interval: 1m
+      count: 5
+      failureLimit: 1
+      maxErrorRatio: 0.01
+      minLatencyGoodRatio: 0.99
+
+worker:
+  replicas: 2
+  port: 9100
+  resources:
+    requests: { cpu: 100m, memory: 96Mi }
+    limits: { cpu: 500m, memory: 256Mi }
+  hpa:
+    enabled: true
+    minReplicas: 2
+    maxReplicas: 4
+    targetCPUUtilizationPercentage: 70
+  pdb:
+    minAvailable: 1
+  env: {}
+
+producer:
+  replicas: 1
+  port: 9200
+  rate: 20
+  resources:
+    requests: { cpu: 50m, memory: 64Mi }
+    limits: { cpu: 300m, memory: 192Mi }
+  env: {}
+
+redis:
+  image:
+    repository: redis
+    tag: 8.10.2-alpine@sha256:0bf6577d7774e592b29d093e3ac9390eb91e13d72c21e506afce736de5e0eeb0
+  port: 6379
+  resources:
+    requests: { cpu: 50m, memory: 64Mi }
+    limits: { cpu: 500m, memory: 256Mi }
+
+ingress:
+  enabled: true
+  className: nginx
+  host: marketpulse.localtest.me
+
+networkPolicy:
+  enabled: true
+  # Namespaces allowed to reach the services (by kubernetes.io/metadata.name).
+  ingressNamespace: ingress-nginx
+  monitoringNamespace: monitoring
+
+monitoring:
+  podMonitors: true
+  rules: true
+  dashboards: true

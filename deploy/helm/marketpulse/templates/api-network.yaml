@@ -1,0 +1,45 @@
+{{- $c := dict "root" . "component" "api" -}}
+{{- $name := printf "%s-api" (include "mp.name" .) -}}
+{{- $services := list $name -}}
+{{- if .Values.api.rollout.enabled }}
+{{- $services = list (printf "%s-stable" $name) (printf "%s-canary" $name) -}}
+{{- end }}
+{{- range $services }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ . }}
+  labels:
+    {{- include "mp.labels" $ | nindent 4 }}
+    app.kubernetes.io/component: api
+spec:
+  selector:
+    {{- include "mp.selector" $c | nindent 4 }}
+  ports:
+    - name: http
+      port: 80
+      targetPort: http
+---
+{{- end }}
+{{- if .Values.ingress.enabled }}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ $name }}
+  labels:
+    {{- include "mp.labels" . | nindent 4 }}
+    app.kubernetes.io/component: api
+spec:
+  ingressClassName: {{ .Values.ingress.className }}
+  rules:
+    - host: {{ .Values.ingress.host }}
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ index $services 0 }}
+                port:
+                  name: http
+{{- end }}

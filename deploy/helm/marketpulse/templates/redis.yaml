@@ -1,0 +1,70 @@
+{{- $c := dict "root" . "component" "redis" -}}
+{{- $name := printf "%s-redis" (include "mp.name" .) -}}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ $name }}
+  labels:
+    {{- include "mp.labels" . | nindent 4 }}
+    app.kubernetes.io/component: redis
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      {{- include "mp.selector" $c | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "mp.selector" $c | nindent 8 }}
+    spec:
+      serviceAccountName: {{ $name }}
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 999
+        runAsGroup: 999
+        fsGroup: 999
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: redis
+          image: "{{ .Values.redis.image.repository }}:{{ .Values.redis.image.tag }}"
+          imagePullPolicy: IfNotPresent
+          # Dev store: latest quotes and the event streams only, no persistence.
+          args: ["redis-server", "--save", "", "--appendonly", "no", "--protected-mode", "no"]
+          ports:
+            - name: redis
+              containerPort: {{ .Values.redis.port }}
+          securityContext:
+            {{- toYaml .Values.containerSecurityContext | nindent 12 }}
+          resources:
+            {{- toYaml .Values.redis.resources | nindent 12 }}
+          readinessProbe:
+            exec: { command: ["redis-cli", "ping"] }
+            periodSeconds: 5
+          livenessProbe:
+            exec: { command: ["redis-cli", "ping"] }
+            periodSeconds: 10
+          volumeMounts:
+            - name: data
+              mountPath: /data
+      volumes:
+        - name: data
+          emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ $name }}
+  labels:
+    {{- include "mp.labels" . | nindent 4 }}
+    app.kubernetes.io/component: redis
+spec:
+  selector:
+    {{- include "mp.selector" $c | nindent 4 }}
+  ports:
+    - name: redis
+      port: {{ .Values.redis.port }}
+      targetPort: redis

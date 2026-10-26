@@ -1,0 +1,94 @@
+{{- $c := dict "root" . "component" "api" -}}
+{{- $name := printf "%s-api" (include "mp.name" .) -}}
+{{- $r := .Values.api.rollout -}}
+{{- if $r.enabled }}
+apiVersion: argoproj.io/v1alpha1
+kind: Rollout
+{{- else }}
+apiVersion: apps/v1
+kind: Deployment
+{{- end }}
+metadata:
+  name: {{ $name }}
+  labels:
+    {{- include "mp.labels" . | nindent 4 }}
+    app.kubernetes.io/component: api
+spec:
+  {{- if not .Values.api.hpa.enabled }}
+  replicas: {{ .Values.api.replicas }}
+  {{- end }}
+  revisionHistoryLimit: 5
+  selector:
+    matchLabels:
+      {{- include "mp.selector" $c | nindent 6 }}
+  {{- if $r.enabled }}
+  strategy:
+    canary:
+      stableService: {{ $name }}-stable
+      canaryService: {{ $name }}-canary
+      canaryMetadata:
+        labels: { role: canary }
+      stableMetadata:
+        labels: { role: stable }
+      abortScaleDownDelaySeconds: {{ $r.abortScaleDownDelaySeconds }}
+      trafficRouting:
+        {{- if eq $r.trafficRouting "nginx" }}
+        nginx:
+          stableIngress: {{ $name }}
+        {{- else }}
+        {{- fail "only nginx traffic routing is supported in this build" }}
+        {{- end }}
+      steps:
+        {{- toYaml $r.steps | nindent 8 }}
+  {{- else }}
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+      maxSurge: 1
+  {{- end }}
+  template:
+    metadata:
+      labels:
+        {{- include "mp.selector" $c | nindent 8 }}
+    spec:
+      serviceAccountName: {{ $name }}
+      automountServiceAccountToken: false
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      terminationGracePeriodSeconds: 20
+      {{- include "mp.topologySpread" $c | nindent 6 }}
+      containers:
+        - name: api
+          image: {{ include "mp.image" . }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          args: ["api"]
+          ports:
+            - name: http
+              containerPort: {{ .Values.api.port }}
+          env:
+            {{- include "mp.commonEnv" . | nindent 12 }}
+            - name: API_PORT
+              value: {{ .Values.api.port | quote }}
+            {{- include "mp.extraEnv" .Values.api.env | nindent 12 }}
+          securityContext:
+            {{- toYaml .Values.containerSecurityContext | nindent 12 }}
+          resources:
+            {{- toYaml .Values.api.resources | nindent 12 }}
+          startupProbe:
+            httpGet: { path: /health/live, port: http }
+            periodSeconds: 2
+            failureThreshold: 30
+          readinessProbe:
+            httpGet: { path: /health/ready, port: http }
+            periodSeconds: 5
+            failureThreshold: 2
+          livenessProbe:
+            httpGet: { path: /health/live, port: http }
+            periodSeconds: 10
+            failureThreshold: 3
+          lifecycle:
+            # Give the ingress time to stop routing to a terminating pod before it exits.
+            preStop:
+              exec:
+                command: ["python", "-c", "import time; time.sleep(5)"]

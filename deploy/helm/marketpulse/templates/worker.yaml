@@ -1,0 +1,105 @@
+{{- $c := dict "root" . "component" "worker" -}}
+{{- $name := printf "%s-worker" (include "mp.name" .) -}}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ $name }}
+  labels:
+    {{- include "mp.labels" . | nindent 4 }}
+    app.kubernetes.io/component: worker
+spec:
+  {{- if not .Values.worker.hpa.enabled }}
+  replicas: {{ .Values.worker.replicas }}
+  {{- end }}
+  revisionHistoryLimit: 5
+  selector:
+    matchLabels:
+      {{- include "mp.selector" $c | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "mp.selector" $c | nindent 8 }}
+    spec:
+      serviceAccountName: {{ $name }}
+      automountServiceAccountToken: false
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      terminationGracePeriodSeconds: 20
+      {{- include "mp.topologySpread" $c | nindent 6 }}
+      containers:
+        - name: worker
+          image: {{ include "mp.image" . }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          args: ["worker"]
+          ports:
+            - name: http
+              containerPort: {{ .Values.worker.port }}
+          env:
+            {{- include "mp.commonEnv" . | nindent 12 }}
+            - name: WORKER_PORT
+              value: {{ .Values.worker.port | quote }}
+            {{- include "mp.extraEnv" .Values.worker.env | nindent 12 }}
+          securityContext:
+            {{- toYaml .Values.containerSecurityContext | nindent 12 }}
+          resources:
+            {{- toYaml .Values.worker.resources | nindent 12 }}
+          readinessProbe:
+            httpGet: { path: /health/ready, port: http }
+            periodSeconds: 5
+          livenessProbe:
+            httpGet: { path: /health/live, port: http }
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            failureThreshold: 3
+---
+{{- $p := dict "root" . "component" "producer" }}
+{{- $pname := printf "%s-producer" (include "mp.name" .) }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ $pname }}
+  labels:
+    {{- include "mp.labels" . | nindent 4 }}
+    app.kubernetes.io/component: producer
+spec:
+  replicas: {{ .Values.producer.replicas }}
+  revisionHistoryLimit: 5
+  selector:
+    matchLabels:
+      {{- include "mp.selector" $p | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "mp.selector" $p | nindent 8 }}
+    spec:
+      serviceAccountName: {{ $pname }}
+      automountServiceAccountToken: false
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: producer
+          image: {{ include "mp.image" . }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          args: ["producer"]
+          ports:
+            - name: http
+              containerPort: {{ .Values.producer.port }}
+          env:
+            {{- include "mp.commonEnv" . | nindent 12 }}
+            - name: PRODUCER_PORT
+              value: {{ .Values.producer.port | quote }}
+            - name: PRODUCER_RATE
+              value: {{ .Values.producer.rate | quote }}
+            - name: PRODUCER_SYMBOLS
+              value: {{ .Values.producerSymbols | quote }}
+            {{- include "mp.extraEnv" .Values.producer.env | nindent 12 }}
+          securityContext:
+            {{- toYaml .Values.containerSecurityContext | nindent 12 }}
+          resources:
+            {{- toYaml .Values.producer.resources | nindent 12 }}
+          readinessProbe:
+            httpGet: { path: /health/ready, port: http }
+            periodSeconds: 5
+          livenessProbe:
+            httpGet: { path: /health/live, port: http }
+            periodSeconds: 10

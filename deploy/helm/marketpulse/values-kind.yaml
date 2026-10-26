@@ -1,0 +1,9 @@
+# kind overrides. The image is built locally and loaded with `kind load docker-image`
+# (no registry). Reach the API at http://127.0.0.1:18080 with Host: marketpulse.localtest.me.
+image:
+  repository: marketpulse
+  tag: "0.1.0"
+  pullPolicy: Never
+
+ingress:
+  host: marketpulse.localtest.me
