@@ -1,0 +1,1 @@
+{"alert": "DeadLetterQueueNotEmpty", "state": "firing", "observed_at": "2026-10-26T09:19:38+00:00", "waited_since": "2026-10-26T09:18:22+00:00", "starts_at": ["2026-10-26T09:19:29.992Z"], "labels": [{"alertname": "DeadLetterQueueNotEmpty", "prometheus": "monitoring/kps", "severity": "ticket", "slo": "ingestion_lag"}]}

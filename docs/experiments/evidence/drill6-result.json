@@ -1,0 +1,3 @@
+{"poison_published": 20, "dlq_added": 20, "seconds_to_all_dead_lettered": 9,
+ "seconds_to_dlq_alert": 85, "worker_restarts_after": "1 1 ",
+ "good_events_processed_during_drill": 2200}
