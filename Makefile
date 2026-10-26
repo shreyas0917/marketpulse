@@ -31,8 +31,8 @@ chart-assets: ## Copy SLO rules and dashboards into the Helm chart (single sourc
 	cp observability/grafana/dashboards/*.json $(CHART)/files/dashboards/
 
 chart-lint: ## helm lint, kubeconform -strict, and check chart assets match observability/
-	diff -r observability/prometheus/rules $(CHART)/files/rules
-	diff -r observability/grafana/dashboards $(CHART)/files/dashboards
+	diff -r --strip-trailing-cr observability/prometheus/rules $(CHART)/files/rules
+	diff -r --strip-trailing-cr observability/grafana/dashboards $(CHART)/files/dashboards
 	helm lint --strict $(CHART) -f $(CHART)/values-kind.yaml
 	helm lint --strict $(CHART) -f $(CHART)/values-kind.yaml --set api.rollout.enabled=true
 	helm template mp $(CHART) -f $(CHART)/values-kind.yaml | kubeconform -strict -summary $(KUBECONFORM_SCHEMAS)
@@ -88,5 +88,8 @@ kind-down: ## Delete the kind cluster
 deploy-local: ## Build + kind-load the image and helm upgrade --install onto kind
 	scripts/deploy-local.sh
 
-gitops-up drill:
+gitops-up: ## Install Argo CD + Argo Rollouts on kind and register the Application (M5)
+	scripts/gitops-up.sh
+
+drill:
 	@echo "target '$@' is added in a later milestone" >&2; exit 1
