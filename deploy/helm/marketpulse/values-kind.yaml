@@ -13,5 +13,6 @@ api:
   # Argo CD syncs it and Argo Rollouts runs the canary. scripts/canary.sh edits this block.
   env:
     RELEASE_NOTE: "initial"
+    FAULT_API_ERROR_RATE: "0.2"
   rollout:
     enabled: true
