@@ -53,7 +53,7 @@ modelled, numbers come from the kind drills in M6.
 
 | Check | Status | Date | Verified with |
 |---|---|---|---|
-| `helm lint` and `helm template \| kubeconform -strict` pass | ✅ 28 resources valid (29 with the Rollout variant) | 2026-10-26 | `make chart-lint` (part of `make lint`) |
+| `helm lint` and `helm template \| kubeconform -strict` pass | ✅ 29 resources valid (30 with the Rollout variant) | 2026-10-26 | `make chart-lint` (part of `make lint`) |
 | `make kind-up && make deploy-local` deploys everything; all pods Ready | ✅ 3 nodes Ready, 30/30 pods Ready across all namespaces | 2026-10-26 | `make kind-up` (1098 s, mostly first-time image pulls), `make deploy-local`, `kubectl get pods -A` |
 | `make smoke` passes against the kind ingress | ✅ 10 passed | 2026-10-26 | `make smoke TARGET=kind` (API via 127.0.0.1:18080 + Host header; worker/producer via port-forward) |
 | Containers non-root with requests and limits | ✅ uid 10001 (redis 999), `runAsNonRoot`, read-only root FS, requests + limits on every container | 2026-10-26 | `scripts/m4-checks.sh security` (`kubectl get pod -o jsonpath`) |
