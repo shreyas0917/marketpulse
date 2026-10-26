@@ -37,11 +37,16 @@ set_api_env() {
 import re, sys
 path, key, value = sys.argv[1:]
 text = open(path, encoding="utf-8").read()
-m = re.search(r"^api:\n  env:\n((?:    .*\n)*)", text, re.M)
-assert m, "values-kind.yaml needs an 'api:\n  env:' block"
-lines = [l for l in m.group(1).splitlines() if not l.strip().startswith(f"{key}:")]
+# Match `api:` then its `  env:` child, tolerating comment/blank lines between them,
+# and capture the existing `    KEY: value` entries that follow.
+m = re.search(
+    r"^(?P<head>api:\n(?:[ \t]*#.*\n|[ \t]*\n)*  env:\n)(?P<body>(?:    [^#\n].*\n)*)",
+    text, re.M,
+)
+assert m, "values-kind.yaml needs an 'api:' block with an 'env:' child"
+lines = [l for l in m.group("body").splitlines() if not l.strip().startswith(f"{key}:")]
 lines.append(f'    {key}: "{value}"')
-new = "api:\n  env:\n" + "\n".join(lines) + "\n"
+new = m.group("head") + "\n".join(lines) + "\n"
 open(path, "w", encoding="utf-8", newline="\n").write(text[:m.start()] + new + text[m.end():])
 EOF
 }
