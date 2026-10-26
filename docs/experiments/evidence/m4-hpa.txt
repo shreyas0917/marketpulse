@@ -1,0 +1,7 @@
+2026-10-26T04:50:38Z hpa: start 2/2 (min 2); starting load 400 req/s for 4m
+2026-10-26T04:50:39Z hpa desired=2 marketpulse-api-67449f59d7-jck2z=3m marketpulse-api-67449f59d7-xs9z5=3m 
+2026-10-26T04:51:20Z hpa desired=3 marketpulse-api-67449f59d7-jck2z=148m marketpulse-api-67449f59d7-xs9z5=214m 
+2026-10-26T04:51:20Z scaled up at 2026-10-26T04:51:20Z (42s after load start)
+2026-10-26T04:51:31Z hpa desired=6 marketpulse-api-67449f59d7-4p45q=351m marketpulse-api-67449f59d7-jck2z=393m marketpulse-api-67449f59d7-xs9z5=486m 
+2026-10-26T04:54:57Z load stopped at 2026-10-26T04:54:57Z (peak desired=6); waiting for scale-down
+2026-10-26T04:56:50Z PASS hpa: up at 2026-10-26T04:51:20Z, peak 6, load stop 2026-10-26T04:54:57Z, back to 2 at 2026-10-26T04:56:50Z (113s after load stop)
