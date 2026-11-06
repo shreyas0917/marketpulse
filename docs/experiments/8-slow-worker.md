@@ -4,7 +4,7 @@
 |---|---|
 | Run date | 2026-10-26, 09:44:17 → 09:59:36 UTC (fault 09:44:32 → 09:59:36, **15 min**) |
 | Environment | kind (1 control plane + 2 workers), image `marketpulse:0.1.0`, 2 worker replicas (CPU HPA 2–4), producer 20 events/s, `FAULT_WORKER_EXTRA_LATENCY_MS=500` |
-| Script | `make drill N=8` → `scripts/drills/8-slow-worker.sh` (pauses Argo CD auto-sync, sets the env on the worker Deployment, restores by re-enabling auto-sync so self-heal reverts it) |
+| Script | `make drill N=8` → `scripts/drills/8-slow-worker.sh` (pauses Argo CD auto-sync, sets the env on the worker Deployment, then re-enables auto-sync; in this run the env was removed by the drill's own cleanup, not by self-heal — see the correction below) |
 | Load during run | normal producer traffic only; no k6 |
 
 ## Hypothesis
@@ -40,7 +40,7 @@ ticket-level `IngestionLagSlowBurn` from the day's earlier disruptions.
 | `IngestionLagFastBurn` during the fault | **did not fire** in 15 min (1h/5m needs the 1 h ratio > 0.144; 6h/30m needs the 30 m ratio > 0.06) |
 | `IngestionStalled` (gap alert) | pending 09:44:50, **firing 09:46:50 — 2 min 18 s** after the fault started; resolved ≈ 10:00:00 |
 | Worker HPA during the fault | stayed at **2** — a worker sleeping 500 ms per event uses little CPU |
-| Restore (auto-sync re-enabled → self-heal reverted the env) | 09:59:36 |
+| Restore (drill cleanup removed the env; auto-sync re-enabled) | 09:59:36 |
 | Backlog drained (≤ 20) | **10:00:10**, 34 s after restore |
 | `IngestionLagFastBurn` after restore | **fired 10:00:10 → 10:05:40** (6h/30m pair: 30 m ratio peaked at 0.144, 6 h at 0.19) |
 | Worker HPA after restore | scaled to 4 during the drain burst (CPU finally rose) |
@@ -64,11 +64,23 @@ target") is therefore recorded as **not met by the burn alert, met by the gap al
 
 The script's 15-minute wait for `IngestionLagFastBurn` returned non-zero and, under `set -e`, the
 drill exited at that point (exit code 1) before its own stall check, restore timing and export. The
-cleanup trap still re-enabled Argo CD auto-sync, and self-heal reverted the worker env within
-seconds, so the system was restored. The numbers above come from the same run: the per-window ratios
+cleanup trap restored the system: it runs its steps in reverse order, so the drill's own
+`kubectl set env … FAULT_WORKER_EXTRA_LATENCY_MS-` removed the fault first and auto-sync was
+re-enabled after it. The numbers above come from the same run: the per-window ratios
 were captured live during the fault (`drill8-live-windows.json`) and the ranges and alert timeline
 were exported from Prometheus immediately afterwards (`drill8.json`). The script was then fixed to
 record a non-firing alert as a result and continue (see `scripts/drills/8-slow-worker.sh`).
+
+### Correction (2026-11-06): self-heal did not revert this fault
+
+An earlier version of this page said Argo CD self-heal reverted the worker env. It did not, and it
+could not: Argo CD applies and diffs server-side, and with server-side diff it only compares fields
+the manifest declares. `FAULT_WORKER_EXTRA_LATENCY_MS` was not in the chart, so setting it by hand
+was invisible to Argo CD. Verification run 3 showed this directly: the fault stayed in place for
+26 minutes while the application reported `Synced/Healthy` (finding F13,
+[postmortem](../incidents/2026-11-06-fault-env-invisible-to-argocd.md)). The chart now declares
+every `FAULT_*` variable with a neutral value, so a manual change is drift that self-heal reverts;
+the drill keeps its own cleanup and its log now records who restored the env (finding F14).
 
 ## Evidence
 

@@ -32,7 +32,7 @@ implemented here.
 | Service-account token abuse | One ServiceAccount per component, `automountServiceAccountToken: false` (no workload talks to the API server) | — |
 | Secrets leaked in Git or images | No secrets exist in the app; `.gitignore` covers env/kubeconfig/credentials; `gitleaks` scan before every push; image contains only the venv and `app/` | Trivy image scanning in CI is a later-phase item (section 11) |
 | Bad release reaches all users | Canary with Prometheus analysis on canary-only series; automatic abort; no-data counts as failure | — |
-| Configuration drift / manual changes | Argo CD auto-sync with self-heal reverts `kubectl edit` (verified in M5) | — |
+| Configuration drift / manual changes | Argo CD auto-sync with self-heal reverts `kubectl edit` of fields the chart declares (verified in M5). With server-side diff, a field Git does not declare (for example an extra env var) is not drift; the chart therefore declares every `FAULT_*` switch (F13) | Undeclared fields added by hand are still invisible to Argo CD |
 | Supply chain: dependency or image tampering | Exact pins in `pyproject.toml` + `uv.lock`; base and infra images pinned by tag **and** digest; Helm chart versions pinned | No signature verification (cosign) |
 | Denial of service on the API | Resource limits, HPA on CPU, ingress in front | No rate limiting; out of scope for local |
 | Alert suppression / blind spots | Gap alerts for stalled worker, no traffic, Redis down, DLQ, scrape failures; rules unit-tested | Alertmanager has no external receiver locally |
