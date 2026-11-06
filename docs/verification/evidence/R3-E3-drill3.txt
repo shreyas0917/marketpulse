@@ -1,0 +1,38 @@
+# command: EVIDENCE=/d/marketpulse/docs/verification/evidence/R3-E-drills make drill N=3 (run from main worktree); start 2026-11-06T16:02:54Z
+scripts/drills/run.sh 3
+2026-11-06T16:02:55Z [drill 3] START 2026-11-06T16:02:55Z - deploy bad version
+2026-11-06T16:02:58.386Z [canary bad] rollout before: Healthy|6|0||65ddb44f9d|65ddb44f9d
+2026-11-06T16:02:58.655Z [canary bad] k6 steady load 30 req/s started
+[90m9:34PM[0m [32mINF[0m [1m90 commits scanned.[0m
+[90m9:34PM[0m [32mINF[0m [1mscanned ~1710606 bytes (1.71 MB) in 832ms[0m
+[90m9:34PM[0m [32mINF[0m [1mno leaks found[0m
+2026-11-06T16:04:03.478Z [canary bad] pushed fe83a6faf7cb566fc0f3ed4cd781453fd126df94 to main
+2026-11-06T16:04:04.329Z [canary bad] rollout phase|step|weight|abort|stableRS|currentHash = Healthy|6|0||65ddb44f9d|65ddb44f9d
+2026-11-06T16:04:04.463Z [canary bad] canary ingress weight = 0
+2026-11-06T16:04:14.194Z [canary bad] rollout phase|step|weight|abort|stableRS|currentHash = Progressing|0|0||65ddb44f9d|6c8df9f74c
+2026-11-06T16:04:22.441Z [canary bad] rollout phase|step|weight|abort|stableRS|currentHash = Paused|1|10||65ddb44f9d|6c8df9f74c
+2026-11-06T16:04:22.599Z [canary bad] canary ingress weight = 10
+2026-11-06T16:09:21.360Z [canary bad] rollout phase|step|weight|abort|stableRS|currentHash = Progressing|2|10||65ddb44f9d|6c8df9f74c
+2026-11-06T16:09:21.518Z [canary bad] analysisrun marketpulse-api-6c8df9f74c-7-2|Running
+2026-11-06T16:10:20.444Z [canary bad] analysisrun marketpulse-api-6c8df9f74c-7-2|Failed
+2026-11-06T16:10:20.693Z [canary bad] analysis failed
+2026-11-06T16:10:22.807Z [canary bad] rollout phase|step|weight|abort|stableRS|currentHash = Degraded|0|0|true|65ddb44f9d|6c8df9f74c
+2026-11-06T16:10:23.006Z [canary bad] canary ingress weight = 0
+2026-11-06T16:10:23.243Z [canary bad] 100% stable (canary weight 0)
+2026-11-06T16:10:23.431Z [canary bad] outcome: aborted
+2026-11-06T16:10:23.509Z [canary bad] analysis failure -> 100% stable: 2567 ms
+OutOfSync/Degraded
+2026-11-06T16:10:25.244Z [canary bad] GitOps follow-up: reverting fe83a6faf7cb566fc0f3ed4cd781453fd126df94 so Git matches what runs
+[90m9:40PM[0m [32mINF[0m [1m91 commits scanned.[0m
+[90m9:40PM[0m [32mINF[0m [1mscanned ~1710606 bytes (1.71 MB) in 1.09s[0m
+[90m9:40PM[0m [32mINF[0m [1mno leaks found[0m
+2026-11-06T16:10:30.724Z [canary bad] pushed revert 6fccf81c43124f2d72e6b8d3a982da5e2f556413
+2026-11-06T16:10:41.727Z [canary bad] rollout after revert: Healthy|6|0||65ddb44f9d|65ddb44f9d
+OutOfSync/Healthy
+Using CPython 3.13.7 interpreter at: C:\Python313\python.exe
+Creating virtual environment at: .venv
+Installed 61 packages in 3.41s
+wrote D:\marketpulse\docs\verification\evidence\R3-E-drills\drill3.json
+2026-11-06T16:10:47Z [drill 3] cleanup (exit code 0)
+2026-11-06T16:10:47Z [drill 3] END 2026-11-06T16:10:47Z
+# exit: 0

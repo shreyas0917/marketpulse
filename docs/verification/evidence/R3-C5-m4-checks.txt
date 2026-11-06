@@ -1,0 +1,65 @@
+# id: R3-C5-m4-checks
+# command: SUMMARY=docs/verification/evidence/R3-C5-pod-delete-k6-summary.json scripts/m4-checks.sh all
+# start: 2026-11-06T14:06:36Z
+2026-11-06T14:06:36Z security: every container non-root with requests and limits
+marketpulse-api-5556ccf5f8-4mxwt runAsNonRoot=true uid=10001 ro=true req={"cpu":"100m","memory":"96Mi"} lim={"cpu":"500m","memory":"256Mi"}
+marketpulse-api-5556ccf5f8-mbj8p runAsNonRoot=true uid=10001 ro=true req={"cpu":"100m","memory":"96Mi"} lim={"cpu":"500m","memory":"256Mi"}
+marketpulse-producer-7998c8d598-vw67s runAsNonRoot=true uid=10001 ro=true req={"cpu":"50m","memory":"64Mi"} lim={"cpu":"300m","memory":"192Mi"}
+marketpulse-redis-8cf748c55-2t5g5 runAsNonRoot=true uid=999 ro=true req={"cpu":"50m","memory":"64Mi"} lim={"cpu":"500m","memory":"256Mi"}
+marketpulse-worker-868857467d-f85d8 runAsNonRoot=true uid=10001 ro=true req={"cpu":"100m","memory":"96Mi"} lim={"cpu":"500m","memory":"256Mi"}
+marketpulse-worker-868857467d-kl89v runAsNonRoot=true uid=10001 ro=true req={"cpu":"100m","memory":"96Mi"} lim={"cpu":"500m","memory":"256Mi"}
+2026-11-06T14:06:37Z PASS security
+2026-11-06T14:06:37Z netpol: positive control - same probe pod labelled as the worker must reach Redis
+  control: PONG exit=0 warning: couldn't attach to pod/np-control, falling back to streaming logs: unable to upgrade connection: container np-control not found in pod np-control_marketpulse PONG exit=0 
+2026-11-06T14:06:41Z netpol: pod outside the allowed set must NOT reach Redis
+  intruder: Terminated exit=143 
+2026-11-06T14:06:50Z PASS intruder blocked
+2026-11-06T14:06:53Z PASS api (marketpulse-api-5556ccf5f8-4mxwt) reaches Redis
+2026-11-06T14:06:55Z PASS worker (marketpulse-worker-868857467d-f85d8) reaches Redis
+2026-11-06T14:06:55Z pod-delete: 2 API replicas; 60 s of load at 30 req/s with strict checks
+2026-11-06T14:07:25Z deleting marketpulse-api-5556ccf5f8-4mxwt
+
+
+  █ THRESHOLDS 
+
+    checks{scenario:steady}
+    ✓ 'rate==1.0' rate=100.00%
+
+
+  █ TOTAL RESULTS 
+
+    checks_total.......: 3602    51.454517/s
+    checks_succeeded...: 100.00% 3602 out of 3602
+    checks_failed......: 0.00%   0 out of 3602
+
+    ✓ no transport error
+    ✓ not 5xx
+
+    HTTP
+    http_req_duration..............: avg=3.92ms p(50)=3.31ms p(90)=5.81ms p(99)=10.36ms max=47.73ms
+      { expected_response:true }...: avg=3.92ms p(50)=3.31ms p(90)=5.81ms p(99)=10.36ms max=47.73ms
+    http_req_failed................: 0.00%  0 out of 1902
+    http_reqs......................: 1902   27.170042/s
+
+    EXECUTION
+    iteration_duration.............: avg=4.05ms p(50)=3.35ms p(90)=6.13ms p(99)=11.2ms  max=50.12ms
+    iterations.....................: 1902   27.170042/s
+    vus............................: 0      min=0         max=2 
+    vus_max........................: 30     min=30        max=30
+
+    NETWORK
+    data_received..................: 657 kB 9.4 kB/s
+    data_sent......................: 185 kB 2.6 kB/s
+
+
+
+2026-11-06T14:08:06Z PASS pod-delete: no failed requests while marketpulse-api-5556ccf5f8-4mxwt was replaced
+2026-11-06T14:08:07Z hpa: start 2/2 (min 2); starting load 400 req/s for 4m
+2026-11-06T14:08:07Z hpa desired=2 marketpulse-api-5556ccf5f8-jczbm=174m marketpulse-api-5556ccf5f8-mbj8p=31m 
+2026-11-06T14:10:42Z hpa desired=6 marketpulse-api-5556ccf5f8-jczbm=365m marketpulse-api-5556ccf5f8-mbj8p=387m 
+2026-11-06T14:10:42Z scaled up at 2026-11-06T14:10:42Z (155s after load start)
+2026-11-06T14:12:24Z load stopped at 2026-11-06T14:12:24Z (peak desired=6); waiting for scale-down
+2026-11-06T14:14:27Z PASS hpa: up at 2026-11-06T14:10:42Z, peak 6, load stop 2026-11-06T14:12:24Z, back to 2 at 2026-11-06T14:14:26Z (122s after load stop)
+# end: 2026-11-06T14:14:27Z
+# exit: 0
+# seconds: 471

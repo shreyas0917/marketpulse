@@ -1,0 +1,38 @@
+# id: R3-E4-drill4
+# command: EVIDENCE=/d/marketpulse/docs/verification/evidence/R3-E-drills make drill N=4
+# start: 2026-11-06T15:08:53Z
+scripts/drills/run.sh 4
+2026-11-06T15:08:54Z [drill 4] START 2026-11-06T15:08:54Z - stop Redis
+2026-11-06T15:08:55Z [drill 4] Argo CD auto-sync paused
+2026-11-06T15:08:55Z [drill 4] k6 load started: 30 req/s for 10m (pid 16545)
+2026-11-06T15:09:56Z [drill 4] ready API pods before: 2
+2026-11-06T15:10:01Z [drill 4] stopping Redis (scale to 0) at 2026-11-06T15:10:01Z
+2026-11-06T15:10:06Z [drill 4] restarting API pod marketpulse-api-65ddb44f9d-z8vnz mid-outage (cold-cache check)
+2026-11-06T15:10:13Z [drill 4] replacement pod marketpulse-api-65ddb44f9d-n6tbq ready 12s into the outage; probing it directly
+2026-11-06T15:10:28Z [drill 4] cold pod responses:      65 503,QUOTE_UNAVAILABLE 
+2026-11-06T15:10:28Z [drill 4] ready API pods during outage: 2 (readiness ignores Redis)
+{"alert": "QuoteStoreDown", "state": "firing", "observed_at": "2026-11-06T15:11:23+00:00", "waited_since": "2026-11-06T15:10:28+00:00", "starts_at": ["2026-11-06T15:11:13.891Z"], "labels": [{"alertname": "QuoteStoreDown", "prometheus": "monitoring/kps", "severity": "warning", "slo": "freshness"}]}
+2026-11-06T15:12:32Z [drill 4] ready API pods at end of outage: 3
+2026-11-06T15:12:32Z [drill 4] alerts firing: 3
+2026-11-06T15:12:38Z [drill 4] restoring Redis at 2026-11-06T15:12:38Z after 157s
+2026-11-06T15:12:40Z [drill 4] redis ready 2s after restore
+{"alert": "QuoteStoreDown", "state": "resolved", "observed_at": "2026-11-06T15:13:06+00:00", "waited_since": "2026-11-06T15:12:40+00:00", "starts_at": [], "labels": []}
+2026-11-06T15:19:06Z [drill 4] k6 load finished
+2026-11-06T15:19:06Z [drill 4] k6: requests=18102 checks_passed=31857 checks_failed=4145 p99_ms=63.2
+{
+ "probe_rows": 1509,
+ "stale_200_count": 95,
+ "stale_200_last_seen_s_after_stop": 28.9,
+ "max_stale_age_seconds": 28.73658,
+ "first_503_s_after_stop": 14.8,
+ "all_503_from_s": 29.0,
+ "first_fresh_200_s_after_restore": 3.7
+}
+wrote D:\marketpulse\docs\verification\evidence\R3-E-drills\drill4.json
+2026-11-06T15:19:07Z [drill 4] cleanup (exit code 0)
+2026-11-06T15:19:07Z [drill 4] redis restored
+2026-11-06T15:19:08Z [drill 4] Argo CD auto-sync re-enabled
+2026-11-06T15:19:08Z [drill 4] END 2026-11-06T15:19:08Z
+# end: 2026-11-06T15:19:08Z
+# exit: 0
+# seconds: 615

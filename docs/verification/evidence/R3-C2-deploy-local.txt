@@ -1,0 +1,18 @@
+# id: R3-C2-deploy-local
+# command: make deploy-local
+# start: 2026-11-06T14:03:24Z
+scripts/deploy-local.sh
+14:03:25 building marketpulse:0.1.0
+14:03:37 loading marketpulse:0.1.0 into kind
+Image: "marketpulse:0.1.0" with ID "sha256:d71a180c3e851c58cdf58d5010098d1349410e512b4b6d86d81e18507bd86817" not yet present on node "marketpulse-control-plane", loading...
+Image: "marketpulse:0.1.0" with ID "sha256:d71a180c3e851c58cdf58d5010098d1349410e512b4b6d86d81e18507bd86817" not yet present on node "marketpulse-worker2", loading...
+Image: "marketpulse:0.1.0" with ID "sha256:d71a180c3e851c58cdf58d5010098d1349410e512b4b6d86d81e18507bd86817" not yet present on node "marketpulse-worker", loading...
+14:04:25 could not pre-load redis:8.10.2-alpine@sha256:0bf6577d7774e592b29d093e3ac9390eb91e13d72c21e506afce736de5e0eeb0; nodes will pull it
+14:04:25 helm upgrade --install marketpulse
+Error: unable to build kubernetes objects from release manifest: [resource mapping not found for name: "api-canary-health" namespace: "" from "": no matches for kind "AnalysisTemplate" in version "argoproj.io/v1alpha1"
+ensure CRDs are installed first, resource mapping not found for name: "marketpulse-api" namespace: "" from "": no matches for kind "Rollout" in version "argoproj.io/v1alpha1"
+ensure CRDs are installed first]
+make: *** [Makefile:89: deploy-local] Error 1
+# end: 2026-11-06T14:04:28Z
+# exit: 2
+# seconds: 64

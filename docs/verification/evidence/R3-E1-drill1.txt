@@ -1,0 +1,21 @@
+# id: R3-E1-drill1
+# command: EVIDENCE=/d/marketpulse/docs/verification/evidence/R3-E-drills make drill N=1
+# start: 2026-11-06T14:57:25Z
+scripts/drills/run.sh 1
+2026-11-06T14:57:27Z [drill 1] START 2026-11-06T14:57:27Z - kill API pods
+2026-11-06T14:57:29Z [drill 1] k6 load started: 30 req/s for 4m (pid 15974)
+2026-11-06T14:58:30Z [drill 1] round 1: force-killing marketpulse-api-65ddb44f9d-w4krj (ready API pods: 2)
+2026-11-06T14:58:52Z [drill 1] round 1: replacement ready after 22s
+2026-11-06T14:59:38Z [drill 1] round 2: force-killing marketpulse-api-65ddb44f9d-drss8 (ready API pods: 2)
+2026-11-06T14:59:55Z [drill 1] round 2: replacement ready after 17s
+2026-11-06T15:01:41Z [drill 1] k6 load finished
+2026-11-06T15:01:41Z [drill 1] k6: requests=7300 checks_passed=14380 checks_failed=20 p99_ms=100.6
+2026-11-06T15:01:43Z [drill 1] availability error ratio 5m: 0
+2026-11-06T15:01:44Z [drill 1] 5xx in drill window: 0
+2026-11-06T15:01:45Z [drill 1] AvailabilityFastBurn firing: 0
+wrote D:\marketpulse\docs\verification\evidence\R3-E-drills\drill1.json
+2026-11-06T15:01:46Z [drill 1] cleanup (exit code 0)
+2026-11-06T15:01:46Z [drill 1] END 2026-11-06T15:01:46Z
+# end: 2026-11-06T15:01:46Z
+# exit: 0
+# seconds: 261

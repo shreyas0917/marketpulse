@@ -1,0 +1,22 @@
+## state before interrupt 2026-11-06T16:23:44Z: redis replicas=0 automated=[] k6=1
+## sending SIGTERM to drill pid 23318 at 2026-11-06T16:23:59Z
+drill exit=130
+## state after interrupt 2026-11-06T16:24:39Z
+deployment "marketpulse-redis" successfully rolled out
+redis replicas=1 ready=1
+argo automated={"prune":true,"selfHeal":true}
+FAULT env on api/worker: 0
+k6=0 kubectl(port-forwards)=0
+quote via ingress: {"error":"QUOTE_UNAVAILABLE","detail":"quote store unavailable and no fresh cached quote"}
+16:25:04 quote status 503
+16:25:10 quote status 200
+{"error":"QUOTE_UNAVAILABLE","detail":"quote store unavailable and no fresh cached quote"}## 2026-11-06T16:25:23Z 20 requests:
+200 200 200 200 200 200 200 200 200 200 200 200 200 200 200 200 200 200 200 200 
+marketpulse-api-65ddb44f9d-mdn9s 1/1 Running 0 2m
+marketpulse-api-65ddb44f9d-p4mh7 1/1 Running 0 116s
+marketpulse-api-65ddb44f9d-z9gnk 1/1 Running 0 84m
+marketpulse-api-65ddb44f9d-zcnr6 1/1 Running 0 2m16s
+== pod/marketpulse-api-65ddb44f9d-mdn9s: 160 quote_unavailable log lines (3m); last reason: "reason": "TimeoutError"
+== pod/marketpulse-api-65ddb44f9d-p4mh7: 2 quote_unavailable log lines (3m); last reason: "reason": "TimeoutError"
+== pod/marketpulse-api-65ddb44f9d-z9gnk: 455 quote_unavailable log lines (3m); last reason: "reason": "TimeoutError"
+== pod/marketpulse-api-65ddb44f9d-zcnr6: 590 quote_unavailable log lines (3m); last reason: "reason": "TimeoutError"

@@ -1,0 +1,23 @@
+# id: R3-C2b-deploy-local
+# command: make deploy-local
+# start: 2026-11-06T14:04:50Z
+scripts/deploy-local.sh
+14:04:51 building marketpulse:0.1.0
+14:04:55 loading marketpulse:0.1.0 into kind
+Image: "marketpulse:0.1.0" with ID "sha256:441e44ef43483ffdb09683a5271c076494196fe1741839963235511ad4314cf4" not yet present on node "marketpulse-control-plane", loading...
+Image: "marketpulse:0.1.0" with ID "sha256:441e44ef43483ffdb09683a5271c076494196fe1741839963235511ad4314cf4" not yet present on node "marketpulse-worker2", loading...
+Image: "marketpulse:0.1.0" with ID "sha256:441e44ef43483ffdb09683a5271c076494196fe1741839963235511ad4314cf4" not yet present on node "marketpulse-worker", loading...
+14:05:34 could not pre-load redis:8.10.2-alpine@sha256:0bf6577d7774e592b29d093e3ac9390eb91e13d72c21e506afce736de5e0eeb0; nodes will pull it
+14:05:34 Argo Rollouts CRDs not installed: deploying the API as a Deployment
+14:05:34 helm upgrade --install marketpulse
+NAME                                    READY   STATUS    RESTARTS   AGE   IP              NODE                  NOMINATED NODE   READINESS GATES
+marketpulse-api-5556ccf5f8-4mxwt        1/1     Running   0          34s   192.168.215.8   marketpulse-worker    <none>           <none>
+marketpulse-api-5556ccf5f8-mbj8p        1/1     Running   0          35s   192.168.44.73   marketpulse-worker2   <none>           <none>
+marketpulse-producer-7998c8d598-vw67s   1/1     Running   0          35s   192.168.44.72   marketpulse-worker2   <none>           <none>
+marketpulse-redis-8cf748c55-2t5g5       1/1     Running   0          35s   192.168.44.74   marketpulse-worker2   <none>           <none>
+marketpulse-worker-868857467d-f85d8     1/1     Running   0          34s   192.168.215.7   marketpulse-worker    <none>           <none>
+marketpulse-worker-868857467d-kl89v     1/1     Running   0          35s   192.168.44.71   marketpulse-worker2   <none>           <none>
+14:06:11 deployed marketpulse:0.1.0
+# end: 2026-11-06T14:06:11Z
+# exit: 0
+# seconds: 81

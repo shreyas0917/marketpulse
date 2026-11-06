@@ -1,0 +1,21 @@
+## verifier intervention 2026-11-06T16:01:14Z: Argo CD self-heal did not remove FAULT_WORKER_EXTRA_LATENCY_MS (added by field manager kubectl-set); applying the drill's own cleanup command
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+    import json,sys; d=json.load(sys.stdin); print('managers:', sorted({m['manager'] for m in d['metadata']['managedFields']}))
+                                                                                              ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+KeyError: 'managedFields'
+app=Synced/Healthy selfHeal=true
+ServiceAccount=Synced
+Deployment=Synced
+HorizontalPodAutoscaler=Synced
+PodMonitor=Synced
+PodDisruptionBudget=Synced
+deployment.apps/marketpulse-worker env updated
+Waiting for deployment "marketpulse-worker" rollout to finish: 0 out of 2 new replicas have been updated...
+Waiting for deployment "marketpulse-worker" rollout to finish: 1 out of 2 new replicas have been updated...
+Waiting for deployment "marketpulse-worker" rollout to finish: 1 out of 2 new replicas have been updated...
+Waiting for deployment "marketpulse-worker" rollout to finish: 1 out of 2 new replicas have been updated...
+Waiting for deployment "marketpulse-worker" rollout to finish: 1 old replicas are pending termination...
+Waiting for deployment "marketpulse-worker" rollout to finish: 1 old replicas are pending termination...
+deployment "marketpulse-worker" successfully rolled out
+env removed at 2026-11-06T16:01:29Z

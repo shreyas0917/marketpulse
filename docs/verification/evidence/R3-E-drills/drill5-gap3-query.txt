@@ -1,0 +1,9 @@
+# drill 5 window 15:20:30-15:26:00Z, queried 2026-11-06T15:30:25Z
+## sum by (status) (increase(http_requests_total{route="/v1/quotes/{symbol}", status=~"5.."}[6m] @ 1793978760))
+  {'status': '503'} 1656.6
+## sum by (source) (increase(quote_responses_total[6m] @ 1793978760))
+  {'source': 'store'} 63746.2
+  {'source': 'local_cache'} 28083.5
+  {'source': 'unavailable'} 1657.6
+## max_over_time(min(quote_store_up)[6m:15s] @ 1793978760)
+  {} 1.0

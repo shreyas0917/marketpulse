@@ -1,0 +1,24 @@
+# id: R3-E8-drill8
+# command: EVIDENCE=/d/marketpulse/docs/verification/evidence/R3-E-drills make drill N=8
+# start: 2026-11-06T15:30:35Z
+scripts/drills/run.sh 8
+2026-11-06T15:30:36Z [drill 8] START 2026-11-06T15:30:36Z - slow worker
+2026-11-06T15:30:37Z [drill 8] Argo CD auto-sync paused
+2026-11-06T15:30:37Z [drill 8] baseline lag p99: 0.0495
+2026-11-06T15:30:54Z [drill 8] slow workers running at 2026-11-06T15:30:54Z (500 ms per event)
+{"alert": "IngestionLagFastBurn", "state": "firing", "timeout": true, "waited_since": "2026-11-06T15:30:55+00:00", "gave_up_at": "2026-11-06T15:45:58+00:00"}
+2026-11-06T15:45:58Z [drill 8] IngestionLagFastBurn did NOT fire within 900 s (burn is rate-weighted; see IngestionStalled)
+{"alert": "IngestionStalled", "state": "firing", "observed_at": "2026-11-06T15:45:59+00:00", "waited_since": "2026-11-06T15:45:58+00:00", "starts_at": ["2026-11-06T15:33:13.891Z"], "labels": [{"alertname": "IngestionStalled", "prometheus": "monitoring/kps", "severity": "page", "slo": "ingestion_lag"}]}
+2026-11-06T15:46:00Z [drill 8] peak queue depth: 16235; lag p99 now: 30
+2026-11-06T15:46:00Z [drill 8] restoring: re-enabling Argo CD auto-sync (self-heal reverts the env change)
+2026-11-06T15:50:24Z [drill 8] Argo CD reverted the worker env after 264s
+2026-11-06T16:01:21Z [drill 8] backlog drained 921s after restore started
+{"alert": "IngestionLagFastBurn", "state": "resolved", "observed_at": "2026-11-06T16:01:21+00:00", "waited_since": "2026-11-06T16:01:21+00:00", "starts_at": [], "labels": []}
+{"alert": "IngestionStalled", "state": "resolved", "observed_at": "2026-11-06T16:02:17+00:00", "waited_since": "2026-11-06T16:01:22+00:00", "starts_at": [], "labels": []}
+wrote D:\marketpulse\docs\verification\evidence\R3-E-drills\drill8.json
+2026-11-06T16:02:18Z [drill 8] cleanup (exit code 0)
+2026-11-06T16:02:18Z [drill 8] Argo CD auto-sync re-enabled
+2026-11-06T16:02:18Z [drill 8] END 2026-11-06T16:02:18Z
+# end: 2026-11-06T16:02:18Z
+# exit: 0
+# seconds: 1903

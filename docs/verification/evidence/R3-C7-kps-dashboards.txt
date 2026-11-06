@@ -1,0 +1,101 @@
+# id: R3-C7-kps-dashboards
+# command: uv run python scripts/verify_stack.py --prometheus http://localhost:29090 --grafana http://localhost:23001 --api http://127.0.0.1:18080 --api-host marketpulse.localtest.me --warm 30 --dashboards marketpulse-slo,marketpulse-api,marketpulse-ingestion,marketpulse-platform
+# start: 2026-11-06T14:14:51Z
+sent 485 warm-up quote requests
+[PASS] target api http://192.168.215.9:8000/metrics health=up
+[PASS] target api http://192.168.44.78:8000/metrics health=up
+[PASS] target producer http://192.168.44.72:9200/metrics health=up
+[PASS] target worker http://192.168.215.7:9100/metrics health=up
+[PASS] target worker http://192.168.44.71:9100/metrics health=up
+[PASS] target kps-alertmanager http://192.168.44.69:9093/metrics health=up
+[PASS] target kps-alertmanager http://192.168.44.69:8080/metrics health=up
+[PASS] target apiserver https://172.30.0.4:6443/metrics health=up
+[PASS] target coredns http://192.168.44.65:9153/metrics health=up
+[PASS] target coredns http://192.168.44.66:9153/metrics health=up
+[PASS] target kps-grafana http://192.168.215.5:3000/metrics health=up
+[PASS] target kube-state-metrics http://192.168.215.3:8080/metrics health=up
+[PASS] target kubelet https://172.30.0.4:10250/metrics health=up
+[PASS] target kubelet https://172.30.0.3:10250/metrics health=up
+[PASS] target kubelet https://172.30.0.2:10250/metrics health=up
+[PASS] target kubelet https://172.30.0.4:10250/metrics/cadvisor health=up
+[PASS] target kubelet https://172.30.0.3:10250/metrics/cadvisor health=up
+[PASS] target kubelet https://172.30.0.2:10250/metrics/cadvisor health=up
+[PASS] target kubelet https://172.30.0.4:10250/metrics/probes health=up
+[PASS] target kubelet https://172.30.0.3:10250/metrics/probes health=up
+[PASS] target kubelet https://172.30.0.2:10250/metrics/probes health=up
+[PASS] target kps-operator https://192.168.215.4:10250/metrics health=up
+[PASS] target node-exporter http://172.30.0.2:9100/metrics health=up
+[PASS] target node-exporter http://172.30.0.3:9100/metrics health=up
+[PASS] target node-exporter http://172.30.0.4:9100/metrics health=up
+[PASS] target kps-prometheus http://192.168.215.6:9090/metrics health=up
+[PASS] target kps-prometheus http://192.168.215.6:8080/metrics health=up
+[PASS] no series with up == 0 (0 found)
+[PASS] grafana lists dashboard marketpulse-slo (MarketPulse / SLO overview)
+[PASS] marketpulse-slo / Paging alerts firing: 1 series
+[PASS] marketpulse-slo / Ticket/warning alerts firing: 1 series
+[PASS] marketpulse-slo / SLI over selected range: 1 series
+[PASS] marketpulse-slo / Error budget remaining (selected range): 1 series
+[PASS] marketpulse-slo / Burn rate (error ratio / budget): 1 series
+[PASS] marketpulse-slo / Burn rate (error ratio / budget): 1 series
+[PASS] marketpulse-slo / Burn rate (error ratio / budget): 1 series
+[PASS] marketpulse-slo / SLI over selected range: 1 series
+[PASS] marketpulse-slo / Error budget remaining (selected range): 1 series
+[PASS] marketpulse-slo / Burn rate (error ratio / budget): 1 series
+[PASS] marketpulse-slo / Burn rate (error ratio / budget): 1 series
+[PASS] marketpulse-slo / Burn rate (error ratio / budget): 1 series
+[PASS] marketpulse-slo / SLI over selected range: 1 series
+[PASS] marketpulse-slo / Error budget remaining (selected range): 1 series
+[PASS] marketpulse-slo / Burn rate (error ratio / budget): 1 series
+[PASS] marketpulse-slo / Burn rate (error ratio / budget): 1 series
+[PASS] marketpulse-slo / Burn rate (error ratio / budget): 1 series
+[PASS] marketpulse-slo / SLI over selected range: 1 series
+[PASS] marketpulse-slo / Error budget remaining (selected range): 1 series
+[PASS] marketpulse-slo / Burn rate (error ratio / budget): 1 series
+[PASS] marketpulse-slo / Burn rate (error ratio / budget): 1 series
+[PASS] marketpulse-slo / Burn rate (error ratio / budget): 1 series
+[PASS] grafana lists dashboard marketpulse-api (MarketPulse / API)
+[PASS] marketpulse-api / Request rate: 1 series
+[PASS] marketpulse-api / 5xx ratio (5m): 1 series
+[PASS] marketpulse-api / Quote store up: 1 series
+[PASS] marketpulse-api / Faults active: 1 series
+[PASS] marketpulse-api / Requests by status: 2 series
+[PASS] marketpulse-api / Error ratio (5xx / all): 1 series
+[PASS] marketpulse-api / Quote latency percentiles: 1 series
+[PASS] marketpulse-api / Quote latency percentiles: 1 series
+[PASS] marketpulse-api / Quote latency percentiles: 1 series
+[PASS] marketpulse-api / Quote age percentiles: 1 series
+[PASS] marketpulse-api / Quote age percentiles: 1 series
+[PASS] marketpulse-api / Responses by source (stale-response rate): 3 series
+[PASS] marketpulse-api / Quote store up by pod: 2 series
+[PASS] grafana lists dashboard marketpulse-ingestion (MarketPulse / Ingestion)
+[PASS] marketpulse-ingestion / Events/s processed: 1 series
+[PASS] marketpulse-ingestion / Queue depth: 1 series
+[PASS] marketpulse-ingestion / Oldest queued event age: 1 series
+[PASS] marketpulse-ingestion / DLQ depth: 1 series
+[PASS] marketpulse-ingestion / Events by result: 3 series
+[PASS] marketpulse-ingestion / Events by result: 1 series
+[PASS] marketpulse-ingestion / Retries and dead-letters: 1 series
+[PASS] marketpulse-ingestion / Retries and dead-letters: 1 series
+[PASS] marketpulse-ingestion / Ingestion lag percentiles: 1 series
+[PASS] marketpulse-ingestion / Ingestion lag percentiles: 1 series
+[PASS] marketpulse-ingestion / Ingestion lag percentiles: 1 series
+[PASS] marketpulse-ingestion / Queue depth and DLQ depth: 1 series
+[PASS] marketpulse-ingestion / Queue depth and DLQ depth: 1 series
+[PASS] marketpulse-ingestion / Oldest queued event age: 1 series
+[PASS] marketpulse-ingestion / Producer target rate and burst: 1 series
+[PASS] marketpulse-ingestion / Producer target rate and burst: 1 series
+[PASS] grafana lists dashboard marketpulse-platform (MarketPulse / Platform)
+[PASS] marketpulse-platform / Pod restarts (1h): 1 series
+[PASS] marketpulse-platform / Unavailable replicas: 1 series
+[PASS] marketpulse-platform / Pods not ready: 1 series
+[PASS] marketpulse-platform / HPA desired vs current replicas: 2 series
+[PASS] marketpulse-platform / HPA desired vs current replicas: 2 series
+[PASS] marketpulse-platform / Pod restarts: 10 series
+[PASS] marketpulse-platform / CPU usage vs limit by pod: 9 series
+[PASS] marketpulse-platform / CPU usage vs limit by pod: 6 series
+[PASS] marketpulse-platform / Memory working set vs limit by pod: 6 series
+[PASS] marketpulse-platform / Memory working set vs limit by pod: 6 series
+ALL CHECKS PASSED
+# end: 2026-11-06T14:15:23Z
+# exit: 0
+# seconds: 32
