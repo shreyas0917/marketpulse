@@ -31,16 +31,45 @@ helm repo add metrics-server https://kubernetes-sigs.github.io/metrics-server/ >
 helm repo add prometheus-community https://prometheus-community.github.io/helm-charts >/dev/null 2>&1 || true
 helm repo update >/dev/null
 
+# preload_chart_images RELEASE CHART VERSION NAMESPACE VALUES
+# Pre-pull every image a chart renders so the Helm --wait budget is not spent on cold image pulls
+# (the ingress-nginx pull alone exceeded 5 minutes on a fresh machine). docker pull + kind load
+# first; digest-pinned multi-platform images cannot be `kind load`ed from Docker Desktop's
+# containerd store, so those fall back to `crictl pull` inside each node. Best effort: a failure
+# here only means the pull happens during the install instead.
+preload_chart_images() {
+  local images img node
+  images=$(helm template "$1" "$2" --version "$3" -n "$4" -f "$5" 2>/dev/null \
+    | grep -oE '(image: *"?[^" ]+"?|--prometheus-config-reloader=[^" ]+)' \
+    | sed -E 's/^image: *"?//; s/"$//; s/^--prometheus-config-reloader=//' | sort -u)
+  for img in $images; do
+    if docker pull -q "$img" >/dev/null 2>&1 && kind load docker-image "$img" --name "$CLUSTER" >/dev/null 2>&1; then
+      log "  preloaded $img"
+      continue
+    fi
+    for node in $(kind get nodes --name "$CLUSTER"); do
+      docker exec "$node" crictl pull "$img" >/dev/null 2>&1 || log "  could not preload $img on $node"
+    done
+    log "  pulled $img inside the nodes"
+  done
+}
+
 log "installing metrics-server $METRICS_SERVER_CHART_VERSION"
 helm upgrade --install metrics-server metrics-server/metrics-server \
   --version "$METRICS_SERVER_CHART_VERSION" -n kube-system \
   -f "$KIND_DIR/metrics-server-values.yaml" --wait --timeout 5m >/dev/null
 
+log "preloading ingress-nginx images"
+preload_chart_images ingress-nginx ingress-nginx/ingress-nginx "$INGRESS_NGINX_CHART_VERSION" \
+  ingress-nginx "$KIND_DIR/ingress-nginx-values.yaml"
 log "installing ingress-nginx $INGRESS_NGINX_CHART_VERSION"
 helm upgrade --install ingress-nginx ingress-nginx/ingress-nginx \
   --version "$INGRESS_NGINX_CHART_VERSION" -n ingress-nginx --create-namespace \
-  -f "$KIND_DIR/ingress-nginx-values.yaml" --wait --timeout 5m >/dev/null
+  -f "$KIND_DIR/ingress-nginx-values.yaml" --wait --timeout 10m >/dev/null
 
+log "preloading kube-prometheus-stack images"
+preload_chart_images kps prometheus-community/kube-prometheus-stack \
+  "$KUBE_PROMETHEUS_STACK_CHART_VERSION" monitoring "$KIND_DIR/kube-prometheus-stack-values.yaml"
 log "installing kube-prometheus-stack $KUBE_PROMETHEUS_STACK_CHART_VERSION"
 helm upgrade --install kps prometheus-community/kube-prometheus-stack \
   --version "$KUBE_PROMETHEUS_STACK_CHART_VERSION" -n monitoring --create-namespace \
