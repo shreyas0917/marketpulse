@@ -94,8 +94,11 @@ argocd_revert=null
 [[ "$reverted_by" == "argocd" ]] && argocd_revert=$(( T_REVERT - T1 ))
 resolved_at=""
 $resolved && resolved_at=$T_RESOLVED
+# Seconds from the fault to the burn page, or null if it did not fire.
+lag_burn_alert=null
+[[ -n "$T_DETECT" ]] && lag_burn_alert=$(( T_DETECT - T0 ))
 cat > "$EVIDENCE/$NAME-result.json" <<EOF
-{"latency_ms": $LATENCY_MS, "seconds_to_lag_burn_alert": ${T_DETECT:+$(( T_DETECT - T0 ))}${T_DETECT:-null}, "fault_seconds": $(( T1 - T0 )),
+{"latency_ms": $LATENCY_MS, "seconds_to_lag_burn_alert": $lag_burn_alert, "fault_seconds": $(( T1 - T0 )),
  "peak_queue_depth": "$peak_depth", "reverted_by": "$reverted_by", "argocd_out_of_sync_seen": $saw_out_of_sync,
  "seconds_argocd_revert": $argocd_revert, "seconds_to_restore": $(( T_REVERT - T1 )),
  "seconds_to_drain_after_restore": $(since_restore "$drained"),
