@@ -36,4 +36,4 @@ No new prices reach the store. Quotes age past 2 s and the freshness SLI burns w
 ## Verify recovery
 
 `max(queue_oldest_event_age_seconds)` back under 1 s and `queue_depth` draining. Messages left
-pending by a dead consumer are reclaimed with `XAUTOCLAIM` after `RETRY_MIN_IDLE_MS`.
+pending by a dead consumer are reclaimed with `XCLAIM` after `RETRY_MIN_IDLE_MS` (failed retries back off exponentially from there).

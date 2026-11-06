@@ -46,6 +46,7 @@ class Settings(BaseSettings):
     worker_batch_size: int = Field(default=50, ge=1)
     worker_block_ms: int = Field(default=1000, ge=0)
     retry_min_idle_ms: int = Field(default=2000, ge=0)
+    retry_max_backoff_ms: int = Field(default=60_000, ge=0)
     retry_backoff_base_seconds: float = Field(default=2.0, ge=0)
     dedup_ttl_seconds: int = Field(default=3600, ge=1)
     worker_heartbeat_timeout_seconds: float = Field(default=30.0, gt=0)

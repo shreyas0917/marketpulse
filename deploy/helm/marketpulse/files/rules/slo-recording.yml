@@ -53,6 +53,18 @@ groups:
         labels:
           slo: availability
           slo_target: "0.999"
+      - record: sli:availability:good_rate5m
+        expr: |
+          sum(rate(http_requests_total{route="/v1/quotes/{symbol}", status!~"5.."}[5m]))
+        labels:
+          slo: availability
+          slo_target: "0.999"
+      - record: sli:availability:total_rate5m
+        expr: |
+          sum(rate(http_requests_total{route="/v1/quotes/{symbol}"}[5m]))
+        labels:
+          slo: availability
+          slo_target: "0.999"
   - name: slo-latency
     rules:
       - record: sli:latency:error_ratio_rate5m
@@ -105,6 +117,18 @@ groups:
         labels:
           slo: latency
           slo_target: "0.99"
+      - record: sli:latency:good_rate5m
+        expr: |
+          sum(rate(http_request_duration_seconds_bucket{route="/v1/quotes/{symbol}", le="0.25"}[5m]))
+        labels:
+          slo: latency
+          slo_target: "0.99"
+      - record: sli:latency:total_rate5m
+        expr: |
+          sum(rate(http_request_duration_seconds_count{route="/v1/quotes/{symbol}"}[5m]))
+        labels:
+          slo: latency
+          slo_target: "0.99"
   - name: slo-freshness
     rules:
       - record: sli:freshness:error_ratio_rate5m
@@ -154,6 +178,18 @@ groups:
             /
             sum(rate(quote_age_seconds_count[3d]))
           )
+        labels:
+          slo: freshness
+          slo_target: "0.99"
+      - record: sli:freshness:good_rate5m
+        expr: |
+          sum(rate(quote_age_seconds_bucket{le="2.0"}[5m]))
+        labels:
+          slo: freshness
+          slo_target: "0.99"
+      - record: sli:freshness:total_rate5m
+        expr: |
+          sum(rate(quote_age_seconds_count[5m]))
         labels:
           slo: freshness
           slo_target: "0.99"
@@ -229,3 +265,83 @@ groups:
         labels:
           slo: ingestion_lag
           slo_target: "0.99"
+      - record: sli:ingestion_lag:good_rate5m
+        expr: |
+          sum(rate(ingestion_lag_seconds_bucket{le="1.0"}[5m]))
+        labels:
+          slo: ingestion_lag
+          slo_target: "0.99"
+      - record: sli:ingestion_lag:total_rate5m
+        expr: |
+          (
+              sum(rate(ingestion_lag_seconds_count[5m]))
+              +
+              sum(rate(events_processed_total{result="dead_lettered"}[5m]))
+            )
+        labels:
+          slo: ingestion_lag
+          slo_target: "0.99"
+  - name: slo-availability-30d
+    interval: 5m
+    rules:
+      - record: sli:availability:error_ratio_30d
+        expr: |
+          1 - (
+            sum_over_time(sli:availability:good_rate5m[30d])
+            /
+            sum_over_time(sli:availability:total_rate5m[30d])
+          )
+      - record: slo:availability:compliance_30d
+        expr: |
+          1 - sli:availability:error_ratio_30d
+      - record: slo:availability:error_budget_remaining_30d
+        expr: |
+          1 - (sli:availability:error_ratio_30d / 0.001)
+  - name: slo-latency-30d
+    interval: 5m
+    rules:
+      - record: sli:latency:error_ratio_30d
+        expr: |
+          1 - (
+            sum_over_time(sli:latency:good_rate5m[30d])
+            /
+            sum_over_time(sli:latency:total_rate5m[30d])
+          )
+      - record: slo:latency:compliance_30d
+        expr: |
+          1 - sli:latency:error_ratio_30d
+      - record: slo:latency:error_budget_remaining_30d
+        expr: |
+          1 - (sli:latency:error_ratio_30d / 0.01)
+  - name: slo-freshness-30d
+    interval: 5m
+    rules:
+      - record: sli:freshness:error_ratio_30d
+        expr: |
+          1 - (
+            sum_over_time(sli:freshness:good_rate5m[30d])
+            /
+            sum_over_time(sli:freshness:total_rate5m[30d])
+          )
+      - record: slo:freshness:compliance_30d
+        expr: |
+          1 - sli:freshness:error_ratio_30d
+      - record: slo:freshness:error_budget_remaining_30d
+        expr: |
+          1 - (sli:freshness:error_ratio_30d / 0.01)
+  - name: slo-ingestion-lag-30d
+    interval: 5m
+    rules:
+      - record: sli:ingestion_lag:error_ratio_30d
+        expr: |
+          1 - (
+            sum_over_time(sli:ingestion_lag:good_rate5m[30d])
+            /
+            sum_over_time(sli:ingestion_lag:total_rate5m[30d])
+          )
+      - record: slo:ingestion_lag:compliance_30d
+        expr: |
+          1 - sli:ingestion_lag:error_ratio_30d
+      - record: slo:ingestion_lag:error_budget_remaining_30d
+        expr: |
+          1 - (sli:ingestion_lag:error_ratio_30d / 0.01)

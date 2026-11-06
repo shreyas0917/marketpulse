@@ -2,8 +2,9 @@
 
 - Main queue: stream `events`, consumer group `workers`; DLQ: stream `events-dlq`.
 - Retry tracking: delivery count from XPENDING.
-- Retry backoff: failed messages stay pending and are reclaimed with XAUTOCLAIM
-  once idle for `min_idle_ms`.
+- Retry backoff: a failed message stays pending. It is reclaimed with XCLAIM once it has been
+  idle for `min_idle_ms * 2^(n-1)` (n = deliveries so far), capped at `max_backoff_ms`, so
+  each retry waits twice as long as the one before (2 s, 4 s, 8 s, 16 s with the defaults).
 - Ack: XACK followed by XDEL, so XLEN of the main stream is the queue depth.
 """
 
@@ -41,6 +42,7 @@ class RedisStreamQueue:
         consumer: str = "worker",
         min_idle_ms: int = 2000,
         max_attempts: int = 5,
+        max_backoff_ms: int = 60_000,
     ) -> None:
         self._client = client
         self.stream = stream
@@ -49,6 +51,7 @@ class RedisStreamQueue:
         self.consumer = consumer
         self.min_idle_ms = min_idle_ms
         self.max_attempts = max_attempts
+        self.max_backoff_ms = max_backoff_ms
         self._group_ready = False
 
     def ensure_group(self) -> None:
@@ -71,37 +74,59 @@ class RedisStreamQueue:
             pipe.xadd(self.stream, {DATA_FIELD: body})
         pipe.execute()
 
-    def _delivery_counts(self, ids: list[str]) -> dict[str, int]:
-        """Delivery count (including the current delivery) for each reclaimed id.
+    def backoff_ms(self, deliveries: int) -> int:
+        """Idle time a message delivered `deliveries` times must reach before it is retried."""
+        exponent = max(0, deliveries - 1)
+        return int(min(self.min_idle_ms * (2**exponent), self.max_backoff_ms))
 
-        One range query covers the usual case; any id it misses is looked up on its own. If
-        the count is still unknown, the message is treated as having used all but one attempt
-        (max_attempts - 1 previous deliveries), so this delivery is its last and a failure now
-        dead-letters it. A missing count must never allow unbounded retries.
+    def _reclaim(self, max_messages: int) -> list[Message]:
+        """Claim pending messages whose backoff has elapsed, oldest first.
+
+        XPENDING lists candidates with their delivery count and idle time; only those idle for
+        at least backoff_ms(count) are claimed. XCLAIM repeats the idle check atomically, so two
+        workers never both claim the same delivery, and it drops entries already deleted from
+        the stream. If an entry's count is unreadable, it is treated as having used all but one
+        attempt, so this delivery is its last: a missing count must never allow unbounded
+        retries.
         """
-        if not ids:
-            return {}
+        kwargs: dict[str, Any] = {"idle": self.min_idle_ms} if self.min_idle_ms > 0 else {}
         entries = self._client.xpending_range(
-            self.stream,
-            self.group,
-            min=min(ids, key=_sort_key),
-            max=max(ids, key=_sort_key),
-            count=len(ids) * 4 + 10,
-            consumername=self.consumer,
+            self.stream, self.group, min="-", max="+", count=max_messages * 4, **kwargs
         )
-        counts = {_s(e["message_id"]): int(e["times_delivered"]) for e in entries}
-        for msg_id in ids:
-            if msg_id in counts:
-                continue
-            single = self._client.xpending_range(
-                self.stream, self.group, min=msg_id, max=msg_id, count=1
-            )
-            if single:
-                counts[msg_id] = int(single[0]["times_delivered"])
-            else:
-                counts[msg_id] = self.max_attempts
+        due: dict[str, int] = {}
+        for entry in entries:
+            msg_id = _s(entry["message_id"])
+            try:
+                delivered = int(entry["times_delivered"])
+            except (KeyError, TypeError, ValueError):
+                delivered = self.max_attempts - 1
                 log.warning("delivery_count_unknown", extra={"message_id": msg_id})
-        return counts
+            if int(entry.get("time_since_delivered", 0)) >= self.backoff_ms(delivered):
+                due[msg_id] = delivered
+            if len(due) >= max_messages:
+                break
+        messages: list[Message] = []
+        # Claim per backoff bucket: XCLAIM takes one min-idle value for all ids in a call.
+        by_wait: dict[int, list[str]] = {}
+        for msg_id, delivered in due.items():
+            by_wait.setdefault(self.backoff_ms(delivered), []).append(msg_id)
+        for wait, ids in sorted(by_wait.items()):
+            claimed: list[Any] = self._client.xclaim(
+                self.stream,
+                self.group,
+                self.consumer,
+                min_idle_time=wait,
+                message_ids=list[Any](ids),
+            )
+            for raw_id, fields in claimed or []:
+                if not fields:
+                    continue
+                msg_id = _s(raw_id)
+                body = _s(fields.get(DATA_FIELD.encode(), fields.get(DATA_FIELD, b"")))
+                # XCLAIM counts this delivery too.
+                messages.append(Message(id=msg_id, body=body, attempts=due[msg_id] + 1))
+        messages.sort(key=lambda m: _sort_key(m.id))
+        return messages
 
     def receive(self, max_messages: int, wait_ms: int) -> list[Message]:
         try:
@@ -117,20 +142,9 @@ class RedisStreamQueue:
         self.ensure_group()
         messages: list[Message] = []
 
-        # 1. Reclaim messages whose earlier delivery failed (or whose consumer died).
-        claimed: list[Any] = self._client.xautoclaim(
-            self.stream,
-            self.group,
-            self.consumer,
-            min_idle_time=self.min_idle_ms,
-            start_id="0-0",
-            count=max_messages,
-        )
-        reclaimed = [(_s(i), f) for i, f in claimed[1] if f] if len(claimed) > 1 else []
-        counts = self._delivery_counts([i for i, _ in reclaimed])
-        for msg_id, fields in reclaimed:
-            body = _s(fields.get(DATA_FIELD.encode(), fields.get(DATA_FIELD, b"")))
-            messages.append(Message(id=msg_id, body=body, attempts=counts[msg_id]))
+        # 1. Reclaim messages whose earlier delivery failed (or whose consumer died) once their
+        #    backoff has elapsed.
+        messages.extend(self._reclaim(max_messages))
 
         # 2. Read new messages.
         remaining = max_messages - len(messages)
@@ -159,7 +173,7 @@ class RedisStreamQueue:
         pipe.execute()
 
     def retry(self, message: Message) -> None:
-        # Leaving the entry pending is the retry: XAUTOCLAIM picks it up after min_idle_ms.
+        # Leaving the entry pending is the retry: _reclaim picks it up once its backoff elapses.
         return None
 
     def dead_letter(self, message: Message, reason: str) -> None:

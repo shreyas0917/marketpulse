@@ -51,6 +51,13 @@ SUMMARIES = {
     "ingestion_lag": "Too many events take longer than 1 s to ingest",
 }
 
+# The SLO window. Its error ratio is weighted by events: sum of good rates / sum of total rates
+# over the window (averaging short-window ratios would weight a quiet minute like a busy one).
+# Prometheus can only answer for the history it keeps: with shorter retention the "30d" rules
+# cover the retention period instead (see docs/slos.md).
+SLO_WINDOW = "30d"
+LOW_BUDGET = 0.25  # error-budget policy: below 25 % remaining, feature releases freeze
+
 # (alert suffix, long window, short window, burn factor, severity, budget consumed)
 BURNS = (
     ("FastBurn", "1h", "5m", 14.4, "page", "2%"),
@@ -77,6 +84,32 @@ def recording() -> str:
             out.append("        labels:")
             out.append(f"          slo: {sli}")
             out.append(f'          slo_target: "{target}"')
+        for kind, expr in (("good", good), ("total", total)):
+            out.append(f"      - record: sli:{sli}:{kind}_rate5m")
+            out.append("        expr: |")
+            out.append(f"          {expr.replace('WINDOW', '5m')}")
+            out.append("        labels:")
+            out.append(f"          slo: {sli}")
+            out.append(f'          slo_target: "{target}"')
+    for sli, (_, target, _, _) in SLIS.items():
+        budget = round(1 - target, 6)
+        w = SLO_WINDOW
+        out.append(f"  - name: slo-{sli.replace('_', '-')}-{w}")
+        out.append("    interval: 5m")
+        out.append("    rules:")
+        out.append(f"      - record: sli:{sli}:error_ratio_{w}")
+        out.append("        expr: |")
+        out.append("          1 - (")
+        out.append(f"            sum_over_time(sli:{sli}:good_rate5m[{w}])")
+        out.append("            /")
+        out.append(f"            sum_over_time(sli:{sli}:total_rate5m[{w}])")
+        out.append("          )")
+        out.append(f"      - record: slo:{sli}:compliance_{w}")
+        out.append("        expr: |")
+        out.append(f"          1 - sli:{sli}:error_ratio_{w}")
+        out.append(f"      - record: slo:{sli}:error_budget_remaining_{w}")
+        out.append("        expr: |")
+        out.append(f"          1 - (sli:{sli}:error_ratio_{w} / {budget})")
     return "\n".join(out) + "\n"
 
 
@@ -103,6 +136,25 @@ def alerts() -> str:
                 f' is used within {long_w}."',
                 f"          runbook_url: {runbook}#{anchor}",
             ]
+    out += ["  - name: slo-error-budget", "    rules:"]
+    for sli, (title, _, _, _) in SLIS.items():
+        w = SLO_WINDOW
+        out += [
+            f"      - alert: {title}ErrorBudgetLow",
+            "        expr: |",
+            f"          slo:{sli}:error_budget_remaining_{w} < {LOW_BUDGET}",
+            "        for: 15m",
+            "        labels:",
+            "          severity: ticket",
+            f"          slo: {sli}",
+            f"          window: {w}",
+            "        annotations:",
+            f'          summary: "Less than {LOW_BUDGET:.0%} of the {w} {sli} error budget'
+            ' is left"',
+            '          description: "{{ $value | humanizePercentage }} of the budget remains. '
+            'Error-budget policy: freeze feature releases; reliability fixes only."',
+            f"          runbook_url: {RUNBOOK_BASE}/error-budget.md#budget-low",
+        ]
     return "\n".join(out) + "\n"
 
 

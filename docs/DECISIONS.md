@@ -313,3 +313,34 @@ Pinned in `deploy/kind/versions.env` and `deploy/kind/cluster.yaml`.
   (2) report DLQ depth alongside unique `original_message_id`s so duplicates are visible; and
   (3) decide whether the SQS redrive policy backstop (`maxReceiveCount = 10`) also needs a dedup
   attribute.
+
+## D34 — 30-day compliance and error budget as event-weighted recording rules
+
+- **Gap:** budget remaining was only computed in Grafana over the selected time range, so there
+  was no recorded 30-day compliance number and nothing could alert on the error-budget policy.
+- **Choice:** record `sli:<sli>:good_rate5m` and `sli:<sli>:total_rate5m`, then
+  `sli:<sli>:error_ratio_30d = 1 - sum_over_time(good[30d]) / sum_over_time(total[30d])`, plus
+  `slo:<sli>:compliance_30d` and `slo:<sli>:error_budget_remaining_30d`, in 5-minute rule groups.
+  Summing rates weights every event equally; `avg_over_time` of a ratio would weight by time and
+  was rejected. A `ticket` alert fires below 25 % remaining, the policy's freeze threshold.
+- **Limitation:** the window cannot exceed Prometheus retention (7 d compose, 2 d kind). Kept as is
+  locally to save memory and disk. **TODO (M7):** set retention to at least 31 d, or use remote
+  storage, in the AWS values.
+
+## D35 — Exponential retry backoff on the Redis Streams backend
+
+- **Gap:** the SQS backend already doubled its visibility timeout per attempt, but Redis Streams
+  retried every failure after the same fixed 2 s (`XAUTOCLAIM` takes one `min_idle_time`).
+- **Choice:** replace `XAUTOCLAIM` with `XPENDING … IDLE` (candidates with their delivery count and
+  idle time) followed by `XCLAIM` of only those idle for at least
+  `RETRY_MIN_IDLE_MS × 2^(n-1)` (capped at `RETRY_MAX_BACKOFF_MS`), grouped by backoff so each
+  `XCLAIM` repeats the idle check atomically. Two workers therefore never claim the same
+  delivery, and entries already deleted from the stream are skipped (Redis ≥ 7 drops them from
+  the pending list). With the defaults a poison message is retried after 2, 4, 8 and 16 s and
+  dead-lettered on the fifth delivery, about 30 s after the first, instead of about 8 s.
+- **F5 kept:** the delivery count now comes from the same `XPENDING` entry that made the message
+  due, so the separate per-id lookup is gone; an unreadable count still makes the delivery the
+  last one.
+- **Effect on drills:** drill 6 (poison messages) will take longer to fill the DLQ than the 9 s
+  recorded on 2026-10-26; re-run it after this change.
+
