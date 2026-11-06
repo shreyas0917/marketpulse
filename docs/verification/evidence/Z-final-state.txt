@@ -1,0 +1,24 @@
+## final state 2026-11-06T12:06:39Z
+marketpulse
+marketpulse-control-plane   Ready   control-plane   15m   v1.37.0
+marketpulse-worker          Ready   <none>          15m   v1.37.0
+marketpulse-worker2         Ready   <none>          15m   v1.37.0
+ingress-nginx ingress-nginx-controller-7b96d79789-rkpqx 0/1 ContainerCreating
+kube-system calico-kube-controllers-846669895c-tlrxc 1/1 Running
+kube-system calico-node-5lrwt 1/1 Running
+kube-system calico-node-8x4v5 1/1 Running
+kube-system calico-node-twzph 1/1 Running
+kube-system coredns-559f6c778d-bk8nt 1/1 Running
+kube-system coredns-559f6c778d-bmbtc 1/1 Running
+kube-system etcd-marketpulse-control-plane 1/1 Running
+kube-system kube-apiserver-marketpulse-control-plane 1/1 Running
+kube-system kube-controller-manager-marketpulse-control-plane 1/1 Running
+kube-system kube-proxy-c25zj 1/1 Running
+kube-system kube-proxy-lzbb8 1/1 Running
+kube-system kube-proxy-r7xc9 1/1 Running
+kube-system kube-scheduler-marketpulse-control-plane 1/1 Running
+kube-system metrics-server-854576df46-l4mzn 1/1 Running
+local-path-storage local-path-provisioner-75f7fc7dc5-hdd8n 1/1 Running
+k6=0 kubectl=0 compose_containers=3
+available 2.34 GB
+note: the 3 'compose_containers' are the kind node containers matching the name filter; compose services: 0

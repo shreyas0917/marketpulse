@@ -1,0 +1,185 @@
+# id: B1-make-up
+# command: make up
+# start: 2026-11-06T11:11:06Z
+docker compose up -d --build --wait --wait-timeout 120
+ Image marketpulse:dev Building 
+ Image marketpulse:dev Building 
+ Image marketpulse:dev Building 
+#1 [internal] load local bake definitions
+#1 reading from stdin 1.29kB done
+#1 DONE 0.0s
+
+#2 [api internal] load build definition from Dockerfile
+#2 transferring dockerfile: 1.27kB done
+#2 DONE 0.0s
+
+#3 [worker] resolve image config for docker-image://docker.io/docker/dockerfile:1
+#3 DONE 3.4s
+
+#4 [api] docker-image://docker.io/docker/dockerfile:1@sha256:4edf897a3ffa55b89f906fc8cc78afdb3f1834cc9c7083565e611a8a7d5fe99e
+#4 resolve docker.io/docker/dockerfile:1@sha256:4edf897a3ffa55b89f906fc8cc78afdb3f1834cc9c7083565e611a8a7d5fe99e 0.1s done
+#4 CACHED
+
+#5 [producer internal] load metadata for ghcr.io/astral-sh/uv:0.13.5@sha256:32a7bb39b496babbd997b0a39a4d66c126bdaf5661b302bf6f06abda8deca6ff
+#5 DONE 0.1s
+
+#6 [producer internal] load metadata for docker.io/library/python:3.13-slim-trixie@sha256:d98cc29d3266e535dd9da1099688d9cb3ca4753813571e071763d17725460962
+#6 DONE 0.1s
+
+#7 [producer internal] load .dockerignore
+#7 transferring context: 105B done
+#7 DONE 0.0s
+
+#8 [producer internal] load build context
+#8 DONE 0.0s
+
+#9 [producer uv 1/1] FROM ghcr.io/astral-sh/uv:0.13.5@sha256:32a7bb39b496babbd997b0a39a4d66c126bdaf5661b302bf6f06abda8deca6ff
+#9 resolve ghcr.io/astral-sh/uv:0.13.5@sha256:32a7bb39b496babbd997b0a39a4d66c126bdaf5661b302bf6f06abda8deca6ff
+#9 resolve ghcr.io/astral-sh/uv:0.13.5@sha256:32a7bb39b496babbd997b0a39a4d66c126bdaf5661b302bf6f06abda8deca6ff 0.1s done
+#9 DONE 0.1s
+
+#10 [producer builder 1/7] FROM docker.io/library/python:3.13-slim-trixie@sha256:d98cc29d3266e535dd9da1099688d9cb3ca4753813571e071763d17725460962
+#10 resolve docker.io/library/python:3.13-slim-trixie@sha256:d98cc29d3266e535dd9da1099688d9cb3ca4753813571e071763d17725460962 0.1s done
+#10 DONE 0.1s
+
+#8 [producer internal] load build context
+#8 transferring context: 1.20kB done
+#8 transferring context: 1.20kB done
+#8 DONE 0.0s
+
+#11 [producer builder 3/7] WORKDIR /src
+#11 CACHED
+
+#12 [producer builder 4/7] COPY pyproject.toml uv.lock .python-version ./
+#12 CACHED
+
+#13 [producer builder 5/7] RUN uv sync --frozen --no-dev --no-install-project
+#13 CACHED
+
+#14 [producer builder 6/7] COPY app ./app
+#14 CACHED
+
+#15 [producer builder 7/7] RUN /opt/venv/bin/python -m compileall -q app
+#15 CACHED
+
+#16 [producer runtime 3/5] COPY --from=builder /opt/venv /opt/venv
+#16 CACHED
+
+#17 [producer builder 2/7] COPY --from=uv /uv /usr/local/bin/uv
+#17 CACHED
+
+#18 [producer runtime 4/5] COPY --from=builder /src/app /srv/app
+#18 CACHED
+
+#19 [producer runtime 2/5] RUN groupadd --system --gid 10001 app     && useradd --system --uid 10001 --gid app --no-create-home --shell /usr/sbin/nologin app
+#19 CACHED
+
+#20 [producer runtime 5/5] WORKDIR /srv
+#20 CACHED
+
+#21 [producer] exporting to image
+#21 exporting layers done
+#21 exporting manifest sha256:05c155ed7e4d54c5e543586056d4fc05a970319e146c9026c5c383c1823decb7 0.0s done
+#21 exporting config sha256:555a42ebceb9174584d876cd81032feff88b182e7c6361b2f81883c2c3aa4738
+#21 exporting config sha256:555a42ebceb9174584d876cd81032feff88b182e7c6361b2f81883c2c3aa4738 0.0s done
+#21 exporting attestation manifest sha256:26439854dd8fee59e24c177d7a96537046e3b52ab9dabbef213e0eebce59c479
+#21 exporting attestation manifest sha256:26439854dd8fee59e24c177d7a96537046e3b52ab9dabbef213e0eebce59c479 0.4s done
+#21 exporting manifest list sha256:7768f2499695ec792314740125f009dfb760af0882b51576fa061c0a03c56f62
+#21 exporting manifest list sha256:7768f2499695ec792314740125f009dfb760af0882b51576fa061c0a03c56f62 0.1s done
+#21 naming to docker.io/library/marketpulse:dev 0.0s done
+#21 unpacking to docker.io/library/marketpulse:dev 0.0s done
+#21 DONE 0.8s
+
+#22 [worker] exporting to image
+#22 exporting layers done
+#22 exporting manifest sha256:eed74dfbe531882e5c26daf2419157d598179a7c1c54e8f7740b9461270dd209 0.0s done
+#22 exporting config sha256:f01e79ea6383ab484ca7b45fe4f94aa749e44bfd8981f1d1d5a070df6f3f8bd7 0.0s done
+#22 exporting attestation manifest sha256:2d4414fac72818c6a75a2247c7cfdefe2dcc84fd9bd576b962cfe7b49da3b43f 0.3s done
+#22 exporting manifest list sha256:bbddc6af0c3cb20210ad5613f4359b6db04fff6c6ccf96b80407277ebd386016 0.1s done
+#22 naming to docker.io/library/marketpulse:dev 0.1s done
+#22 unpacking to docker.io/library/marketpulse:dev 0.0s done
+#22 DONE 0.7s
+
+#23 [api] exporting to image
+#23 exporting layers done
+#23 exporting manifest sha256:006666ca3b23d1a28e7959ae0eb66e6afedf726fc62860e4eb2de06d5ca853dc 0.0s done
+#23 exporting config sha256:93332b75f25920a69d003a45068780c4b940033c4424d987245a3c3d61fc52a6 0.0s done
+#23 exporting attestation manifest sha256:53e6c82d1608e4539fc3414be521d19bb77ce98a2cd2c1efeb56e73bae43ae24 0.3s done
+#23 exporting manifest list sha256:c2bb7ac99ef4781f24c7a42f6bfda90335078c8ab29679f1c5500c6d856211c5 0.2s done
+#23 naming to docker.io/library/marketpulse:dev 0.0s done
+#23 unpacking to docker.io/library/marketpulse:dev 0.0s done
+#23 DONE 0.8s
+
+#24 [worker] resolving provenance for metadata file
+#24 DONE 0.2s
+
+#25 [api] resolving provenance for metadata file
+#25 DONE 0.1s
+
+#26 [producer] resolving provenance for metadata file
+#26 DONE 0.0s
+ Image marketpulse:dev Built 
+ Image marketpulse:dev Built 
+ Image marketpulse:dev Built 
+ Network marketpulse_default Creating 
+ Network marketpulse_default Created 
+ Container marketpulse-alertmanager-1 Creating 
+ Container marketpulse-redis-1 Creating 
+ Container marketpulse-prometheus-1 Creating 
+ Container marketpulse-alertmanager-1 Created 
+ Container marketpulse-redis-1 Created 
+ Container marketpulse-worker-1 Creating 
+ Container marketpulse-producer-1 Creating 
+ Container marketpulse-api-1 Creating 
+ Container marketpulse-prometheus-1 Created 
+ Container marketpulse-grafana-1 Creating 
+ Container marketpulse-producer-1 Created 
+ Container marketpulse-worker-1 Created 
+ Container marketpulse-api-1 Created 
+ Container marketpulse-grafana-1 Created 
+ Container marketpulse-alertmanager-1 Starting 
+ Container marketpulse-redis-1 Starting 
+ Container marketpulse-prometheus-1 Starting 
+ Container marketpulse-redis-1 Started 
+ Container marketpulse-redis-1 Waiting 
+ Container marketpulse-redis-1 Waiting 
+ Container marketpulse-redis-1 Waiting 
+ Container marketpulse-prometheus-1 Started 
+ Container marketpulse-prometheus-1 Waiting 
+ Container marketpulse-alertmanager-1 Started 
+ Container marketpulse-redis-1 Healthy 
+ Container marketpulse-producer-1 Starting 
+ Container marketpulse-redis-1 Healthy 
+ Container marketpulse-api-1 Starting 
+ Container marketpulse-redis-1 Healthy 
+ Container marketpulse-worker-1 Starting 
+ Container marketpulse-prometheus-1 Healthy 
+ Container marketpulse-grafana-1 Starting 
+ Container marketpulse-worker-1 Started 
+ Container marketpulse-producer-1 Started 
+ Container marketpulse-api-1 Started 
+ Container marketpulse-grafana-1 Started 
+ Container marketpulse-api-1 Waiting 
+ Container marketpulse-worker-1 Waiting 
+ Container marketpulse-producer-1 Waiting 
+ Container marketpulse-prometheus-1 Waiting 
+ Container marketpulse-alertmanager-1 Waiting 
+ Container marketpulse-grafana-1 Waiting 
+ Container marketpulse-redis-1 Waiting 
+ Container marketpulse-alertmanager-1 Healthy 
+ Container marketpulse-prometheus-1 Healthy 
+ Container marketpulse-redis-1 Healthy 
+ Container marketpulse-api-1 Healthy 
+ Container marketpulse-worker-1 Healthy 
+ Container marketpulse-producer-1 Healthy 
+ Container marketpulse-grafana-1 Healthy 
+# end: 2026-11-06T11:11:50Z
+# exit: 0
+# seconds: 44
+alertmanager: Up 37 seconds (healthy)
+api: Up 31 seconds (healthy)
+grafana: Up 31 seconds (healthy)
+producer: Up 31 seconds (healthy)
+prometheus: Up 37 seconds (healthy)
+redis: Up 37 seconds (healthy)
+worker: Up 31 seconds (healthy)

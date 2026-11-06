@@ -1,0 +1,10 @@
+# id: A6-uid
+# command: docker run --rm --entrypoint id marketpulse:dev && docker image inspect -f 'user={{.Config.User}} size={{.Size}}' marketpulse:dev && docker run --rm --read-only marketpulse:dev nope; echo usage-exit=$?
+# start: 2026-11-06T11:07:44Z
+uid=10001(app) gid=10001(app) groups=10001(app)
+user=10001:10001 size=68189101
+usage: python -m app {api|worker|producer}
+usage-exit=2
+# end: 2026-11-06T11:07:47Z
+# exit: 0
+# seconds: 3

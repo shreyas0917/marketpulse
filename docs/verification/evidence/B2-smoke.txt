@@ -1,0 +1,9 @@
+# id: B2-smoke
+# command: make smoke
+# start: 2026-11-06T11:11:57Z
+uv run pytest tests/smoke -p no:cacheprovider
+..........                                                               [100%]
+10 passed in 0.42s
+# end: 2026-11-06T11:11:59Z
+# exit: 0
+# seconds: 2

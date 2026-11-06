@@ -1,0 +1,41 @@
+# id: C1-kind-up
+# command: make kind-up
+# start: 2026-11-06T11:50:46Z
+scripts/kind-up.sh
+11:50:46 creating cluster marketpulse
+Creating cluster "marketpulse" ...
+ • Ensuring node image (kindest/node:v1.37.0) 🖼️  ...
+ ✓ Ensuring node image (kindest/node:v1.37.0) 🖼️
+ • Preparing nodes 📦 📦 📦   ...
+ ✓ Preparing nodes 📦 📦 📦 
+ • Writing configuration 📜  ...
+ ✓ Writing configuration 📜
+ • Starting control-plane 🕹️  ...
+ ✓ Starting control-plane 🕹️
+ • Installing StorageClass 💾  ...
+ ✓ Installing StorageClass 💾
+ • Joining worker nodes 🚜  ...
+ ✓ Joining worker nodes 🚜
+Set kubectl context to "kind-marketpulse"
+You can now use your cluster with:
+
+kubectl cluster-info --context kind-marketpulse
+
+Have a question, bug, or feature request? Let us know! https://kind.sigs.k8s.io/#community 🙂
+11:51:25 installing Calico v3.33.0
+Waiting for daemon set "calico-node" rollout to finish: 0 of 3 updated pods are available...
+Waiting for daemon set "calico-node" rollout to finish: 1 of 3 updated pods are available...
+Waiting for daemon set "calico-node" rollout to finish: 2 of 3 updated pods are available...
+daemon set "calico-node" successfully rolled out
+deployment "calico-kube-controllers" successfully rolled out
+node/marketpulse-control-plane condition met
+node/marketpulse-worker condition met
+node/marketpulse-worker2 condition met
+11:56:38 installing metrics-server 3.14.0
+11:59:40 installing ingress-nginx 4.15.1
+Error: resource Deployment/ingress-nginx/ingress-nginx-controller not ready. status: InProgress, message: Available: 0/1
+context deadline exceeded
+make: *** [Makefile:83: kind-up] Error 1
+# end: 2026-11-06T12:04:42Z
+# exit: 2
+# seconds: 836

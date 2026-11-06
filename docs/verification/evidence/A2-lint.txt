@@ -1,0 +1,30 @@
+# id: A2-lint
+# command: make lint
+# start: 2026-11-06T11:03:37Z
+uv run ruff check .
+All checks passed!
+uv run ruff format --check .
+66 files already formatted
+uv run mypy
+Success: no issues found in 23 source files
+scripts/lib/tool.sh shellcheck -x scripts/canary.sh scripts/deploy-local.sh scripts/drills/1-kill-api-pods.sh scripts/drills/2-fail-readiness.sh scripts/drills/3-bad-deploy.sh scripts/drills/4-redis-outage.sh scripts/drills/5-market-open-burst.sh scripts/drills/6-poison-messages.sh scripts/drills/8-slow-worker.sh scripts/drills/lib.sh scripts/drills/run.sh scripts/gitops-up.sh scripts/kind-down.sh scripts/kind-up.sh scripts/lib/tool.sh scripts/m3-live-check.sh scripts/m4-checks.sh scripts/smoke-kind.sh
+C:/Users/Admin/tools/bin/make.exe --no-print-directory chart-lint
+diff -r --strip-trailing-cr observability/prometheus/rules deploy/helm/marketpulse/files/rules
+diff -r --strip-trailing-cr observability/grafana/dashboards deploy/helm/marketpulse/files/dashboards
+helm lint --strict deploy/helm/marketpulse -f deploy/helm/marketpulse/values-kind.yaml
+==> Linting deploy/helm/marketpulse
+[INFO] Chart.yaml: icon is recommended
+
+1 chart(s) linted, 0 chart(s) failed
+helm lint --strict deploy/helm/marketpulse -f deploy/helm/marketpulse/values-kind.yaml --set api.rollout.enabled=true
+==> Linting deploy/helm/marketpulse
+[INFO] Chart.yaml: icon is recommended
+
+1 chart(s) linted, 0 chart(s) failed
+helm template mp deploy/helm/marketpulse -f deploy/helm/marketpulse/values-kind.yaml | kubeconform -strict -summary -schema-location default 	-schema-location 'https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/{{.Group}}/{{.ResourceKind}}_{{.ResourceAPIVersion}}.json'
+Summary: 31 resources found parsing stdin - Valid: 31, Invalid: 0, Errors: 0, Skipped: 0
+helm template mp deploy/helm/marketpulse -f deploy/helm/marketpulse/values-kind.yaml --set api.rollout.enabled=true | kubeconform -strict -summary -schema-location default 	-schema-location 'https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/{{.Group}}/{{.ResourceKind}}_{{.ResourceAPIVersion}}.json'
+Summary: 31 resources found parsing stdin - Valid: 31, Invalid: 0, Errors: 0, Skipped: 0
+# end: 2026-11-06T11:06:55Z
+# exit: 0
+# seconds: 198

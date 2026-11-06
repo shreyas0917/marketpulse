@@ -1,0 +1,14 @@
+## teardown 2026-11-06T10:18:41Z
+Deleting cluster "marketpulse" ...
+Deleted nodes: ["marketpulse-worker" "marketpulse-control-plane" "marketpulse-worker2"]
+ Network marketpulse_default Removing 
+ Network marketpulse_default Removed 
+## after teardown
+No kind clusters found.
+marketpulse containers: 0
+## docker system df
+TYPE            TOTAL     ACTIVE    SIZE      RECLAIMABLE
+Images          53        32        19.85GB   4.807GB (24%)
+Containers      40        6         77.81MB   63.89MB (82%)
+Local Volumes   59        28        7.156GB   725.7MB (10%)
+Build Cache     352       0         17.14GB   11.94GB

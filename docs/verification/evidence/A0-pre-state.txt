@@ -1,0 +1,12 @@
+## pre-clean 2026-11-06T10:18:27Z
+marketpulse
+marketpulse-worker-1 Up 20 seconds (healthy)
+marketpulse-producer-1 Up 20 seconds (healthy)
+marketpulse-api-1 Up 20 seconds (healthy)
+marketpulse-grafana-1 Up 20 seconds (health: starting)
+marketpulse-redis-1 Up 20 seconds (healthy)
+marketpulse-prometheus-1 Up 20 seconds (healthy)
+marketpulse-alertmanager-1 Up 20 seconds (healthy)
+marketpulse-worker Up 20 seconds
+marketpulse-control-plane Up 20 seconds
+marketpulse-worker2 Up 20 seconds

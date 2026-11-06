@@ -1,0 +1,72 @@
+# id: B3-verify-stack
+# command: make verify-stack VERIFY_ARGS="--dashboards marketpulse-slo,marketpulse-api,marketpulse-ingestion"
+# start: 2026-11-06T11:11:59Z
+uv run python scripts/verify_stack.py --dashboards marketpulse-slo,marketpulse-api,marketpulse-ingestion
+sent 466 warm-up quote requests
+[PASS] target alertmanager http://alertmanager:9093/metrics health=up
+[PASS] target api http://api:8000/metrics health=up
+[PASS] target producer http://producer:9200/metrics health=up
+[PASS] target prometheus http://localhost:9090/metrics health=up
+[PASS] target worker http://worker:9100/metrics health=up
+[PASS] no series with up == 0 (0 found)
+[PASS] grafana lists dashboard marketpulse-slo (MarketPulse / SLO overview)
+[PASS] marketpulse-slo / Paging alerts firing: 1 series
+[PASS] marketpulse-slo / Ticket/warning alerts firing: 1 series
+[PASS] marketpulse-slo / SLI over selected range: 1 series
+[PASS] marketpulse-slo / Error budget remaining (selected range): 1 series
+[PASS] marketpulse-slo / Burn rate (error ratio / budget): 1 series
+[PASS] marketpulse-slo / Burn rate (error ratio / budget): 1 series
+[PASS] marketpulse-slo / Burn rate (error ratio / budget): 1 series
+[PASS] marketpulse-slo / SLI over selected range: 1 series
+[PASS] marketpulse-slo / Error budget remaining (selected range): 1 series
+[PASS] marketpulse-slo / Burn rate (error ratio / budget): 1 series
+[PASS] marketpulse-slo / Burn rate (error ratio / budget): 1 series
+[PASS] marketpulse-slo / Burn rate (error ratio / budget): 1 series
+[PASS] marketpulse-slo / SLI over selected range: 1 series
+[PASS] marketpulse-slo / Error budget remaining (selected range): 1 series
+[PASS] marketpulse-slo / Burn rate (error ratio / budget): 1 series
+[PASS] marketpulse-slo / Burn rate (error ratio / budget): 1 series
+[PASS] marketpulse-slo / Burn rate (error ratio / budget): 1 series
+[PASS] marketpulse-slo / SLI over selected range: 1 series
+[PASS] marketpulse-slo / Error budget remaining (selected range): 1 series
+[PASS] marketpulse-slo / Burn rate (error ratio / budget): 1 series
+[PASS] marketpulse-slo / Burn rate (error ratio / budget): 1 series
+[PASS] marketpulse-slo / Burn rate (error ratio / budget): 1 series
+[PASS] grafana lists dashboard marketpulse-api (MarketPulse / API)
+[PASS] marketpulse-api / Request rate: 1 series
+[PASS] marketpulse-api / 5xx ratio (5m): 1 series
+[PASS] marketpulse-api / Quote store up: 1 series
+[PASS] marketpulse-api / Faults active: 1 series
+[PASS] marketpulse-api / Requests by status: 1 series
+[PASS] marketpulse-api / Error ratio (5xx / all): 1 series
+[PASS] marketpulse-api / Quote latency percentiles: 1 series
+[PASS] marketpulse-api / Quote latency percentiles: 1 series
+[PASS] marketpulse-api / Quote latency percentiles: 1 series
+[PASS] marketpulse-api / Quote age percentiles: 1 series
+[PASS] marketpulse-api / Quote age percentiles: 1 series
+[PASS] marketpulse-api / Responses by source (stale-response rate): 3 series
+[PASS] marketpulse-api / Quote store up by pod: 1 series
+[PASS] grafana lists dashboard marketpulse-ingestion (MarketPulse / Ingestion)
+[PASS] marketpulse-ingestion / Events/s processed: 1 series
+[PASS] marketpulse-ingestion / Queue depth: 1 series
+[PASS] marketpulse-ingestion / Oldest queued event age: 1 series
+[PASS] marketpulse-ingestion / DLQ depth: 1 series
+[PASS] marketpulse-ingestion / Events by result: 3 series
+[PASS] marketpulse-ingestion / Events by result: 1 series
+[PASS] marketpulse-ingestion / Retries and dead-letters: 1 series
+[PASS] marketpulse-ingestion / Retries and dead-letters: 1 series
+[PASS] marketpulse-ingestion / Ingestion lag percentiles: 1 series
+[PASS] marketpulse-ingestion / Ingestion lag percentiles: 1 series
+[PASS] marketpulse-ingestion / Ingestion lag percentiles: 1 series
+[PASS] marketpulse-ingestion / Queue depth and DLQ depth: 1 series
+[PASS] marketpulse-ingestion / Queue depth and DLQ depth: 1 series
+[PASS] marketpulse-ingestion / Oldest queued event age: 1 series
+[PASS] marketpulse-ingestion / Producer target rate and burst: 1 series
+[PASS] marketpulse-ingestion / Producer target rate and burst: 1 series
+ALL CHECKS PASSED
+# end: 2026-11-06T11:12:30Z
+# exit: 0
+# seconds: 31
+marketpulse-api          pass=13 fail=0
+marketpulse-ingestion    pass=16 fail=0
+marketpulse-slo          pass=22 fail=0

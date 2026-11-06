@@ -1,0 +1,18 @@
+## (a)/(b) code review notes — see VERIFICATION.md; key lines:
+105:        retry=Retry(NoBackoff(), 0),
+162:        if faults.readiness_fail:
+184:            quote = await asyncio.wait_for(state["reader"].get(symbol), timeout)
+189:            cached = cache.get_fresh(symbol, now)
+199:                    headers={"Retry-After": str(settings.retry_after_seconds)},
+33:            if quote is None or now - quote.event_ts > self.max_age_seconds:
+22:local fresh = redis.call('SET', KEYS[2], '1', 'NX', 'EX', ARGV[4])
+27:if current and tonumber(current) >= tonumber(ARGV[2]) then
+78:            if message.attempts >= self.settings.worker_max_attempts:
+78:            count=len(ids) * 4 + 10,
+88:            if "NOGROUP" not in str(exc):
+103:            start_id="0-0",
+110:            messages.append(Message(id=msg_id, body=body, attempts=counts.get(msg_id, 2)))
+83:    def dead_letter(self, message: Message, reason: str) -> None:
+84:        self._client.send_message(
+93:        self.ack(message)
+204:        if quote is None:
