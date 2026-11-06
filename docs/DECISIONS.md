@@ -296,3 +296,20 @@ Pinned in `deploy/kind/versions.env` and `deploy/kind/cluster.yaml`.
   exited (`set -e`), skipping its own stall check and drain measurement; the cleanup trap still
   restored the system. The script now records a non-firing alert as a result and continues. The
   run's evidence was exported from Prometheus immediately afterwards and is used unchanged.
+
+## D33 — SQS dead-letter queue may hold duplicates
+
+- **Found:** independent verification (`docs/VERIFICATION.md`, F6). On the SQS backend,
+  dead-lettering is two calls, `SendMessage` to the DLQ then `DeleteMessage` on the main queue
+  (`app/common/queue/sqs.py`, `SqsQueue.dead_letter`). A crash between them redelivers the message;
+  it fails again with `ApproximateReceiveCount >= 5` and is dead-lettered a second time.
+- **Choice:** accept it, no code change. At-least-once delivery already means the main queue can
+  deliver duplicates; the DLQ inherits the same property. Every DLQ entry carries the original body
+  (with its `event_id`) and an `original_message_id` attribute, and consumers deduplicate on
+  `event_id`: the worker's `SET NX` dedup key and last-write-wins compare make a redriven duplicate
+  harmless. The Redis Streams path is unaffected (`XADD` + `XACK` + `XDEL` run in one `MULTI`).
+- **TODO (M7):** when the SQS queues are provisioned, (1) make the DLQ redrive runbook idempotent,
+  i.e. tolerate duplicate `event_id`s and do not count duplicates as distinct failures;
+  (2) report DLQ depth alongside unique `original_message_id`s so duplicates are visible; and
+  (3) decide whether the SQS redrive policy backstop (`maxReceiveCount = 10`) also needs a dedup
+  attribute.
