@@ -1,0 +1,42 @@
+# id: R2-test
+# command: make test
+# start: 2026-11-06T12:24:54Z
+uv run pytest --cov --cov-report=term-missing --cov-report=xml
+........................................................................ [ 94%]
+....                                                                     [100%]
+=============================== tests coverage ================================
+_______________ coverage: platform win32, python 3.13.7-final-0 _______________
+
+Name                                Stmts   Miss  Cover   Missing
+-----------------------------------------------------------------
+app\__init__.py                         0      0   100%
+app\__main__.py                        25     14    44%   18-41, 45
+app\api\__init__.py                     0      0   100%
+app\api\cache.py                       25      1    96%   27
+app\api\main.py                       162      3    98%   101, 128, 130
+app\api\metrics.py                     14      0   100%
+app\common\__init__.py                  0      0   100%
+app\common\config.py                   52      0   100%
+app\common\faults.py                   28      0   100%
+app\common\http.py                     56      0   100%
+app\common\logging.py                  32      8    75%   37, 42-48
+app\common\metrics.py                  38      2    95%   68-69
+app\common\models.py                   24      0   100%
+app\common\queue\__init__.py           15      0   100%
+app\common\queue\base.py               19      0   100%
+app\common\queue\redis_streams.py     107      2    98%   61, 112
+app\common\queue\sqs.py                39      0   100%
+app\common\store.py                    39      0   100%
+app\producer\__init__.py                0      0   100%
+app\producer\main.py                  111     23    79%   128-129, 136-169
+app\worker\__init__.py                  0      0   100%
+app\worker\main.py                    103     17    83%   133-154
+app\worker\metrics.py                  10      0   100%
+-----------------------------------------------------------------
+TOTAL                                 899     70    92%
+Coverage XML written to file coverage.xml
+Required test coverage of 80.0% reached. Total coverage: 92.21%
+76 passed in 5.78s
+# end: 2026-11-06T12:25:02Z
+# exit: 0
+# seconds: 8

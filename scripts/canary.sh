@@ -13,7 +13,7 @@ ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT"
 NS=marketpulse
 VALUES=deploy/helm/marketpulse/values-kind.yaml
-EVIDENCE=docs/experiments/evidence
+EVIDENCE="${EVIDENCE:-docs/experiments/evidence}"
 MODE="${1:?usage: canary.sh good|bad|no-traffic}"
 NAME="canary-$MODE"
 TIMELINE="$EVIDENCE/$NAME-timeline.jsonl"

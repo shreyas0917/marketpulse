@@ -1,0 +1,22 @@
+# id: R3-E5-drill5
+# command: EVIDENCE=/d/marketpulse/docs/verification/evidence/R3-E-drills make drill N=5
+# start: 2026-11-06T15:19:30Z
+scripts/drills/run.sh 5
+2026-11-06T15:19:31Z [drill 5] START 2026-11-06T15:19:31Z - market-open burst
+2026-11-06T15:19:31Z [drill 5] burst load started: base 30 req/s, 10x from +60s for 300s
+2026-11-06T15:29:57Z [drill 5] k6: requests=101231 checks_passed=198781 checks_failed=3680 p99_ms=4051.8
+{
+ "api_replicas_max": 6,
+ "api_replicas_start": 2,
+ "worker_replicas_max": 4,
+ "queue_depth_baseline": 2.0,
+ "queue_depth_peak": 1479.0,
+ "ingestion_lag_p99_peak_s": 9.838965060974488,
+ "queue_drain_seconds_after_burst": 13.0
+}
+wrote D:\marketpulse\docs\verification\evidence\R3-E-drills\drill5.json
+2026-11-06T15:29:58Z [drill 5] cleanup (exit code 0)
+2026-11-06T15:29:58Z [drill 5] END 2026-11-06T15:29:58Z
+# end: 2026-11-06T15:29:58Z
+# exit: 0
+# seconds: 628

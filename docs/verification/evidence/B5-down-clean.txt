@@ -1,0 +1,38 @@
+# id: B5-down-clean
+# command: make down && echo "containers=$(docker ps -a --filter name=marketpulse- -q | wc -l) networks=$(docker network ls --filter name=marketpulse -q | wc -l) volumes=$(docker volume ls --filter name=marketpulse -q | wc -l)"
+# start: 2026-11-06T11:49:19Z
+docker compose down -v --remove-orphans
+ Container marketpulse-alertmanager-1 Stopping 
+ Container marketpulse-worker-1 Stopping 
+ Container marketpulse-producer-1 Stopping 
+ Container marketpulse-api-1 Stopping 
+ Container marketpulse-grafana-1 Stopping 
+ Container marketpulse-alertmanager-1 Stopped 
+ Container marketpulse-alertmanager-1 Removing 
+ Container marketpulse-grafana-1 Stopped 
+ Container marketpulse-grafana-1 Removing 
+ Container marketpulse-alertmanager-1 Removed 
+ Container marketpulse-worker-1 Stopped 
+ Container marketpulse-worker-1 Removing 
+ Container marketpulse-grafana-1 Removed 
+ Container marketpulse-prometheus-1 Stopping 
+ Container marketpulse-worker-1 Removed 
+ Container marketpulse-producer-1 Stopped 
+ Container marketpulse-producer-1 Removing 
+ Container marketpulse-producer-1 Removed 
+ Container marketpulse-api-1 Stopped 
+ Container marketpulse-api-1 Removing 
+ Container marketpulse-api-1 Removed 
+ Container marketpulse-redis-1 Stopping 
+ Container marketpulse-redis-1 Stopped 
+ Container marketpulse-redis-1 Removing 
+ Container marketpulse-redis-1 Removed 
+ Container marketpulse-prometheus-1 Stopped 
+ Container marketpulse-prometheus-1 Removing 
+ Container marketpulse-prometheus-1 Removed 
+ Network marketpulse_default Removing 
+ Network marketpulse_default Removed 
+containers=0 networks=0 volumes=0
+# end: 2026-11-06T11:49:29Z
+# exit: 0
+# seconds: 10

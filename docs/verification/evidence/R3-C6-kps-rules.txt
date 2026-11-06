@@ -1,0 +1,7 @@
+# id: R3-C6-kps-rules
+# command: curl -s localhost:29090/api/v1/rules | python -c "import json,sys; g=json.load(sys.stdin)[\"data\"][\"groups\"]; print(len(g),\"groups\", sum(len(x[\"rules\"]) for x in g),\"rules\", sorted({x[\"name\"] for x in g}))"
+# start: 2026-11-06T14:14:51Z
+6 groups 37 rules ['slo-availability', 'slo-burn-rate', 'slo-freshness', 'slo-gaps', 'slo-ingestion-lag', 'slo-latency']
+# end: 2026-11-06T14:14:51Z
+# exit: 0
+# seconds: 0

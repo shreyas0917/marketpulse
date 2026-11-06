@@ -1,0 +1,15 @@
+# id: R3-D1-gitops-up
+# command: make gitops-up
+# start: 2026-11-06T14:15:40Z
+scripts/gitops-up.sh
+14:16:01 installing Argo Rollouts chart 2.43.8
+14:16:48 installing Argo CD chart 10.11.1
+14:19:38 handing marketpulse over from helm to Argo CD
+14:19:39 removing pre-Rollout Deployment/Service marketpulse-api superseded by the Rollout
+14:19:39 registering Application marketpulse
+NAME          SYNC STATUS   HEALTH STATUS
+marketpulse   Synced        Healthy
+14:20:02 Argo CD UI: kubectl -n argocd port-forward svc/argocd-server 18443:80 (user admin, password: kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath='{.data.password}' | base64 -d)
+# end: 2026-11-06T14:20:02Z
+# exit: 0
+# seconds: 262

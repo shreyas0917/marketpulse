@@ -1,0 +1,9 @@
+# id: R3-C4-smoke-kind
+# command: make smoke TARGET=kind
+# start: 2026-11-06T14:06:21Z
+scripts/smoke-kind.sh
+..........                                                               [100%]
+10 passed in 0.41s
+# end: 2026-11-06T14:06:23Z
+# exit: 0
+# seconds: 3

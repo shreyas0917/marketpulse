@@ -1,0 +1,19 @@
+# id: R3-E2-drill2
+# command: EVIDENCE=/d/marketpulse/docs/verification/evidence/R3-E-drills make drill N=2
+# start: 2026-11-06T15:01:56Z
+scripts/drills/run.sh 2
+2026-11-06T15:01:58Z [drill 2] START 2026-11-06T15:01:58Z - fail readiness on one pod
+2026-11-06T15:02:00Z [drill 2] k6 load started: 30 req/s for 4m (pid 16258)
+2026-11-06T15:02:30Z [drill 2] starting marketpulse-api-unready (copy of marketpulse-api-65ddb44f9d-mngdr with FAULT_READINESS_FAIL=true)
+2026-11-06T15:04:33Z [drill 2] marketpulse-api-unready after 122s: Running ready=false restarts=0; ready endpoint entries: 0
+2026-11-06T15:04:34Z [drill 2] quote requests served by marketpulse-api-unready: 0
+2026-11-06T15:04:34Z [drill 2] fault gauge on marketpulse-api-unready: 1
+2026-11-06T15:06:11Z [drill 2] k6 load finished
+2026-11-06T15:06:11Z [drill 2] k6: requests=7302 checks_passed=14402 checks_failed=0 p99_ms=40.4
+wrote D:\marketpulse\docs\verification\evidence\R3-E-drills\drill2.json
+2026-11-06T15:06:12Z [drill 2] cleanup (exit code 0)
+2026-11-06T15:06:13Z [drill 2] removed marketpulse-api-unready
+2026-11-06T15:06:13Z [drill 2] END 2026-11-06T15:06:13Z
+# end: 2026-11-06T15:06:13Z
+# exit: 0
+# seconds: 257

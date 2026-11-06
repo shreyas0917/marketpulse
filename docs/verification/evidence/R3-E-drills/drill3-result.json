@@ -1,0 +1,3 @@
+{"mode": "bad", "commit": "fe83a6faf7cb566fc0f3ed4cd781453fd126df94", "outcome": "aborted",
+ "analysis_failed_epoch_ms": 1793981420615, "stable_epoch_ms": 1793981423182,
+ "failure_to_stable_ms": 2567}

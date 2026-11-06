@@ -7,7 +7,7 @@
 set -euo pipefail
 
 cd "$(dirname "$0")/.."
-EVIDENCE=docs/experiments/evidence
+EVIDENCE="${EVIDENCE:-docs/experiments/evidence}"
 ALERTS=(uv run python scripts/lib/alerts.py)
 RATE="${RATE:-50}"
 mkdir -p "$EVIDENCE"

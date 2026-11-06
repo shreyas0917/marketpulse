@@ -6,7 +6,7 @@ set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 NS=marketpulse
-EVIDENCE="$ROOT/docs/experiments/evidence"
+EVIDENCE="${EVIDENCE:-$ROOT/docs/experiments/evidence}"
 BASE_URL=http://127.0.0.1:18080
 HOST_HEADER=marketpulse.localtest.me
 PROM=http://localhost:29090

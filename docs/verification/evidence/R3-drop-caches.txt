@@ -1,0 +1,11 @@
+# drop VM page cache 2026-11-06T13:44:06Z
+before: available 2.08 GB | vmmemWSL 8165 MB
+              total        used        free      shared  buff/cache   available
+Mem:           7944        1839         256          43        5848        5869
+dropped
+              total        used        free      shared  buff/cache   available
+Mem:           7944        1819        4645          43        1480        5906
+after +15s: available 5.02 GB | vmmemWSL 5100 MB
+after +30s: available 5.01 GB | vmmemWSL 5084 MB
+after +45s: available 5.12 GB | vmmemWSL 5144 MB
+after +60s: available 4.92 GB | vmmemWSL 5360 MB

@@ -1,0 +1,15 @@
+{"ts": "2026-11-06T16:04:03.530Z", "epoch": 1793981043, "event": "pushed fe83a6faf7cb566fc0f3ed4cd781453fd126df94 to main"}
+{"ts": "2026-11-06T16:04:04.378Z", "epoch": 1793981044, "event": "rollout phase|step|weight|abort|stableRS|currentHash = Healthy|6|0||65ddb44f9d|65ddb44f9d"}
+{"ts": "2026-11-06T16:04:04.516Z", "epoch": 1793981044, "event": "canary ingress weight = 0"}
+{"ts": "2026-11-06T16:04:14.270Z", "epoch": 1793981054, "event": "rollout phase|step|weight|abort|stableRS|currentHash = Progressing|0|0||65ddb44f9d|6c8df9f74c"}
+{"ts": "2026-11-06T16:04:22.506Z", "epoch": 1793981062, "event": "rollout phase|step|weight|abort|stableRS|currentHash = Paused|1|10||65ddb44f9d|6c8df9f74c"}
+{"ts": "2026-11-06T16:04:22.669Z", "epoch": 1793981062, "event": "canary ingress weight = 10"}
+{"ts": "2026-11-06T16:09:21.430Z", "epoch": 1793981361, "event": "rollout phase|step|weight|abort|stableRS|currentHash = Progressing|2|10||65ddb44f9d|6c8df9f74c"}
+{"ts": "2026-11-06T16:09:21.566Z", "epoch": 1793981361, "event": "analysisrun marketpulse-api-6c8df9f74c-7-2|Running"}
+{"ts": "2026-11-06T16:10:20.513Z", "epoch": 1793981420, "event": "analysisrun marketpulse-api-6c8df9f74c-7-2|Failed"}
+{"ts": "2026-11-06T16:10:20.769Z", "epoch": 1793981420, "event": "analysis failed"}
+{"ts": "2026-11-06T16:10:22.880Z", "epoch": 1793981422, "event": "rollout phase|step|weight|abort|stableRS|currentHash = Degraded|0|0|true|65ddb44f9d|6c8df9f74c"}
+{"ts": "2026-11-06T16:10:23.080Z", "epoch": 1793981423, "event": "canary ingress weight = 0"}
+{"ts": "2026-11-06T16:10:23.314Z", "epoch": 1793981423, "event": "100% stable (canary weight 0)"}
+{"ts": "2026-11-06T16:10:30.794Z", "epoch": 1793981430, "event": "pushed revert 6fccf81c43124f2d72e6b8d3a982da5e2f556413"}
+{"ts": "2026-11-06T16:10:41.793Z", "epoch": 1793981441, "event": "rollout after revert: Healthy|6|0||65ddb44f9d|65ddb44f9d"}

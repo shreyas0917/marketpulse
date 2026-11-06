@@ -1,0 +1,28 @@
+# command: extract good/total per SLI (5m) from slo-recording.yml vs docs/slos.md; start 2026-11-06T12:06:29Z
+## availability
+sum(rate(http_requests_total{route="/v1/quotes/{symbol}", status!~"5.."}[5m]))
+sum(rate(http_requests_total{route="/v1/quotes/{symbol}"}[5m]))
+## latency
+sum(rate(http_request_duration_seconds_bucket{route="/v1/quotes/{symbol}", le="0.25"}[5m]))
+sum(rate(http_request_duration_seconds_count{route="/v1/quotes/{symbol}"}[5m]))
+## freshness
+sum(rate(quote_age_seconds_bucket{le="2.0"}[5m]))
+sum(rate(quote_age_seconds_count[5m]))
+## ingestion_lag
+sum(rate(ingestion_lag_seconds_bucket{le="1.0"}[5m]))
+sum(rate(ingestion_lag_seconds_count[5m]))
+sum(rate(events_processed_total{result="dead_lettered"}[5m]))
+## docs/slos.md
+good:  sum(rate(http_requests_total{Q, status!~"5.."}[w]))
+total: sum(rate(http_requests_total{Q}[w]))
+good:  sum(rate(http_request_duration_seconds_bucket{Q, le="0.25"}[w]))
+total: sum(rate(http_request_duration_seconds_count{Q}[w]))
+good:  sum(rate(quote_age_seconds_bucket{le="2.0"}[w]))
+total: sum(rate(quote_age_seconds_count[w]))
+good:  sum(rate(ingestion_lag_seconds_bucket{le="1.0"}[w]))
+total: sum(rate(ingestion_lag_seconds_count[w])) + sum(rate(events_processed_total{result="dead_lettered"}[w]))
+## records per SLI
+      5 record: sli:availability:
+      5 record: sli:freshness:
+      5 record: sli:ingestion_lag:
+      5 record: sli:latency:

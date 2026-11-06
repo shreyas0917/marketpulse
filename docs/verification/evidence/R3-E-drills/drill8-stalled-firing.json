@@ -1,0 +1,1 @@
+{"alert": "IngestionStalled", "state": "firing", "observed_at": "2026-11-06T15:45:59+00:00", "waited_since": "2026-11-06T15:45:58+00:00", "starts_at": ["2026-11-06T15:33:13.891Z"], "labels": [{"alertname": "IngestionStalled", "prometheus": "monitoring/kps", "severity": "page", "slo": "ingestion_lag"}]}

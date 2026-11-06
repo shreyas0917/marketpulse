@@ -1,0 +1,27 @@
+## run3 final state 2026-11-06T16:25:50Z
+main: 6fccf81; canary/drill commits since a8f65b0:
+6fccf81 Revert "release(api): enable FAULT_API_ERROR_RATE=0.2 (canary demo: bad version)"
+fe83a6f release(api): enable FAULT_API_ERROR_RATE=0.2 (canary demo: bad version)
+661412f Revert "release(api): harmless RELEASE_NOTE change with no traffic (canary demo)"
+4fa4482 release(api): harmless RELEASE_NOTE change with no traffic (canary demo)
+6783fe9 Revert "release(api): enable FAULT_API_ERROR_RATE=0.2 (canary demo: bad version)"
+d7a2875 release(api): enable FAULT_API_ERROR_RATE=0.2 (canary demo: bad version)
+76b8860 release(api): harmless RELEASE_NOTE change (canary demo: good)
+FAULT lines in main values: 0
+marketpulse-control-plane   Ready   control-plane   166m   v1.37.0
+marketpulse-worker          Ready   <none>          165m   v1.37.0
+marketpulse-worker2         Ready   <none>          165m   v1.37.0
+pods: 38, not ready: 0
+app=OutOfSync/Healthy automated={"prune":true,"selfHeal":true}
+rollout=Healthy stable=65ddb44f9d
+k6=0 kubectl=0
+win available 2.94 GB
+resource flags in run 3: BELOW_2GB=1 MEMORY_PRESSURE=0 OOMKILLED=0 CACHE_DROPPED=8 samples=159
+16:26:11 app=OutOfSync/Healthy oos=[Service/marketpulse-api-canary Service/marketpulse-api-stable ]
+16:26:21 app=OutOfSync/Healthy oos=[Service/marketpulse-api-canary Service/marketpulse-api-stable ]
+16:26:32 app=OutOfSync/Healthy oos=[Service/marketpulse-api-canary Service/marketpulse-api-stable ]
+16:26:42 app=OutOfSync/Healthy oos=[Service/marketpulse-api-canary Service/marketpulse-api-stable ]
+16:26:53 app=OutOfSync/Healthy oos=[Service/marketpulse-api-canary Service/marketpulse-api-stable ]
+16:27:03 app=OutOfSync/Healthy oos=[Service/marketpulse-api-canary Service/marketpulse-api-stable ]
+16:27:13 app=OutOfSync/Healthy oos=[Service/marketpulse-api-canary Service/marketpulse-api-stable ]
+16:27:24 app=Synced/Healthy oos=[]

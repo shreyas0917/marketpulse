@@ -1,0 +1,40 @@
+# id: R3-C3-pods-ready
+# command: kubectl get pods -A --no-headers; echo "total=$(kubectl get pods -A --no-headers | wc -l) not_ready=$(kubectl get pods -A --no-headers | awk "{split(\$3,a,\"/\"); if (a[1]!=a[2] && \$4!=\"Completed\") c++} END{print c+0}")"; kubectl get nodes --no-headers
+# start: 2026-11-06T14:06:20Z
+ingress-nginx        ingress-nginx-controller-7b96d79789-2wtg5           1/1   Running   0               16m
+kube-system          calico-kube-controllers-846669895c-f2sbf            1/1   Running   0               26m
+kube-system          calico-node-5nf9t                                   1/1   Running   0               26m
+kube-system          calico-node-llqcx                                   1/1   Running   0               26m
+kube-system          calico-node-tmhzr                                   1/1   Running   0               26m
+kube-system          coredns-559f6c778d-2ghg9                            1/1   Running   0               26m
+kube-system          coredns-559f6c778d-hb2q2                            1/1   Running   0               26m
+kube-system          etcd-marketpulse-control-plane                      1/1   Running   0               26m
+kube-system          kube-apiserver-marketpulse-control-plane            1/1   Running   0               26m
+kube-system          kube-controller-manager-marketpulse-control-plane   1/1   Running   1 (6m22s ago)   26m
+kube-system          kube-proxy-9jd44                                    1/1   Running   0               26m
+kube-system          kube-proxy-gjxqm                                    1/1   Running   0               26m
+kube-system          kube-proxy-gtvdz                                    1/1   Running   0               26m
+kube-system          kube-scheduler-marketpulse-control-plane            1/1   Running   1 (6m21s ago)   26m
+kube-system          metrics-server-854576df46-kptcs                     1/1   Running   0               20m
+local-path-storage   local-path-provisioner-75f7fc7dc5-f9blg             1/1   Running   0               26m
+marketpulse          marketpulse-api-5556ccf5f8-4mxwt                    1/1   Running   0               43s
+marketpulse          marketpulse-api-5556ccf5f8-mbj8p                    1/1   Running   0               44s
+marketpulse          marketpulse-producer-7998c8d598-vw67s               1/1   Running   0               44s
+marketpulse          marketpulse-redis-8cf748c55-2t5g5                   1/1   Running   0               44s
+marketpulse          marketpulse-worker-868857467d-f85d8                 1/1   Running   0               43s
+marketpulse          marketpulse-worker-868857467d-kl89v                 1/1   Running   0               44s
+monitoring           alertmanager-kps-0                                  2/2   Running   0               9m28s
+monitoring           kps-grafana-5585c5d7ff-fn5t4                        3/3   Running   2 (3m35s ago)   9m32s
+monitoring           kps-kube-state-metrics-5f69fb89b6-zzh7l             1/1   Running   0               9m32s
+monitoring           kps-operator-66df889c76-9h5cm                       1/1   Running   0               9m32s
+monitoring           kps-prometheus-node-exporter-9vz4g                  1/1   Running   0               9m32s
+monitoring           kps-prometheus-node-exporter-vcvp6                  1/1   Running   0               9m32s
+monitoring           kps-prometheus-node-exporter-vgw5t                  1/1   Running   0               9m32s
+monitoring           prometheus-kps-0                                    2/2   Running   0               9m28s
+total=30 not_ready=0
+marketpulse-control-plane   Ready   control-plane   26m   v1.37.0
+marketpulse-worker          Ready   <none>          26m   v1.37.0
+marketpulse-worker2         Ready   <none>          26m   v1.37.0
+# end: 2026-11-06T14:06:20Z
+# exit: 0
+# seconds: 1

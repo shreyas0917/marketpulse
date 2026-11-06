@@ -123,6 +123,12 @@ or exceeds 50 ms:
    with `stale: true`, `source: local_cache`;
 2. otherwise the API returns `503 {"error": "QUOTE_UNAVAILABLE"}` with `Retry-After`.
 
+When Redis answers but holds **no quote** for the symbol (for example right after a restart without
+persistence, before the producer republishes it), the same cache is consulted: a cached quote no
+older than `STALE_QUOTE_MAX_AGE_SECONDS` is served with `stale: true`, `source: local_cache`;
+otherwise the API returns `404 {"error": "NO_QUOTE"}`. `quote_store_up` stays 1 in this case,
+because the store itself is healthy.
+
 The API never serves an arbitrarily old price. **Limitations:**
 
 - The cache is **per pod**, not shared. Two pods may return different stale values, or one may

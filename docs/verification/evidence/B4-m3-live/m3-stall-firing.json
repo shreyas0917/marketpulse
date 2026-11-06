@@ -1,0 +1,1 @@
+{"alert": "IngestionStalled", "state": "firing", "observed_at": "2026-11-06T11:48:22+00:00", "waited_since": "2026-11-06T11:45:52+00:00", "starts_at": ["2026-11-06T11:48:12.454Z"], "labels": [{"alertname": "IngestionStalled", "severity": "page", "slo": "ingestion_lag"}]}

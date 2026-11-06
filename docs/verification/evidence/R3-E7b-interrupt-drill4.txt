@@ -1,0 +1,10 @@
+2026-11-06T16:22:07Z [drill 4] START 2026-11-06T16:22:07Z - stop Redis
+2026-11-06T16:22:14Z [drill 4] Argo CD auto-sync paused
+2026-11-06T16:22:14Z [drill 4] k6 load started: 30 req/s for 10m (pid 23352)
+2026-11-06T16:23:17Z [drill 4] ready API pods before: 2
+2026-11-06T16:23:23Z [drill 4] stopping Redis (scale to 0) at 2026-11-06T16:23:23Z
+2026-11-06T16:23:31Z [drill 4] restarting API pod marketpulse-api-65ddb44f9d-7z5qg mid-outage (cold-cache check)
+2026-11-06T16:24:00Z [drill 4] cleanup (exit code 130)
+2026-11-06T16:24:24Z [drill 4] redis restored
+2026-11-06T16:24:27Z [drill 4] Argo CD auto-sync re-enabled
+2026-11-06T16:24:31Z [drill 4] END 2026-11-06T16:24:30Z

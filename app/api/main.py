@@ -202,6 +202,13 @@ def create_app(
             return _quote_response(cached, now, stale=True, source="local_cache", warmup=warmup)
 
         if quote is None:
+            # Redis answered but holds nothing for the symbol (e.g. just restarted without
+            # persistence): a fresh-enough cached quote is still better than a 404.
+            now = time.time()
+            cached = cache.get_fresh(symbol, now)
+            if cached is not None:
+                metrics.responses.labels(source="local_cache").inc()
+                return _quote_response(cached, now, stale=True, source="local_cache", warmup=warmup)
             return error(404, "NO_QUOTE", f"no quote received yet for {symbol}")
         cache.put(quote)
         metrics.responses.labels(source="store").inc()

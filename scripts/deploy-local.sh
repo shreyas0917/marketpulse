@@ -40,9 +40,17 @@ if kubectl get namespace argocd >/dev/null 2>&1; then
   done
   log "application marketpulse: ${status:-unknown}"
 else
+  # values-kind.yaml runs the API as an Argo Rollouts Rollout (M5). Before `make gitops-up` the
+  # Rollout CRDs do not exist, so deploy the API as a plain Deployment; gitops-up later hands the
+  # release to Argo CD and removes that Deployment (DECISIONS D30).
+  mode=()
+  if ! kubectl get crd rollouts.argoproj.io >/dev/null 2>&1; then
+    log "Argo Rollouts CRDs not installed: deploying the API as a Deployment"
+    mode=(--set api.rollout.enabled=false)
+  fi
   log "helm upgrade --install marketpulse"
   helm upgrade --install marketpulse "$CHART" -n "$NAMESPACE" --create-namespace \
-    -f "$CHART/values-kind.yaml" "$@" --wait --timeout 5m >/dev/null
+    -f "$CHART/values-kind.yaml" "${mode[@]}" "$@" --wait --timeout 5m >/dev/null
 fi
 # Same tag, new build: restart so pods pick up the freshly loaded image.
 if [[ "${RESTART:-0}" == "1" ]]; then

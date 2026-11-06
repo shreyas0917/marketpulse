@@ -1,0 +1,1074 @@
+{
+ "exported_at": "2026-11-06T15:01:45+00:00",
+ "start": "2026-11-06T14:57:27Z",
+ "end": "2026-11-06T15:01:45Z",
+ "step": "10s",
+ "queries": {
+  "sli:availability:error_ratio_rate5m": {
+   "resultType": "matrix",
+   "result": [
+    {
+     "metric": {
+      "__name__": "sli:availability:error_ratio_rate5m",
+      "slo": "availability",
+      "slo_target": "0.999"
+     },
+     "values": [
+      [
+       1793977047,
+       "NaN"
+      ],
+      [
+       1793977057,
+       "NaN"
+      ],
+      [
+       1793977067,
+       "NaN"
+      ],
+      [
+       1793977077,
+       "0"
+      ],
+      [
+       1793977087,
+       "0"
+      ],
+      [
+       1793977097,
+       "0"
+      ],
+      [
+       1793977107,
+       "0"
+      ],
+      [
+       1793977117,
+       "0"
+      ],
+      [
+       1793977127,
+       "0"
+      ],
+      [
+       1793977137,
+       "0"
+      ],
+      [
+       1793977147,
+       "0"
+      ],
+      [
+       1793977157,
+       "0"
+      ],
+      [
+       1793977167,
+       "0"
+      ],
+      [
+       1793977177,
+       "0"
+      ],
+      [
+       1793977187,
+       "0"
+      ],
+      [
+       1793977197,
+       "0"
+      ],
+      [
+       1793977207,
+       "0"
+      ],
+      [
+       1793977217,
+       "0"
+      ],
+      [
+       1793977227,
+       "0"
+      ],
+      [
+       1793977237,
+       "0"
+      ],
+      [
+       1793977247,
+       "0"
+      ],
+      [
+       1793977257,
+       "0"
+      ],
+      [
+       1793977267,
+       "0"
+      ],
+      [
+       1793977277,
+       "0"
+      ],
+      [
+       1793977287,
+       "0"
+      ],
+      [
+       1793977297,
+       "0"
+      ]
+     ]
+    }
+   ]
+  },
+  "sum by (status) (rate(http_requests_total{route=\"/v1/quotes/{symbol}\"}[1m]))": {
+   "resultType": "matrix",
+   "result": [
+    {
+     "metric": {
+      "status": "200"
+     },
+     "values": [
+      [
+       1793977047,
+       "0"
+      ],
+      [
+       1793977057,
+       "0"
+      ],
+      [
+       1793977067,
+       "1.8997720273567171"
+      ],
+      [
+       1793977077,
+       "7.7405064360027005"
+      ],
+      [
+       1793977087,
+       "13.761218109169906"
+      ],
+      [
+       1793977097,
+       "19.73982360352793"
+      ],
+      [
+       1793977107,
+       "25.769440422309003"
+      ],
+      [
+       1793977117,
+       "29.82560828290186"
+      ],
+      [
+       1793977127,
+       "28.494451312292522"
+      ],
+      [
+       1793977137,
+       "28.97995614660372"
+      ],
+      [
+       1793977147,
+       "27.322933021824507"
+      ],
+      [
+       1793977157,
+       "26.24329721277872"
+      ],
+      [
+       1793977167,
+       "28.801391589448873"
+      ],
+      [
+       1793977177,
+       "28.838826286441808"
+      ],
+      [
+       1793977187,
+       "25.81841140312279"
+      ],
+      [
+       1793977197,
+       "27.780615598719677"
+      ],
+      [
+       1793977207,
+       "27.405879263431956"
+      ],
+      [
+       1793977217,
+       "29.94158519399482"
+      ],
+      [
+       1793977227,
+       "27.436516699435675"
+      ],
+      [
+       1793977237,
+       "29.976372637263726"
+      ],
+      [
+       1793977247,
+       "29.655716035551215"
+      ],
+      [
+       1793977257,
+       "30.043004312449646"
+      ],
+      [
+       1793977267,
+       "29.98269824582266"
+      ],
+      [
+       1793977277,
+       "30.041802508150493"
+      ],
+      [
+       1793977287,
+       "29.98299791174557"
+      ],
+      [
+       1793977297,
+       "29.581486901359757"
+      ]
+     ]
+    },
+    {
+     "metric": {
+      "status": "503"
+     },
+     "values": [
+      [
+       1793977157,
+       "0"
+      ],
+      [
+       1793977167,
+       "0"
+      ],
+      [
+       1793977177,
+       "0"
+      ],
+      [
+       1793977187,
+       "0"
+      ],
+      [
+       1793977197,
+       "0"
+      ],
+      [
+       1793977207,
+       "0"
+      ],
+      [
+       1793977217,
+       "0"
+      ],
+      [
+       1793977227,
+       "0"
+      ],
+      [
+       1793977237,
+       "0"
+      ],
+      [
+       1793977247,
+       "0"
+      ],
+      [
+       1793977257,
+       "0"
+      ],
+      [
+       1793977267,
+       "0"
+      ],
+      [
+       1793977277,
+       "0"
+      ],
+      [
+       1793977287,
+       "0"
+      ],
+      [
+       1793977297,
+       "0"
+      ]
+     ]
+    }
+   ]
+  },
+  "count(up{job=\"api\"} == 1)": {
+   "resultType": "matrix",
+   "result": [
+    {
+     "metric": {},
+     "values": [
+      [
+       1793977047,
+       "2"
+      ],
+      [
+       1793977057,
+       "2"
+      ],
+      [
+       1793977067,
+       "2"
+      ],
+      [
+       1793977077,
+       "2"
+      ],
+      [
+       1793977087,
+       "2"
+      ],
+      [
+       1793977097,
+       "2"
+      ],
+      [
+       1793977107,
+       "2"
+      ],
+      [
+       1793977117,
+       "1"
+      ],
+      [
+       1793977127,
+       "1"
+      ],
+      [
+       1793977137,
+       "2"
+      ],
+      [
+       1793977147,
+       "2"
+      ],
+      [
+       1793977157,
+       "2"
+      ],
+      [
+       1793977167,
+       "2"
+      ],
+      [
+       1793977177,
+       "2"
+      ],
+      [
+       1793977187,
+       "1"
+      ],
+      [
+       1793977197,
+       "1"
+      ],
+      [
+       1793977207,
+       "2"
+      ],
+      [
+       1793977217,
+       "2"
+      ],
+      [
+       1793977227,
+       "2"
+      ],
+      [
+       1793977237,
+       "2"
+      ],
+      [
+       1793977247,
+       "2"
+      ],
+      [
+       1793977257,
+       "2"
+      ],
+      [
+       1793977267,
+       "2"
+      ],
+      [
+       1793977277,
+       "2"
+      ],
+      [
+       1793977287,
+       "2"
+      ],
+      [
+       1793977297,
+       "3"
+      ]
+     ]
+    }
+   ]
+  },
+  "sum(kube_pod_status_ready{namespace=\"marketpulse\", condition=\"true\", pod=~\"marketpulse-api.*\"})": {
+   "resultType": "matrix",
+   "result": [
+    {
+     "metric": {},
+     "values": [
+      [
+       1793977047,
+       "2"
+      ],
+      [
+       1793977057,
+       "2"
+      ],
+      [
+       1793977067,
+       "2"
+      ],
+      [
+       1793977077,
+       "2"
+      ],
+      [
+       1793977087,
+       "2"
+      ],
+      [
+       1793977097,
+       "2"
+      ],
+      [
+       1793977107,
+       "2"
+      ],
+      [
+       1793977117,
+       "2"
+      ],
+      [
+       1793977127,
+       "1"
+      ],
+      [
+       1793977137,
+       "1"
+      ],
+      [
+       1793977147,
+       "2"
+      ],
+      [
+       1793977157,
+       "2"
+      ],
+      [
+       1793977167,
+       "2"
+      ],
+      [
+       1793977177,
+       "2"
+      ],
+      [
+       1793977187,
+       "2"
+      ],
+      [
+       1793977197,
+       "1"
+      ],
+      [
+       1793977207,
+       "2"
+      ],
+      [
+       1793977217,
+       "2"
+      ],
+      [
+       1793977227,
+       "2"
+      ],
+      [
+       1793977237,
+       "2"
+      ],
+      [
+       1793977247,
+       "2"
+      ],
+      [
+       1793977257,
+       "2"
+      ],
+      [
+       1793977267,
+       "2"
+      ],
+      [
+       1793977277,
+       "2"
+      ],
+      [
+       1793977287,
+       "2"
+      ],
+      [
+       1793977297,
+       "3"
+      ]
+     ]
+    }
+   ]
+  }
+ },
+ "alerts_series": {
+  "resultType": "matrix",
+  "result": [
+   {
+    "metric": {
+     "__name__": "ALERTS",
+     "alertname": "AvailabilitySlowBurn",
+     "alertstate": "firing",
+     "severity": "ticket",
+     "slo": "availability",
+     "slo_target": "0.999",
+     "window": "3d/6h"
+    },
+    "values": [
+     [
+      1793977047,
+      "1"
+     ],
+     [
+      1793977057,
+      "1"
+     ],
+     [
+      1793977067,
+      "1"
+     ],
+     [
+      1793977077,
+      "1"
+     ],
+     [
+      1793977087,
+      "1"
+     ],
+     [
+      1793977097,
+      "1"
+     ],
+     [
+      1793977107,
+      "1"
+     ],
+     [
+      1793977117,
+      "1"
+     ],
+     [
+      1793977127,
+      "1"
+     ],
+     [
+      1793977137,
+      "1"
+     ],
+     [
+      1793977147,
+      "1"
+     ],
+     [
+      1793977157,
+      "1"
+     ],
+     [
+      1793977167,
+      "1"
+     ],
+     [
+      1793977177,
+      "1"
+     ],
+     [
+      1793977187,
+      "1"
+     ],
+     [
+      1793977197,
+      "1"
+     ],
+     [
+      1793977207,
+      "1"
+     ],
+     [
+      1793977217,
+      "1"
+     ],
+     [
+      1793977227,
+      "1"
+     ],
+     [
+      1793977237,
+      "1"
+     ],
+     [
+      1793977247,
+      "1"
+     ],
+     [
+      1793977257,
+      "1"
+     ],
+     [
+      1793977267,
+      "1"
+     ],
+     [
+      1793977277,
+      "1"
+     ],
+     [
+      1793977287,
+      "1"
+     ],
+     [
+      1793977297,
+      "1"
+     ]
+    ]
+   },
+   {
+    "metric": {
+     "__name__": "ALERTS",
+     "alertname": "FreshnessSlowBurn",
+     "alertstate": "firing",
+     "severity": "ticket",
+     "slo": "freshness",
+     "slo_target": "0.99",
+     "window": "3d/6h"
+    },
+    "values": [
+     [
+      1793977047,
+      "1"
+     ],
+     [
+      1793977057,
+      "1"
+     ],
+     [
+      1793977067,
+      "1"
+     ],
+     [
+      1793977077,
+      "1"
+     ],
+     [
+      1793977087,
+      "1"
+     ],
+     [
+      1793977097,
+      "1"
+     ],
+     [
+      1793977107,
+      "1"
+     ],
+     [
+      1793977117,
+      "1"
+     ],
+     [
+      1793977127,
+      "1"
+     ],
+     [
+      1793977137,
+      "1"
+     ],
+     [
+      1793977147,
+      "1"
+     ],
+     [
+      1793977157,
+      "1"
+     ],
+     [
+      1793977167,
+      "1"
+     ],
+     [
+      1793977177,
+      "1"
+     ],
+     [
+      1793977187,
+      "1"
+     ],
+     [
+      1793977197,
+      "1"
+     ],
+     [
+      1793977207,
+      "1"
+     ],
+     [
+      1793977217,
+      "1"
+     ],
+     [
+      1793977227,
+      "1"
+     ],
+     [
+      1793977237,
+      "1"
+     ],
+     [
+      1793977247,
+      "1"
+     ],
+     [
+      1793977257,
+      "1"
+     ],
+     [
+      1793977267,
+      "1"
+     ],
+     [
+      1793977277,
+      "1"
+     ],
+     [
+      1793977287,
+      "1"
+     ],
+     [
+      1793977297,
+      "1"
+     ]
+    ]
+   },
+   {
+    "metric": {
+     "__name__": "ALERTS",
+     "alertname": "LatencySlowBurn",
+     "alertstate": "firing",
+     "severity": "ticket",
+     "slo": "latency",
+     "slo_target": "0.99",
+     "window": "3d/6h"
+    },
+    "values": [
+     [
+      1793977047,
+      "1"
+     ],
+     [
+      1793977057,
+      "1"
+     ],
+     [
+      1793977067,
+      "1"
+     ],
+     [
+      1793977077,
+      "1"
+     ],
+     [
+      1793977087,
+      "1"
+     ],
+     [
+      1793977097,
+      "1"
+     ],
+     [
+      1793977107,
+      "1"
+     ],
+     [
+      1793977117,
+      "1"
+     ],
+     [
+      1793977127,
+      "1"
+     ],
+     [
+      1793977137,
+      "1"
+     ],
+     [
+      1793977147,
+      "1"
+     ],
+     [
+      1793977157,
+      "1"
+     ],
+     [
+      1793977167,
+      "1"
+     ],
+     [
+      1793977177,
+      "1"
+     ],
+     [
+      1793977187,
+      "1"
+     ],
+     [
+      1793977197,
+      "1"
+     ],
+     [
+      1793977207,
+      "1"
+     ],
+     [
+      1793977217,
+      "1"
+     ],
+     [
+      1793977227,
+      "1"
+     ],
+     [
+      1793977237,
+      "1"
+     ],
+     [
+      1793977247,
+      "1"
+     ],
+     [
+      1793977257,
+      "1"
+     ],
+     [
+      1793977267,
+      "1"
+     ],
+     [
+      1793977277,
+      "1"
+     ],
+     [
+      1793977287,
+      "1"
+     ],
+     [
+      1793977297,
+      "1"
+     ]
+    ]
+   },
+   {
+    "metric": {
+     "__name__": "ALERTS",
+     "alertname": "QuoteTrafficAbsent",
+     "alertstate": "pending",
+     "severity": "ticket",
+     "slo": "availability"
+    },
+    "values": [
+     [
+      1793977047,
+      "1"
+     ],
+     [
+      1793977057,
+      "1"
+     ],
+     [
+      1793977067,
+      "1"
+     ]
+    ]
+   },
+   {
+    "metric": {
+     "__name__": "ALERTS",
+     "alertname": "TargetDown",
+     "alertstate": "pending",
+     "container": "api",
+     "endpoint": "http",
+     "instance": "192.168.215.18:8000",
+     "job": "api",
+     "namespace": "marketpulse",
+     "pod": "marketpulse-api-65ddb44f9d-z9gnk",
+     "role": "stable",
+     "severity": "ticket"
+    },
+    "values": [
+     [
+      1793977287,
+      "1"
+     ]
+    ]
+   },
+   {
+    "metric": {
+     "__name__": "ALERTS",
+     "alertname": "TargetDown",
+     "alertstate": "pending",
+     "container": "api",
+     "endpoint": "http",
+     "instance": "192.168.44.90:8000",
+     "job": "api",
+     "namespace": "marketpulse",
+     "pod": "marketpulse-api-65ddb44f9d-drss8",
+     "role": "stable",
+     "severity": "ticket"
+    },
+    "values": [
+     [
+      1793977127,
+      "1"
+     ]
+    ]
+   },
+   {
+    "metric": {
+     "__name__": "ALERTS",
+     "alertname": "TargetDown",
+     "alertstate": "pending",
+     "container": "api",
+     "endpoint": "http",
+     "instance": "192.168.44.91:8000",
+     "job": "api",
+     "namespace": "marketpulse",
+     "pod": "marketpulse-api-65ddb44f9d-mngdr",
+     "role": "stable",
+     "severity": "ticket"
+    },
+    "values": [
+     [
+      1793977197,
+      "1"
+     ]
+    ]
+   }
+  ]
+ },
+ "alertmanager_active": [
+  {
+   "annotations": {
+    "description": "At this rate 10% of the 30-day freshness error budget is used within 3d.",
+    "runbook_url": "https://github.com/shreyas0917/marketpulse/blob/main/docs/runbooks/freshness-burn.md#slow-burn",
+    "summary": "Too many served quotes are older than 2 s (1x burn over 3d/6h)"
+   },
+   "endsAt": "2026-11-06T15:05:06.660Z",
+   "fingerprint": "77b0cf44ad607ca6",
+   "receivers": [
+    {
+     "name": "local"
+    }
+   ],
+   "startsAt": "2026-11-06T14:08:36.660Z",
+   "status": {
+    "inhibitedBy": [],
+    "mutedBy": [],
+    "silencedBy": [],
+    "state": "active"
+   },
+   "updatedAt": "2026-11-06T15:01:16.462Z",
+   "generatorURL": "http://kps-prometheus.monitoring:9090/graph?g0.expr=sli%3Afreshness%3Aerror_ratio_rate3d+%3E+%281+%2A+0.01%29+and+sli%3Afreshness%3Aerror_ratio_rate6h+%3E+%281+%2A+0.01%29&g0.tab=1",
+   "labels": {
+    "alertname": "FreshnessSlowBurn",
+    "prometheus": "monitoring/kps",
+    "severity": "ticket",
+    "slo": "freshness",
+    "slo_target": "0.99",
+    "window": "3d/6h"
+   }
+  },
+  {
+   "annotations": {
+    "description": "At this rate 10% of the 30-day latency error budget is used within 3d.",
+    "runbook_url": "https://github.com/shreyas0917/marketpulse/blob/main/docs/runbooks/latency-burn.md#slow-burn",
+    "summary": "Too many quote requests take longer than 250 ms (1x burn over 3d/6h)"
+   },
+   "endsAt": "2026-11-06T15:05:06.660Z",
+   "fingerprint": "aca26a88ec69496e",
+   "receivers": [
+    {
+     "name": "local"
+    }
+   ],
+   "startsAt": "2026-11-06T14:08:36.660Z",
+   "status": {
+    "inhibitedBy": [],
+    "mutedBy": [],
+    "silencedBy": [],
+    "state": "active"
+   },
+   "updatedAt": "2026-11-06T15:01:16.455Z",
+   "generatorURL": "http://kps-prometheus.monitoring:9090/graph?g0.expr=sli%3Alatency%3Aerror_ratio_rate3d+%3E+%281+%2A+0.01%29+and+sli%3Alatency%3Aerror_ratio_rate6h+%3E+%281+%2A+0.01%29&g0.tab=1",
+   "labels": {
+    "alertname": "LatencySlowBurn",
+    "prometheus": "monitoring/kps",
+    "severity": "ticket",
+    "slo": "latency",
+    "slo_target": "0.99",
+    "window": "3d/6h"
+   }
+  },
+  {
+   "annotations": {
+    "description": "At this rate 10% of the 30-day availability error budget is used within 3d.",
+    "runbook_url": "https://github.com/shreyas0917/marketpulse/blob/main/docs/runbooks/availability-burn.md#slow-burn",
+    "summary": "Quote API is returning too many 5xx responses (1x burn over 3d/6h)"
+   },
+   "endsAt": "2026-11-06T15:04:26.660Z",
+   "fingerprint": "f45952c68e90fe21",
+   "receivers": [
+    {
+     "name": "local"
+    }
+   ],
+   "startsAt": "2026-11-06T14:44:06.660Z",
+   "status": {
+    "inhibitedBy": [],
+    "mutedBy": [],
+    "silencedBy": [],
+    "state": "active"
+   },
+   "updatedAt": "2026-11-06T15:00:36.516Z",
+   "generatorURL": "http://kps-prometheus.monitoring:9090/graph?g0.expr=sli%3Aavailability%3Aerror_ratio_rate3d+%3E+%281+%2A+0.001%29+and+sli%3Aavailability%3Aerror_ratio_rate6h+%3E+%281+%2A+0.001%29&g0.tab=1",
+   "labels": {
+    "alertname": "AvailabilitySlowBurn",
+    "prometheus": "monitoring/kps",
+    "severity": "ticket",
+    "slo": "availability",
+    "slo_target": "0.999",
+    "window": "3d/6h"
+   }
+  }
+ ]
+}

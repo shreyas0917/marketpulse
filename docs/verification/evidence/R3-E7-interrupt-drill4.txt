@@ -1,0 +1,31 @@
+2026-11-06T16:11:13Z [drill 4] START 2026-11-06T16:11:13Z - stop Redis
+2026-11-06T16:11:14Z [drill 4] Argo CD auto-sync paused
+2026-11-06T16:11:14Z [drill 4] k6 load started: 30 req/s for 10m (pid 22435)
+2026-11-06T16:12:14Z [drill 4] ready API pods before: 2
+2026-11-06T16:12:19Z [drill 4] stopping Redis (scale to 0) at 2026-11-06T16:12:19Z
+2026-11-06T16:12:25Z [drill 4] restarting API pod marketpulse-api-65ddb44f9d-c2tcr mid-outage (cold-cache check)
+2026-11-06T16:12:36Z [drill 4] replacement pod marketpulse-api-65ddb44f9d-zqjbz ready 17s into the outage; probing it directly
+2026-11-06T16:12:54Z [drill 4] cold pod responses:      60 503,QUOTE_UNAVAILABLE 
+2026-11-06T16:12:55Z [drill 4] ready API pods during outage: 2 (readiness ignores Redis)
+{"alert": "QuoteStoreDown", "state": "firing", "observed_at": "2026-11-06T16:13:30+00:00", "waited_since": "2026-11-06T16:12:55+00:00", "starts_at": ["2026-11-06T16:13:23.891Z"], "labels": [{"alertname": "QuoteStoreDown", "prometheus": "monitoring/kps", "severity": "warning", "slo": "freshness"}]}
+2026-11-06T16:14:50Z [drill 4] ready API pods at end of outage: 3
+2026-11-06T16:14:52Z [drill 4] alerts firing: 4
+2026-11-06T16:14:55Z [drill 4] restoring Redis at 2026-11-06T16:14:55Z after 156s
+2026-11-06T16:15:00Z [drill 4] redis ready 5s after restore
+{"alert": "QuoteStoreDown", "state": "resolved", "observed_at": "2026-11-06T16:15:07+00:00", "waited_since": "2026-11-06T16:15:02+00:00", "starts_at": [], "labels": []}
+2026-11-06T16:21:25Z [drill 4] k6 load finished
+2026-11-06T16:21:26Z [drill 4] k6: requests=18027 checks_passed=31738 checks_failed=4116 p99_ms=236.2
+{
+ "probe_rows": 1386,
+ "stale_200_count": 86,
+ "stale_200_last_seen_s_after_stop": 30.1,
+ "max_stale_age_seconds": 29.370703,
+ "first_503_s_after_stop": 18.5,
+ "all_503_from_s": 30.1,
+ "first_fresh_200_s_after_restore": 7.4
+}
+wrote D:\marketpulse\docs\verification\evidence\R3-E-interrupt\drill4.json
+2026-11-06T16:21:31Z [drill 4] cleanup (exit code 0)
+2026-11-06T16:21:33Z [drill 4] redis restored
+2026-11-06T16:21:35Z [drill 4] Argo CD auto-sync re-enabled
+2026-11-06T16:21:40Z [drill 4] END 2026-11-06T16:21:39Z

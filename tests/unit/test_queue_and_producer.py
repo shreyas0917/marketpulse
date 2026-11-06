@@ -15,6 +15,7 @@ from app.common.logging import JsonFormatter, request_id_var
 from app.common.metrics import QueueMetrics, QueueMetricsPoller, new_registry
 from app.common.queue import RedisStreamQueue, make_queue
 from app.common.queue.sqs import SqsQueue
+from app.common.store import QuoteWriter
 from app.producer.main import Producer
 from tests.unit.conftest import event, make_settings, sample
 
@@ -43,6 +44,47 @@ def test_redis_queue_redelivery_counts_attempts(queue: RedisStreamQueue) -> None
     assert len(second) == 1
     assert second[0].id == first.id
     assert second[0].attempts == 2
+
+
+def _xpending_range_hook(queue: RedisStreamQueue, *, batch: bool, single: bool) -> list[str]:
+    """Make the batch and/or per-id XPENDING lookups return nothing; return the call log."""
+    real = queue._client.xpending_range
+    calls: list[str] = []
+
+    def fake(*args: object, **kwargs: object) -> object:
+        is_single = kwargs.get("count") == 1
+        calls.append("single" if is_single else "batch")
+        if (is_single and single) or (not is_single and batch):
+            return []
+        return real(*args, **kwargs)  # type: ignore[arg-type]
+
+    queue._client.xpending_range = fake  # type: ignore[method-assign]
+    return calls
+
+
+def test_redis_queue_missing_batch_count_uses_per_id_lookup(queue: RedisStreamQueue) -> None:
+    queue.publish([event("AAA")])
+    first = queue.receive(10, 0)[0]
+    queue.retry(first)
+    calls = _xpending_range_hook(queue, batch=True, single=False)
+    second = queue.receive(10, 0)
+    assert calls == ["batch", "single"]
+    assert second[0].attempts == 2  # the real count, fetched for that id
+
+
+def test_redis_queue_unknown_count_makes_this_delivery_the_last(
+    queue: RedisStreamQueue, writer: QuoteWriter
+) -> None:
+    from app.worker.main import Worker
+
+    worker = Worker(make_settings(worker_block_ms=0), queue, writer)
+    queue.publish_raw(["{not json"])
+    worker.run_once()  # delivery 1 fails -> retried
+    _xpending_range_hook(queue, batch=True, single=True)  # count now unknown
+    reclaimed = queue.receive(10, 0)
+    assert [m.attempts for m in reclaimed] == [queue.max_attempts]
+    assert worker.handle(reclaimed[0]) == "dead_lettered"  # never unbounded retries
+    assert queue.stats().dlq_depth == 1
 
 
 def test_redis_queue_respects_min_idle(sync_redis: object) -> None:

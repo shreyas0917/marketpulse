@@ -1,0 +1,14 @@
+# command: parse slo-alerts.yml, check window/multiplier/budget/severity; start 2026-11-06T12:06:30+00:00
+OK  AvailabilityFastBurn   1h/5m   1h>0.0144 5m>0.0144 budget=0.001 page
+OK  AvailabilityFastBurn   6h/30m  6h>0.0060 30m>0.0060 budget=0.001 page
+OK  AvailabilitySlowBurn   3d/6h   3d>0.0010 6h>0.0010 budget=0.001 ticket
+OK  LatencyFastBurn        1h/5m   1h>0.1440 5m>0.1440 budget=0.01 page
+OK  LatencyFastBurn        6h/30m  6h>0.0600 30m>0.0600 budget=0.01 page
+OK  LatencySlowBurn        3d/6h   3d>0.0100 6h>0.0100 budget=0.01 ticket
+OK  FreshnessFastBurn      1h/5m   1h>0.1440 5m>0.1440 budget=0.01 page
+OK  FreshnessFastBurn      6h/30m  6h>0.0600 30m>0.0600 budget=0.01 page
+OK  FreshnessSlowBurn      3d/6h   3d>0.0100 6h>0.0100 budget=0.01 ticket
+OK  IngestionLagFastBurn   1h/5m   1h>0.1440 5m>0.1440 budget=0.01 page
+OK  IngestionLagFastBurn   6h/30m  6h>0.0600 30m>0.0600 budget=0.01 page
+OK  IngestionLagSlowBurn   3d/6h   3d>0.0100 6h>0.0100 budget=0.01 ticket
+mismatches: 0

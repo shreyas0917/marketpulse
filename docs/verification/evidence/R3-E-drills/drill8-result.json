@@ -1,0 +1,3 @@
+{"latency_ms": 500, "seconds_to_lag_burn_alert": null, "fault_seconds": 906,
+ "peak_queue_depth": "16235", "seconds_argocd_revert": 264,
+ "seconds_to_drain_after_restore": 977, "seconds_to_alert_resolved_after_restore": 977}

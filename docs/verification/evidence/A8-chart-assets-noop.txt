@@ -1,0 +1,11 @@
+# id: A8-chart-assets-noop
+# command: make chart-assets >/dev/null && git status --porcelain -- deploy/helm/marketpulse/files && echo porcelain-lines=$(git status --porcelain -- deploy/helm/marketpulse/files | wc -l) && diff -r --strip-trailing-cr observability/prometheus/rules deploy/helm/marketpulse/files/rules && diff -r --strip-trailing-cr observability/grafana/dashboards deploy/helm/marketpulse/files/dashboards && echo IDENTICAL
+# start: 2026-11-06T11:08:00Z
+ M deploy/helm/marketpulse/files/dashboards/api.json
+ M deploy/helm/marketpulse/files/dashboards/ingestion.json
+porcelain-lines=2
+IDENTICAL
+# end: 2026-11-06T11:08:01Z
+# exit: 0
+# seconds: 1
+after re-run: 0 changed files

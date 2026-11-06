@@ -1,0 +1,8 @@
+# id: A1-setup
+# command: make setup
+# start: 2026-11-06T11:03:36Z
+uv sync --frozen
+Checked 61 packages in 362ms
+# end: 2026-11-06T11:03:37Z
+# exit: 0
+# seconds: 1

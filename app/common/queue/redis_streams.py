@@ -9,6 +9,7 @@
 
 from __future__ import annotations
 
+import logging
 import time
 from collections.abc import Sequence
 from typing import Any, cast
@@ -19,6 +20,7 @@ from app.common.models import MarketEvent
 from app.common.queue.base import Message, QueueStats
 
 DATA_FIELD = "data"
+log = logging.getLogger(__name__)
 
 
 def _s(value: Any) -> str:
@@ -38,6 +40,7 @@ class RedisStreamQueue:
         group: str = "workers",
         consumer: str = "worker",
         min_idle_ms: int = 2000,
+        max_attempts: int = 5,
     ) -> None:
         self._client = client
         self.stream = stream
@@ -45,6 +48,7 @@ class RedisStreamQueue:
         self.group = group
         self.consumer = consumer
         self.min_idle_ms = min_idle_ms
+        self.max_attempts = max_attempts
         self._group_ready = False
 
     def ensure_group(self) -> None:
@@ -68,6 +72,13 @@ class RedisStreamQueue:
         pipe.execute()
 
     def _delivery_counts(self, ids: list[str]) -> dict[str, int]:
+        """Delivery count (including the current delivery) for each reclaimed id.
+
+        One range query covers the usual case; any id it misses is looked up on its own. If
+        the count is still unknown, the message is treated as having used all but one attempt
+        (max_attempts - 1 previous deliveries), so this delivery is its last and a failure now
+        dead-letters it. A missing count must never allow unbounded retries.
+        """
         if not ids:
             return {}
         entries = self._client.xpending_range(
@@ -78,7 +89,19 @@ class RedisStreamQueue:
             count=len(ids) * 4 + 10,
             consumername=self.consumer,
         )
-        return {_s(e["message_id"]): int(e["times_delivered"]) for e in entries}
+        counts = {_s(e["message_id"]): int(e["times_delivered"]) for e in entries}
+        for msg_id in ids:
+            if msg_id in counts:
+                continue
+            single = self._client.xpending_range(
+                self.stream, self.group, min=msg_id, max=msg_id, count=1
+            )
+            if single:
+                counts[msg_id] = int(single[0]["times_delivered"])
+            else:
+                counts[msg_id] = self.max_attempts
+                log.warning("delivery_count_unknown", extra={"message_id": msg_id})
+        return counts
 
     def receive(self, max_messages: int, wait_ms: int) -> list[Message]:
         try:
@@ -107,7 +130,7 @@ class RedisStreamQueue:
         counts = self._delivery_counts([i for i, _ in reclaimed])
         for msg_id, fields in reclaimed:
             body = _s(fields.get(DATA_FIELD.encode(), fields.get(DATA_FIELD, b"")))
-            messages.append(Message(id=msg_id, body=body, attempts=counts.get(msg_id, 2)))
+            messages.append(Message(id=msg_id, body=body, attempts=counts[msg_id]))
 
         # 2. Read new messages.
         remaining = max_messages - len(messages)

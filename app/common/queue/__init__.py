@@ -37,4 +37,5 @@ def make_queue(settings: Settings, consumer: str | None = None) -> QueueBackend:
         group=settings.queue_group,
         consumer=consumer or socket.gethostname(),
         min_idle_ms=settings.retry_min_idle_ms,
+        max_attempts=settings.worker_max_attempts,
     )

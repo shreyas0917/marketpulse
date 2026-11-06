@@ -1,0 +1,29 @@
+kinds: {'AnalysisTemplate': 1, 'ConfigMap': 4, 'Deployment': 3, 'HorizontalPodAutoscaler': 2, 'Ingress': 1, 'NetworkPolicy': 4, 'PodDisruptionBudget': 2, 'PodMonitor': 3, 'PrometheusRule': 3, 'Rollout': 1, 'Service': 3, 'ServiceAccount': 4}
+
+Rollout marketpulse-api: replicas=(HPA) automountSAToken=False topologySpread=yes
+  pod securityContext: runAsNonRoot=True runAsUser=10001 seccomp=RuntimeDefault
+  container api: requests={'cpu': '100m', 'memory': '96Mi'} limits={'cpu': '500m', 'memory': '256Mi'}
+    roRootFS=True privEsc=False capsDrop=['ALL'] probes=['startupProbe', 'readinessProbe', 'livenessProbe']
+
+Deployment marketpulse-redis: replicas=1 automountSAToken=False topologySpread=NO
+  pod securityContext: runAsNonRoot=True runAsUser=999 seccomp=RuntimeDefault
+  container redis: requests={'cpu': '50m', 'memory': '64Mi'} limits={'cpu': '500m', 'memory': '256Mi'}
+    roRootFS=True privEsc=False capsDrop=['ALL'] probes=['readinessProbe', 'livenessProbe']
+
+Deployment marketpulse-worker: replicas=(HPA) automountSAToken=False topologySpread=yes
+  pod securityContext: runAsNonRoot=True runAsUser=10001 seccomp=RuntimeDefault
+  container worker: requests={'cpu': '100m', 'memory': '96Mi'} limits={'cpu': '500m', 'memory': '256Mi'}
+    roRootFS=True privEsc=False capsDrop=['ALL'] probes=['readinessProbe', 'livenessProbe']
+
+Deployment marketpulse-producer: replicas=1 automountSAToken=False topologySpread=NO
+  pod securityContext: runAsNonRoot=True runAsUser=10001 seccomp=RuntimeDefault
+  container producer: requests={'cpu': '50m', 'memory': '64Mi'} limits={'cpu': '300m', 'memory': '192Mi'}
+    roRootFS=True privEsc=False capsDrop=['ALL'] probes=['readinessProbe', 'livenessProbe']
+PDB marketpulse-api minAvailable 1
+PDB marketpulse-worker minAvailable 1
+HPA marketpulse-api Rollout 2 - 6
+HPA marketpulse-worker Deployment 2 - 4
+NetPol marketpulse-default-deny-ingress podSelector {} ingress-from [] 
+NetPol marketpulse-redis podSelector {'matchLabels': {'app.kubernetes.io/name': 'marketpulse', 'app.kubernetes.io/instance': 'mp', 'app.kubernetes.io/component': 'redis'}} ingress-from [{'matchExpressions': [{'key': 'app.kubernetes.io/name', 'operator': 'In', 'values': ['marketpulse']}, {'key': 'app.kubernetes.io/component', 'operator': 'In', 'values': ['api', 'worker', 'producer']}]}] 
+NetPol marketpulse-api podSelector {'matchLabels': {'app.kubernetes.io/name': 'marketpulse', 'app.kubernetes.io/instance': 'mp', 'app.kubernetes.io/component': 'api'}} ingress-from [{'matchLabels': {'kubernetes.io/metadata.name': 'ingress-nginx'}}, {'matchLabels': {'kubernetes.io/metadata.name': 'monitoring'}}] 
+NetPol marketpulse-metrics podSelector {'matchExpressions': [{'key': 'app.kubernetes.io/component', 'operator': 'In', 'values': ['worker', 'producer']}]} ingress-from [{'matchLabels': {'kubernetes.io/metadata.name': 'monitoring'}}] 
