@@ -128,6 +128,7 @@ Grafana's SLO overview shows both numbers per SLI next to the selected-range ver
 | Redis down while the cache still serves: availability looks fine for up to 30 s | `QuoteStoreDown`: `min(quote_store_up) == 0` for 1 m |
 | Events stuck in the DLQ (incl. SQS redrive-policy messages the worker never counted) | `DeadLetterQueueNotEmpty`: `max(dlq_depth) > 0` for 1 m |
 | A service cannot be scraped | `TargetDown`: `up == 0` for 2 m |
+| A fault-injection switch left on after a drill or a manual change (the symptoms page, the cause does not) | `FaultInjectionActive` (ticket): `max(fault_injection_active) > 0` for 30 m |
 
 ## Error-budget policy
 

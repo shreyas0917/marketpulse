@@ -123,7 +123,8 @@ Two things combined:
 | Declare every `FAULT_*` env var in the chart with neutral defaults | prevent | owner | Done (F13) |
 | Drill 8 logs only an observed revert and drain | detect | owner | Done (F14) |
 | Correct docs that said self-heal reverted drill 8 | prevent | owner | Done |
-| Alert (ticket) when `max(fault_injection_active) == 1` for longer than a drill's planned duration, and add it to the overview dashboard | detect | owner | Open — alert change, needs owner approval |
+| Alert (ticket) when a fault switch stays on for longer than any drill: `FaultInjectionActive`, `max(fault_injection_active) > 0` for 30 m, with a [runbook](../runbooks/fault-injection-active.md#left-on) and promtool tests | detect | owner | Done (approved by the owner, 2026-11-07) |
+| Show `fault_injection_active` on the overview dashboard | detect | owner | Open |
 | Decide for M8 (EKS) whether drift protection must also catch *undeclared* additions: options are an admission policy that blocks non-Argo writers to managed workloads, or client-side diff/`Replace=true` for selected kinds | prevent | owner | Open — design decision |
 | Add a drill step that asserts the cluster matches Git after restore (env values, not just app status) | detect | owner | Open |
 
