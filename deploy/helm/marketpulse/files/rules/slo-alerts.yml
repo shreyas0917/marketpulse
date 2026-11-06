@@ -159,3 +159,53 @@ groups:
           summary: "Too many events take longer than 1 s to ingest (1x burn over 3d/6h)"
           description: "At this rate 10% of the 30-day ingestion_lag error budget is used within 3d."
           runbook_url: https://github.com/shreyas0917/marketpulse/blob/main/docs/runbooks/ingestion-lag-burn.md#slow-burn
+  - name: slo-error-budget
+    rules:
+      - alert: AvailabilityErrorBudgetLow
+        expr: |
+          slo:availability:error_budget_remaining_30d < 0.25
+        for: 15m
+        labels:
+          severity: ticket
+          slo: availability
+          window: 30d
+        annotations:
+          summary: "Less than 25% of the 30d availability error budget is left"
+          description: "{{ $value | humanizePercentage }} of the budget remains. Error-budget policy: freeze feature releases; reliability fixes only."
+          runbook_url: https://github.com/shreyas0917/marketpulse/blob/main/docs/runbooks/error-budget.md#budget-low
+      - alert: LatencyErrorBudgetLow
+        expr: |
+          slo:latency:error_budget_remaining_30d < 0.25
+        for: 15m
+        labels:
+          severity: ticket
+          slo: latency
+          window: 30d
+        annotations:
+          summary: "Less than 25% of the 30d latency error budget is left"
+          description: "{{ $value | humanizePercentage }} of the budget remains. Error-budget policy: freeze feature releases; reliability fixes only."
+          runbook_url: https://github.com/shreyas0917/marketpulse/blob/main/docs/runbooks/error-budget.md#budget-low
+      - alert: FreshnessErrorBudgetLow
+        expr: |
+          slo:freshness:error_budget_remaining_30d < 0.25
+        for: 15m
+        labels:
+          severity: ticket
+          slo: freshness
+          window: 30d
+        annotations:
+          summary: "Less than 25% of the 30d freshness error budget is left"
+          description: "{{ $value | humanizePercentage }} of the budget remains. Error-budget policy: freeze feature releases; reliability fixes only."
+          runbook_url: https://github.com/shreyas0917/marketpulse/blob/main/docs/runbooks/error-budget.md#budget-low
+      - alert: IngestionLagErrorBudgetLow
+        expr: |
+          slo:ingestion_lag:error_budget_remaining_30d < 0.25
+        for: 15m
+        labels:
+          severity: ticket
+          slo: ingestion_lag
+          window: 30d
+        annotations:
+          summary: "Less than 25% of the 30d ingestion_lag error budget is left"
+          description: "{{ $value | humanizePercentage }} of the budget remains. Error-budget policy: freeze feature releases; reliability fixes only."
+          runbook_url: https://github.com/shreyas0917/marketpulse/blob/main/docs/runbooks/error-budget.md#budget-low

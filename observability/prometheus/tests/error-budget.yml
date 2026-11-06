@@ -1,0 +1,100 @@
+# promtool unit tests: 30-day compliance, error budget remaining and the low-budget ticket.
+# The 30d window holds only the test's 2-4 hours of samples, which is what a short-lived
+# local stack sees too: the rules cover whatever history Prometheus keeps.
+rule_files:
+  - ../rules/slo-recording.yml
+  - ../rules/slo-alerts.yml
+evaluation_interval: 1m
+
+tests:
+  # INSIDE BUDGET: a steady 0.05 % availability errors uses half of the 0.1 % budget.
+  - interval: 1m
+    input_series:
+      - series: 'http_requests_total{route="/v1/quotes/{symbol}", method="GET", status="200"}'
+        values: '0+1999x240'
+      - series: 'http_requests_total{route="/v1/quotes/{symbol}", method="GET", status="503"}'
+        values: '0+1x240'
+    promql_expr_test:
+      - expr: round(slo:availability:compliance_30d, 0.0001)
+        eval_time: 4h
+        exp_samples:
+          - labels: '{slo="availability", slo_target="0.999"}'
+            value: 0.9995
+      - expr: round(slo:availability:error_budget_remaining_30d, 0.001)
+        eval_time: 4h
+        exp_samples:
+          - labels: '{slo="availability", slo_target="0.999"}'
+            value: 0.5
+    alert_rule_test:
+      - eval_time: 4h
+        alertname: AvailabilityErrorBudgetLow
+        exp_alerts: []
+
+  # EVENT-WEIGHTED: 1 h of light traffic with 10 % errors (60 bad of 600), then 1 h of 10x the
+  # traffic with no errors (0 bad of 6,000). Exact event weighting gives 60 / 6,600 = 0.0091;
+  # the rules give 0.0095 because each 5m rate sample near the switch still sees some of the
+  # error hour. Averaging the hourly ratios instead would give (0.10 + 0) / 2 = 0.05.
+  - interval: 1m
+    input_series:
+      - series: 'http_requests_total{route="/v1/quotes/{symbol}", method="GET", status="200"}'
+        values: '0+9x60 540+100x60'
+      - series: 'http_requests_total{route="/v1/quotes/{symbol}", method="GET", status="500"}'
+        values: '0+1x60 60+0x60'
+    promql_expr_test:
+      # Between 0.008 and 0.011 (about 0.0095), never near 0.05.
+      - expr: |
+          (sli:availability:error_ratio_30d > bool 0.008)
+          * (sli:availability:error_ratio_30d < bool 0.011)
+        eval_time: 2h
+        exp_samples:
+          - labels: '{slo="availability", slo_target="0.999"}'
+            value: 1
+
+  # BUDGET EXHAUSTED: a steady 1 % freshness errors is exactly the budget for 99 %, so 0 %
+  # remains; 2 % errors drives it to -100 % and opens the low-budget ticket after 15 m.
+  - interval: 1m
+    input_series:
+      - series: 'quote_age_seconds_bucket{le="2.0"}'
+        values: '0+98x120'
+      - series: 'quote_age_seconds_count'
+        values: '0+100x120'
+    promql_expr_test:
+      - expr: round(slo:freshness:compliance_30d, 0.0001)
+        eval_time: 2h
+        exp_samples:
+          - labels: '{slo="freshness", slo_target="0.99"}'
+            value: 0.98
+      - expr: round(slo:freshness:error_budget_remaining_30d, 0.01)
+        eval_time: 2h
+        exp_samples:
+          - labels: '{slo="freshness", slo_target="0.99"}'
+            value: -1
+    alert_rule_test:
+      - eval_time: 10m
+        alertname: FreshnessErrorBudgetLow
+        exp_alerts: []
+      - eval_time: 2h
+        alertname: FreshnessErrorBudgetLow
+        exp_alerts:
+          - exp_labels: {severity: ticket, slo: freshness, slo_target: "0.99", window: 30d}
+            exp_annotations:
+              summary: "Less than 25% of the 30d freshness error budget is left"
+              description: "-100% of the budget remains. Error-budget policy: freeze feature releases; reliability fixes only."
+              runbook_url: https://github.com/shreyas0917/marketpulse/blob/main/docs/runbooks/error-budget.md#budget-low
+
+  # DEAD LETTERS COUNT AS BAD: 99 % of written events are fast, and 1 dead letter per minute
+  # on top of 100 written. Bad = 1 slow + 1 dead-lettered out of 101 -> compliance 0.9802.
+  - interval: 1m
+    input_series:
+      - series: 'ingestion_lag_seconds_bucket{le="1.0"}'
+        values: '0+99x120'
+      - series: 'ingestion_lag_seconds_count'
+        values: '0+100x120'
+      - series: 'events_processed_total{result="dead_lettered"}'
+        values: '0+1x120'
+    promql_expr_test:
+      - expr: round(slo:ingestion_lag:compliance_30d, 0.0001)
+        eval_time: 2h
+        exp_samples:
+          - labels: '{slo="ingestion_lag", slo_target="0.99"}'
+            value: 0.9802
