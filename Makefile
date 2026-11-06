@@ -33,9 +33,9 @@ chart-assets: ## Copy SLO rules and dashboards into the Helm chart (single sourc
 chart-lint: ## helm lint, kubeconform -strict, and check chart assets match observability/
 	diff -r --strip-trailing-cr observability/prometheus/rules $(CHART)/files/rules
 	diff -r --strip-trailing-cr observability/grafana/dashboards $(CHART)/files/dashboards
-	helm lint --strict $(CHART) -f $(CHART)/values-kind.yaml
+	helm lint --strict $(CHART) -f $(CHART)/values-kind.yaml --set api.rollout.enabled=false
 	helm lint --strict $(CHART) -f $(CHART)/values-kind.yaml --set api.rollout.enabled=true
-	helm template mp $(CHART) -f $(CHART)/values-kind.yaml | kubeconform -strict -summary $(KUBECONFORM_SCHEMAS)
+	helm template mp $(CHART) -f $(CHART)/values-kind.yaml --set api.rollout.enabled=false | kubeconform -strict -summary $(KUBECONFORM_SCHEMAS)
 	helm template mp $(CHART) -f $(CHART)/values-kind.yaml --set api.rollout.enabled=true | kubeconform -strict -summary $(KUBECONFORM_SCHEMAS)
 
 test: ## Unit tests with coverage (fails under 80%)
