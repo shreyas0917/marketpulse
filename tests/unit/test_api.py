@@ -78,6 +78,34 @@ def test_redis_down_with_cache_older_than_max_age_returns_503(
     assert "Retry-After" in resp.headers
 
 
+def test_redis_empty_serves_fresh_cached_quote(
+    client: TestClient, writer: QuoteWriter, sync_redis: fakeredis.FakeRedis
+) -> None:
+    writer.write(event("AAA", 77.0, age=1))
+    assert client.get("/v1/quotes/AAA").status_code == 200  # populates the local cache
+    sync_redis.flushall()  # Redis restarted without persistence: reachable but empty
+    resp = client.get("/v1/quotes/AAA")
+    assert resp.status_code == 200
+    body = resp.json()
+    assert body["stale"] is True
+    assert body["source"] == "local_cache"
+    assert body["price"] == 77.0
+    reg = registry_of(client)
+    assert sample(reg, "quote_store_up") == 1  # the store itself is fine
+    assert sample(reg, "quote_responses_total", {"source": "local_cache"}) == 1
+
+
+def test_redis_empty_with_cache_older_than_max_age_returns_404(
+    client: TestClient, writer: QuoteWriter, sync_redis: fakeredis.FakeRedis
+) -> None:
+    writer.write(event("AAA", 50.0, age=31))
+    assert client.get("/v1/quotes/AAA").status_code == 200  # cached, but already 31 s old
+    sync_redis.flushall()
+    resp = client.get("/v1/quotes/AAA")
+    assert resp.status_code == 404
+    assert resp.json()["error"] == "NO_QUOTE"
+
+
 def test_redis_timeout_is_treated_as_unavailable(queue: RedisStreamQueue) -> None:
     class SlowReader:
         async def get(self, symbol: str) -> Quote | None:
