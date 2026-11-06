@@ -15,10 +15,11 @@ first (below the 4 GB bar, so the run stopped); after Edge was closed, 7.8 GB, s
 
 Evidence paths below are relative to `docs/verification/evidence/`.
 
-> **Three runs.** Run 1 (the sections from M1 to Session changes) is unchanged.
+> **Four runs.** Run 1 (the sections from M1 to Session changes) is unchanged.
 > [Run 2](#run-2--2026-11-06-after-fixes) applies fixes F1, F2, F4, F5, F6, F8 and F9 and re-runs
 > Phase C. [Run 3](#run-3-wsl-capped-at-8-gb--2026-11-06) re-runs Phases C, D and E with WSL capped
-> at 8 GB and gives the current verdict.
+> at 8 GB. [Run 4](#run-4-fixes-f13-f14-f15-f7--2026-11-06) (branch `fix-f13-f15-f7`, on top of
+> M6.5) fixes F13, F14, F15 and F7, proves them live and gives the current verdict.
 
 ## M1 — Application
 
@@ -345,3 +346,88 @@ M7 (Terraform, SQS, ALB) does not depend on any open item. Before **M8** (GitOps
 claim it does — and fix **F14** so drill evidence cannot report a recovery that did not happen. Carry
 known gaps 1–3 into M7/M8 planning (queue-depth scaling for workers, an edge-side SLI, cache warm-up
 on scale-out), and re-baseline the capacity numbers on the capped host (F16).
+
+---
+
+# Run 4 (fixes F13, F14, F15, F7) — 2026-11-06
+
+Branch `fix-f13-f15-f7`, stacked on `m65-slo-backoff` (PR #2), which is stacked on `verify-m1-m6`
+(PR #1, not merged when this run started). Same host as run 3 (WSL capped at 8 GB). Evidence:
+[`evidence/R4-fixes/`](verification/evidence/R4-fixes/).
+
+**How the fixes were tested live.** Argo CD tracks `main`, and these fixes are not on `main`. For
+the test the in-cluster Application was pointed at `fix-f13-f15-f7` (the manifest from the branch,
+with only `targetRevision` changed), with k6 at 30 req/s so the API canary analysis had data. The
+image was rebuilt from the branch first, so the worker runs the M6.5 backoff code. At the end the
+Application was pointed back at `main` the same way.
+
+## M6.5 import (PR #2)
+
+| Check | Result | Measured now | Claim | Command | Evidence |
+|---|---|---|---|---|---|
+| Bundle imports and rebases cleanly | PASS | 3 commits, prerequisite `a9f4488` (on `verify-m1-m6`); rebased onto `origin/verify-m1-m6` with no conflicts | — | `git fetch ./m65-slo-backoff.bundle …; git rebase origin/verify-m1-m6` | git history |
+| `make lint test rules-test chart-lint` | PASS | 81 tests, 92 % coverage; 40 rules; kubeconform Deployment mode 29/29, Rollout mode 31/31 | — | `make lint test rules-test chart-lint` | PR #2 |
+
+The three commits carried `Co-Authored-By: Claude` and `Claude-Session:` trailers. They were
+removed during the rebase (the repo's rule: no Claude in contributors). Authors and content are unchanged.
+
+## Fixes
+
+| # | Fix | Commit |
+|---|---|---|
+| F13 | Chart declares all five `FAULT_*` env vars with neutral values in api, worker and producer (`values.yaml` `faults:`); a component's `env` overrides them | `c255b3c` |
+| F13 | Docs corrected: experiment 8, PROGRESS, threat model (self-heal did not revert drill 8; the drill's own cleanup did). Decision D36 | `6d7ba53`, `122fa93` |
+| F14 | Drill 8 records who restored the env (`argocd` / `drill_cleanup`), whether `OutOfSync` was seen, and `null` for anything not observed. The cleanup sets the env to the declared neutral value | `b478a01` |
+| F14 | A second bug found by this run: the burn-alert time was written with the epoch appended (`708` → `7081793988012`); hidden in run 3 because the alert never fired | `178721a` |
+| F15 | `ignoreDifferences` on `/spec/selector/rollouts-pod-template-hash` for the canary and stable Services | `59502dc` |
+| F7 | Postmortem 3: [fault env invisible to Argo CD](incidents/2026-11-06-fault-env-invisible-to-argocd.md), "Draft — for owner review" | `122fa93`, `976f7f1` |
+
+## Results
+
+| Check | Result | Measured now | Run 3 / claim | Command | Evidence |
+|---|---|---|---|---|---|
+| `make lint test chart-lint` after the fixes | PASS | 81 tests; kubeconform 29/29 and 31/31; shellcheck clean | — | `make lint chart-lint test` | — |
+| Chart renders each FAULT_* once per container; override wins | PASS | api, worker, producer: 5 `FAULT_*` each, names unique; `api.env.FAULT_API_ERROR_RATE=0.2` renders `0.2` | — | `helm template … \| python` | — |
+| App switched to the fix branch: API canary under load | PASS | promoted in **1,117 s**; app `Synced/Healthy` at `59502dc` | good canary 18 m 32 s (run 3) | `switch.sh fix-f13-f15-f7` | `R4-fixes/to-fix-branch-timeline.txt` |
+| **F15:** no OutOfSync during and after a canary; hash selectors kept | PASS | **0 of 103** samples OutOfSync during the canary, **0 of 24** in the 4 min after it; both Services kept `rollouts-pod-template-hash` throughout (stable `65ddb44f9d` → `6557f75cdc`) | run 3: both Services OutOfSync for 1–2 min after canaries, and before this run both selectors had **lost** the hash key | timeline loop | `R4-fixes/to-fix-branch-timeline.txt`, `R4-fixes/f15-post-canary.txt` |
+| **F13:** manual FAULT change on the worker becomes drift and is reverted | PASS | `kubectl set env … FAULT_WORKER_EXTRA_LATENCY_MS=500` at 17:44:57.383Z; Argo CD event `Synced -> OutOfSync` 17:44:57, automated sync `Succeeded` (server-side applied); value back to `0` after **1.97 s**; `Synced/Healthy` after 2.2 s | run 3: not detected, fault stayed 30 m 35 s | `f13proof.sh` (no manual refresh) | `R4-fixes/f13-proof.txt`, `R4-fixes/f13-argocd-record.txt` |
+| **F13:** same on the producer (`FAULT_API_ERROR_RATE=0.5`) | PASS | `OutOfSync` 17:45:00, reverted after **2.24 s**, `Synced/Healthy` after 2.6 s | — | same | same |
+| Drill 6 with M6.5 backoff | PASS | 20/20 dead-lettered in **31 s** (D35 expects ~30 s); ~82 retries (20 × 4 expected); DLQ alert at 102 s; 0 worker restarts; 2,531 good events processed during the drill | run 3: 9 s (no backoff) | `EVIDENCE=… make drill N=6` | `R4-fixes/drill6.txt`, `R4-fixes/drills/drill6-*` |
+| **Drill 8** after the F13/F14 fixes: restore | PASS | auto-sync re-enabled 18:00:14Z; **self-heal reverted the env after 1 s** (`reverted_by: argocd`, `OutOfSync` seen); worker rollout done 14 s; backlog (peak **12,690**) drained **31 s** after restore | run 3: never reverted; script falsely logged 264 s | `EVIDENCE=… make drill N=8` | `R4-fixes/drill8.txt`, `R4-fixes/drills/drill8-result.json` |
+| Drill 8: detection | gap 1 still reproduces | `IngestionStalled` firing 17:50:45 (**2 m 21 s**); `IngestionLagFastBurn` 6h/30m fired at **708 s**, outside the 300 s target. The 6 h window still held run 3's drill 8 backlog from ~16:00, so this page had help; on a clean history it stayed silent (run 3, 900 s) | run 3: burn silent 900 s, stall 2 m 19.9 s | Prometheus `ALERTS` range | `R4-fixes/drill8-alert-spans.txt` |
+| Drill 8: alerts resolve | PASS (late, reported honestly) | `IngestionStalled` firing until 18:00:30; burn 6h/30m until 18:30:45 (30 m window after the drain). The script's 1,800 s wait ended at 18:30:47, so it logged "did NOT resolve within its timeout" and wrote `null` | — | same | same |
+| Drill 8 result JSON | known bug, fixed after the run | `seconds_to_lag_burn_alert: 7081793988012` (should be 708); fixed in `178721a`, evidence left as recorded | — | — | `R4-fixes/drills/drill8-result.json` |
+| Resources | PASS | 0 MemoryPressure, 0 OOMKilled, 0 readings below 2 GB, no page-cache drops needed (86 samples, lowest 2.70 GB) | run 3: one reading at 1.97 GB | `watch4.sh` | `R4-fixes/resource-timeline.txt` |
+| App switched back to `main` | PASS | canary promoted in **1,104 s** under load; `main`'s own Application manifest re-applied; app `Synced/Healthy` at `6fccf81`; 3 nodes Ready, 0 pods not Running; worker has no `FAULT_*` env (as on `main`). The node image `marketpulse:0.1.0` is still the build from this branch (as in run 3, where it was built from `verify-m1-m6`) | — | `switch.sh main` | `R4-fixes/back-to-main-timeline.txt`, `R4-fixes/final-state.txt` |
+
+**Correction to run 3.** F13 in run 3 says the fault stayed "26 min". The run 3 logs give **30 m
+35 s** in total (15:30:54 → 16:01:29), of which **15 m 29 s** came after the drill re-enabled
+self-heal (15:46:00 → 16:01:29). The postmortem uses the logged times.
+
+**F15 was worse than "info".** Before this run, the live canary and stable Services had *no*
+`rollouts-pod-template-hash` in their selectors: self-heal had removed what Argo Rollouts set. After
+a canary that is harmless (one ReplicaSet), but if it happens *during* a canary the stable Service
+also selects canary pods and the traffic split is wrong. With the fix the key stayed in place the
+whole time.
+
+## Findings status after run 4
+
+| # | Status |
+|---|---|
+| F1, F2, F4, F5, F8, F9, F11, F12 | Fixed (runs 2–3) |
+| F3 | Resolved (WSL cap) |
+| F6 | Accepted (D33, M7 TODO) |
+| F7 | **Fixed**: third postmortem, draft for owner review |
+| F10 | Open: gaps 1–3 (gap 1 re-confirmed here) |
+| F13 | **Fixed for declared fault switches** (D36), proven live (revert in ~2 s). Still open as a design question for M8: fields Git does not declare at all are still invisible to Argo CD |
+| F14 | **Fixed** (two bugs), re-run shows only observed events |
+| F15 | **Fixed**, proven over one canary |
+| F16 | Open (info) |
+
+## Ready for M7? (run 4)
+
+**YES.** M7 depends on none of the open items. Carry these into M8 planning: the remaining F13
+design question (undeclared fields), and known gaps 1–3 (queue-depth worker scaling, an edge-side
+SLI, cache warm-up on scale-out). Merge order: PR #1, then PR #2 (M6.5), then this branch. When
+this branch reaches `main`, the API pod template changes (new env vars), so Argo Rollouts runs a
+canary that needs traffic to pass analysis.

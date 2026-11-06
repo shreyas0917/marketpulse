@@ -1,0 +1,23 @@
+## kubectl -n argocd get events (application marketpulse) since 17:44:50Z
+2026-11-06T17:44:57Z OperationStarted Initiated automated sync to '59502dca80654abe82aecf0ebac4fa4ef3f7d37f'
+2026-11-06T17:44:57Z ResourceUpdated Updated sync status: Synced -> OutOfSync
+2026-11-06T17:44:57Z ResourceUpdated Updated health status: Healthy -> Progressing
+2026-11-06T17:44:57Z OperationCompleted Partial sync operation to 59502dca80654abe82aecf0ebac4fa4ef3f7d37f succeeded
+2026-11-06T17:44:58Z ResourceUpdated Updated sync status: OutOfSync -> Synced
+2026-11-06T17:44:58Z ResourceUpdated Updated health status: Progressing -> Healthy
+2026-11-06T17:45:00Z OperationStarted Initiated automated sync to '59502dca80654abe82aecf0ebac4fa4ef3f7d37f'
+2026-11-06T17:45:00Z ResourceUpdated Updated sync status: Synced -> OutOfSync
+2026-11-06T17:45:00Z ResourceUpdated Updated health status: Healthy -> Progressing
+2026-11-06T17:45:00Z OperationCompleted Partial sync operation to 59502dca80654abe82aecf0ebac4fa4ef3f7d37f succeeded
+2026-11-06T17:45:01Z ResourceUpdated Updated sync status: OutOfSync -> Synced
+2026-11-06T17:45:01Z ResourceUpdated Updated health status: Progressing -> Healthy
+
+## operationState
+Succeeded | successfully synced (all tasks run) | started 2026-11-06T17:45:00Z finished 2026-11-06T17:45:00Z | initiatedBy {"automated":true}
+## syncResult resources
+Deployment/marketpulse-producer Synced deployment.apps/marketpulse-producer serverside-applied
+## history (last 4)
+5 2026-11-06T14:56:32Z 2026-11-06T14:56:47Z 661412f0ea218897371e164f62e72114a47dab18
+6 2026-11-06T16:04:07Z 2026-11-06T16:04:12Z fe83a6faf7cb566fc0f3ed4cd781453fd126df94
+7 2026-11-06T16:10:34Z 2026-11-06T16:10:41Z 6fccf81c43124f2d72e6b8d3a982da5e2f556413
+8 2026-11-06T17:21:46Z 2026-11-06T17:21:52Z 59502dca80654abe82aecf0ebac4fa4ef3f7d37f

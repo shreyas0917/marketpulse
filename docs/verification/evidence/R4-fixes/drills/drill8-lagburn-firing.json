@@ -1,0 +1,1 @@
+{"alert": "IngestionLagFastBurn", "state": "firing", "observed_at": "2026-11-06T18:00:12+00:00", "waited_since": "2026-11-06T17:48:24+00:00", "starts_at": ["2026-11-06T18:00:06.660Z"], "labels": [{"alertname": "IngestionLagFastBurn", "prometheus": "monitoring/kps", "severity": "page", "slo": "ingestion_lag", "slo_target": "0.99", "window": "6h/30m"}]}

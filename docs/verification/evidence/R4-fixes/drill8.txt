@@ -1,0 +1,20 @@
+scripts/drills/run.sh 8
+2026-11-06T17:48:09Z [drill 8] START 2026-11-06T17:48:09Z - slow worker
+2026-11-06T17:48:09Z [drill 8] Argo CD auto-sync paused
+2026-11-06T17:48:10Z [drill 8] baseline lag p99: 0.0495
+2026-11-06T17:48:24Z [drill 8] slow workers running at 2026-11-06T17:48:24Z (500 ms per event)
+{"alert": "IngestionLagFastBurn", "state": "firing", "observed_at": "2026-11-06T18:00:12+00:00", "waited_since": "2026-11-06T17:48:24+00:00", "starts_at": ["2026-11-06T18:00:06.660Z"], "labels": [{"alertname": "IngestionLagFastBurn", "prometheus": "monitoring/kps", "severity": "page", "slo": "ingestion_lag", "slo_target": "0.99", "window": "6h/30m"}]}
+2026-11-06T18:00:12Z [drill 8] IngestionLagFastBurn firing 708s after the fault (target <= 300 s)
+{"alert": "IngestionStalled", "state": "firing", "observed_at": "2026-11-06T18:00:12+00:00", "waited_since": "2026-11-06T18:00:12+00:00", "starts_at": ["2026-11-06T17:50:43.891Z"], "labels": [{"alertname": "IngestionStalled", "prometheus": "monitoring/kps", "severity": "page", "slo": "ingestion_lag"}]}
+2026-11-06T18:00:14Z [drill 8] peak queue depth: 12690; lag p99 now: 30
+2026-11-06T18:00:14Z [drill 8] restoring: re-enabling Argo CD auto-sync and waiting up to 300s for self-heal
+2026-11-06T18:00:15Z [drill 8] Argo CD self-heal reverted the worker env after 1s (OutOfSync seen: true)
+2026-11-06T18:00:28Z [drill 8] worker rollout complete 14s after restore started
+2026-11-06T18:00:45Z [drill 8] backlog drained (queue depth <= 20) 31s after restore started
+{"alert": "IngestionLagFastBurn", "state": "resolved", "timeout": true, "waited_since": "2026-11-06T18:00:46+00:00", "gave_up_at": "2026-11-06T18:30:47+00:00"}
+{"alert": "IngestionStalled", "state": "resolved", "observed_at": "2026-11-06T18:30:47+00:00", "waited_since": "2026-11-06T18:30:47+00:00", "starts_at": [], "labels": []}
+2026-11-06T18:30:47Z [drill 8] an ingestion alert did NOT resolve within its timeout
+wrote D:\marketpulse\docs\verification\evidence\R4-fixes\drills\drill8.json
+2026-11-06T18:30:48Z [drill 8] cleanup (exit code 0)
+2026-11-06T18:30:48Z [drill 8] Argo CD auto-sync re-enabled
+2026-11-06T18:30:48Z [drill 8] END 2026-11-06T18:30:48Z

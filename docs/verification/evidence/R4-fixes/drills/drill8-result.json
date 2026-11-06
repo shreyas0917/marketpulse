@@ -1,0 +1,5 @@
+{"latency_ms": 500, "seconds_to_lag_burn_alert": 7081793988012, "fault_seconds": 710,
+ "peak_queue_depth": "12690", "reverted_by": "argocd", "argocd_out_of_sync_seen": true,
+ "seconds_argocd_revert": 1, "seconds_to_restore": 1,
+ "seconds_to_drain_after_restore": 31,
+ "seconds_to_alert_resolved_after_restore": null}
