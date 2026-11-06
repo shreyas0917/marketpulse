@@ -31,8 +31,14 @@ app.kubernetes.io/component: {{ .component }}
   value: {{ .Values.queue.metricsIntervalSeconds | quote }}
 {{- end -}}
 
+{{/*
+Component environment: the neutral fault defaults (.Values.faults) overlaid with the component's
+own env block, which wins on a name clash. Call with (dict "root" $ "env" .Values.<component>.env).
+Rendered in sorted key order, so the list is stable and every name appears once.
+*/}}
 {{- define "mp.extraEnv" -}}
-{{- range $k, $v := . }}
+{{- $env := merge (deepCopy (.env | default dict)) (deepCopy (.root.Values.faults | default dict)) }}
+{{- range $k, $v := $env }}
 - name: {{ $k }}
   value: {{ $v | quote }}
 {{- end }}
