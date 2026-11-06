@@ -46,30 +46,15 @@ def test_redis_queue_redelivery_counts_attempts(queue: RedisStreamQueue) -> None
     assert second[0].attempts == 2
 
 
-def _xpending_range_hook(queue: RedisStreamQueue, *, batch: bool, single: bool) -> list[str]:
-    """Make the batch and/or per-id XPENDING lookups return nothing; return the call log."""
+def _hide_delivery_counts(queue: RedisStreamQueue) -> None:
+    """Make XPENDING return entries whose delivery count cannot be read."""
     real = queue._client.xpending_range
-    calls: list[str] = []
 
     def fake(*args: object, **kwargs: object) -> object:
-        is_single = kwargs.get("count") == 1
-        calls.append("single" if is_single else "batch")
-        if (is_single and single) or (not is_single and batch):
-            return []
-        return real(*args, **kwargs)  # type: ignore[arg-type]
+        entries = real(*args, **kwargs)  # type: ignore[arg-type]
+        return [{**e, "times_delivered": None} for e in entries]
 
     queue._client.xpending_range = fake  # type: ignore[method-assign]
-    return calls
-
-
-def test_redis_queue_missing_batch_count_uses_per_id_lookup(queue: RedisStreamQueue) -> None:
-    queue.publish([event("AAA")])
-    first = queue.receive(10, 0)[0]
-    queue.retry(first)
-    calls = _xpending_range_hook(queue, batch=True, single=False)
-    second = queue.receive(10, 0)
-    assert calls == ["batch", "single"]
-    assert second[0].attempts == 2  # the real count, fetched for that id
 
 
 def test_redis_queue_unknown_count_makes_this_delivery_the_last(
@@ -80,11 +65,49 @@ def test_redis_queue_unknown_count_makes_this_delivery_the_last(
     worker = Worker(make_settings(worker_block_ms=0), queue, writer)
     queue.publish_raw(["{not json"])
     worker.run_once()  # delivery 1 fails -> retried
-    _xpending_range_hook(queue, batch=True, single=True)  # count now unknown
+    _hide_delivery_counts(queue)  # count now unknown
     reclaimed = queue.receive(10, 0)
     assert [m.attempts for m in reclaimed] == [queue.max_attempts]
     assert worker.handle(reclaimed[0]) == "dead_lettered"  # never unbounded retries
     assert queue.stats().dlq_depth == 1
+
+
+def test_redis_queue_backoff_doubles_and_is_capped(sync_redis: object) -> None:
+    q = RedisStreamQueue(
+        sync_redis,  # type: ignore[arg-type]
+        consumer="c",
+        min_idle_ms=2000,
+        max_backoff_ms=10_000,
+    )
+    waits = [q.backoff_ms(n) for n in (1, 2, 3, 4, 5, 6)]
+    assert waits == [2000, 4000, 8000, 10_000, 10_000, 10_000]
+    assert RedisStreamQueue(sync_redis, min_idle_ms=0).backoff_ms(4) == 0  # type: ignore[arg-type]
+
+
+def test_redis_queue_waits_longer_after_each_failed_delivery(sync_redis: object) -> None:
+    q = RedisStreamQueue(sync_redis, consumer="c", min_idle_ms=60)  # type: ignore[arg-type]
+    q.publish([event("AAA")])
+    first = q.receive(10, 0)[0]
+    q.retry(first)
+    time.sleep(0.09)  # past the 60 ms backoff after delivery 1
+    second = q.receive(10, 0)
+    assert [m.attempts for m in second] == [2]
+    q.retry(second[0])
+    time.sleep(0.09)  # after delivery 2 the backoff is 120 ms: not yet due
+    assert q.receive(10, 0) == []
+    time.sleep(0.07)  # now 160 ms idle
+    third = q.receive(10, 0)
+    assert [m.attempts for m in third] == [3]
+    assert third[0].id == first.id
+
+
+def test_redis_queue_reclaim_skips_deleted_entries(queue: RedisStreamQueue) -> None:
+    queue.publish([event("AAA"), event("BBB")])
+    first, second = queue.receive(10, 0)
+    queue._client.xdel(queue.stream, first.id)  # gone from the stream, still pending
+    reclaimed = queue.receive(10, 0)
+    assert [m.id for m in reclaimed] == [second.id]
+    assert [m.attempts for m in reclaimed] == [2]
 
 
 def test_redis_queue_respects_min_idle(sync_redis: object) -> None:

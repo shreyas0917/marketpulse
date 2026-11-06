@@ -28,7 +28,7 @@ All data is synthetic. Nothing connects to an exchange or handles real money.
 ```mermaid
 flowchart LR
     Producer[Synthetic feed producer] -->|XADD| Queue[(Redis Stream<br/>events)]
-    Queue -->|XREADGROUP / XAUTOCLAIM| Worker[Ingestion worker]
+    Queue -->|XREADGROUP / XCLAIM with backoff| Worker[Ingestion worker]
     Worker -->|dedup + last-write-wins Lua| Store[(Redis<br/>latest quotes)]
     Worker -->|after 5 attempts| DLQ[(events-dlq)]
     Store --> API[Quote API<br/>FastAPI + per-pod cache]

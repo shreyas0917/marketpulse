@@ -43,7 +43,8 @@ All services share one settings model, so a variable that does not apply to a se
 | `WORKER_MAX_ATTEMPTS` | `5` | Deliveries before a failing event is dead-lettered. |
 | `WORKER_BATCH_SIZE` | `50` | Max messages read per poll. |
 | `WORKER_BLOCK_MS` | `1000` | How long a poll blocks waiting for new messages. |
-| `RETRY_MIN_IDLE_MS` | `2000` | Redis backend: a failed message is reclaimed with `XAUTOCLAIM` once it has been idle this long. |
+| `RETRY_MIN_IDLE_MS` | `2000` | Redis backend: base retry backoff. After delivery *n* fails, the message is reclaimed with `XCLAIM` once it has been idle `base × 2^(n-1)` ms (2, 4, 8, 16 s with the defaults). Also how long a dead worker's messages wait before another worker takes them. |
+| `RETRY_MAX_BACKOFF_MS` | `60000` | Redis backend: upper limit for that backoff. |
 | `RETRY_BACKOFF_BASE_SECONDS` | `2` | SQS backend: visibility timeout after attempt *n* is `base × 2^(n-1)`, capped at 900 s. |
 | `DEDUP_TTL_SECONDS` | `3600` | How long a processed `event_id` is remembered for deduplication. |
 | `WORKER_HEARTBEAT_TIMEOUT_SECONDS` | `30` | `/health/live` fails if the processing loop has not completed a poll for this long. |
