@@ -344,3 +344,19 @@ Pinned in `deploy/kind/versions.env` and `deploy/kind/cluster.yaml`.
 - **Effect on drills:** drill 6 (poison messages) will take longer to fill the DLQ than the 9 s
   recorded on 2026-10-26; re-run it after this change.
 
+
+## D36 — Declare every fault switch in the chart so Argo CD drift covers it
+
+- **Problem (F13):** with `ServerSideApply` + `ServerSideDiff` (D29), Argo CD only compares fields
+  the manifest declares. A `FAULT_*` env var added with `kubectl set env` was not drift: verification
+  run 3 left one in place for 30 m 35 s while the app reported `Synced/Healthy`
+  ([postmortem](incidents/2026-11-06-fault-env-invisible-to-argocd.md)).
+- **Choice:** keep server-side diff (it is what keeps API-server defaults out of the diff) and declare
+  all five `FAULT_*` switches with neutral values in every MarketPulse container (`values.yaml`
+  `faults:`). A component's `env` block overrides them, so the bad-canary demo still works. A manual
+  change is now a changed value of a declared field: measured `OutOfSync` and revert in about 2 s.
+- **Not covered:** an env var or field that Git does not declare at all is still invisible. For M8
+  (EKS) decide between accepting that, an admission policy that blocks non-Argo writers to managed
+  workloads, or client-side diff for selected kinds.
+- **Drills** keep their own cleanup (they pause auto-sync, so they must restore what they change);
+  drill 8 now records whether Argo CD or its own cleanup restored the env (F14).

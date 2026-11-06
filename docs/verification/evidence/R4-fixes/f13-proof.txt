@@ -1,0 +1,14 @@
+2026-11-06T17:44:56.817Z argocd syncPolicy: {"prune":true,"selfHeal":true} targetRevision: fix-f13-f15-f7 revision: 59502dca80654abe82aecf0ebac4fa4ef3f7d37f
+2026-11-06T17:44:57.130Z --- marketpulse-worker: before app=Synced/Healthy FAULT_WORKER_EXTRA_LATENCY_MS='0'
+2026-11-06T17:44:57.383Z set FAULT_WORKER_EXTRA_LATENCY_MS=500 on marketpulse-worker (kubectl set env)
+2026-11-06T17:44:59.179Z FAULT_WORKER_EXTRA_LATENCY_MS back to '0' (1974ms)
+2026-11-06T17:44:59.399Z app Synced/Healthy and marketpulse-worker rolled out (2200ms)
+2026-11-06T17:44:59.451Z RESULT marketpulse-worker: out_of_sync_seen=NO ms_to_out_of_sync= ms_to_revert=1974 ms_to_synced_healthy=2200
+Succeeded successfully synced (all tasks run) 2026-11-06T17:44:57Z
+2026-11-06T17:44:59.933Z --- marketpulse-producer: before app=Synced/Healthy FAULT_API_ERROR_RATE='0'
+2026-11-06T17:45:00.225Z set FAULT_API_ERROR_RATE=0.5 on marketpulse-producer (kubectl set env)
+2026-11-06T17:45:02.272Z FAULT_API_ERROR_RATE back to '0' (2241ms)
+2026-11-06T17:45:02.610Z app Synced/Healthy and marketpulse-producer rolled out (2569ms)
+2026-11-06T17:45:02.683Z RESULT marketpulse-producer: out_of_sync_seen=NO ms_to_out_of_sync= ms_to_revert=2241 ms_to_synced_healthy=2569
+Succeeded successfully synced (all tasks run) 2026-11-06T17:45:00Z
+2026-11-06T17:45:03.314Z final app=Synced/Healthy

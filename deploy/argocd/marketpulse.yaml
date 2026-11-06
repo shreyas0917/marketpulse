@@ -39,3 +39,14 @@ spec:
       kind: Rollout
       name: marketpulse-api
       jsonPointers: ["/spec/replicas"]
+    # Argo Rollouts adds rollouts-pod-template-hash to the canary and stable Service selectors to
+    # split traffic. Without this, the app goes OutOfSync after every canary and self-heal strips
+    # the key, so the stable Service would also select canary pods (finding F15).
+    - group: ""
+      kind: Service
+      name: marketpulse-api-canary
+      jsonPointers: ["/spec/selector/rollouts-pod-template-hash"]
+    - group: ""
+      kind: Service
+      name: marketpulse-api-stable
+      jsonPointers: ["/spec/selector/rollouts-pod-template-hash"]

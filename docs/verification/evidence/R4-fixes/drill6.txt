@@ -1,0 +1,14 @@
+scripts/drills/run.sh 6
+2026-11-06T17:45:25Z [drill 6] START 2026-11-06T17:45:25Z - poison messages
+2026-11-06T17:45:26Z [drill 6] worker restarts before: 0 0 ; DLQ length before: 0
+2026-11-06T17:45:27Z [drill 6] published 20 poison messages at 2026-11-06T17:45:27Z
+2026-11-06T17:45:58Z [drill 6] DLQ +20 after 31s
+{"alert": "DeadLetterQueueNotEmpty", "state": "firing", "observed_at": "2026-11-06T17:47:09+00:00", "waited_since": "2026-11-06T17:45:59+00:00", "starts_at": ["2026-11-06T17:47:03.891Z"], "labels": [{"alertname": "DeadLetterQueueNotEmpty", "prometheus": "monitoring/kps", "severity": "ticket", "slo": "ingestion_lag"}]}
+2026-11-06T17:47:30Z [drill 6] worker restarts after: 0 0 ; good events processed during drill: 2531
+2026-11-06T17:47:31Z [drill 6] retried: 82.07230868442197 dead_lettered: 20.383269133282063
+wrote D:\marketpulse\docs\verification\evidence\R4-fixes\drills\drill6.json
+2026-11-06T17:47:32Z [drill 6] clearing DLQ so the alert resolves
+{"alert": "DeadLetterQueueNotEmpty", "state": "resolved", "observed_at": "2026-11-06T17:47:58+00:00", "waited_since": "2026-11-06T17:47:33+00:00", "starts_at": [], "labels": []}
+2026-11-06T17:47:58Z [drill 6] cleanup (exit code 0)
+2026-11-06T17:47:58Z [drill 6] DLQ cleared
+2026-11-06T17:47:58Z [drill 6] END 2026-11-06T17:47:58Z

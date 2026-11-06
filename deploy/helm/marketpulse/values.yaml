@@ -68,6 +68,17 @@ api:
       maxErrorRatio: 0.01
       minLatencyGoodRatio: 0.99
 
+
+# Fault-injection switches (section 0.7), declared with neutral values in every MarketPulse
+# container. Because Git declares them, a manual `kubectl set env FAULT_...=x` is drift that
+# Argo CD reports as OutOfSync and self-heal reverts (finding F13). A component's `env` block
+# overrides these, e.g. api.env.FAULT_API_ERROR_RATE: "0.2" for the bad-canary demo.
+faults:
+  FAULT_API_ERROR_RATE: "0"
+  FAULT_API_EXTRA_LATENCY_MS: "0"
+  FAULT_WORKER_FAIL_RATE: "0"
+  FAULT_WORKER_EXTRA_LATENCY_MS: "0"
+  FAULT_READINESS_FAIL: "false"
 worker:
   replicas: 2
   port: 9100

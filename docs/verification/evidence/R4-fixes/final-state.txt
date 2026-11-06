@@ -1,0 +1,14 @@
+2026-11-06T18:50:59Z
+marketpulse-control-plane   Ready   control-plane   5h11m   v1.37.0
+marketpulse-worker          Ready   <none>          5h10m   v1.37.0
+marketpulse-worker2         Ready   <none>          5h10m   v1.37.0
+app=Synced/Healthy rev=6fccf81c43124f2d72e6b8d3a982da5e2f556413 target=main ignoreDiff=Deployment Rollout
+rollout=Healthy stable=65ddb44f9d
+marketpulse-api-65ddb44f9d-rm62g        1/1   Running   0     19m
+marketpulse-api-65ddb44f9d-szph2        1/1   Running   0     50s
+marketpulse-producer-7998c8d598-wrrzw   1/1   Running   0     19m
+marketpulse-redis-8cf748c55-flkgr       1/1   Running   0     146m
+marketpulse-worker-868857467d-2gdhf     1/1   Running   0     19m
+marketpulse-worker-868857467d-gplzz     1/1   Running   0     18m
+pods not Running/Completed: 0
+worker FAULT env names: 0

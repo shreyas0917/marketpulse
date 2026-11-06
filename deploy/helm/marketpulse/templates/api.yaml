@@ -70,7 +70,7 @@ spec:
             {{- include "mp.commonEnv" . | nindent 12 }}
             - name: API_PORT
               value: {{ .Values.api.port | quote }}
-            {{- include "mp.extraEnv" .Values.api.env | nindent 12 }}
+            {{- include "mp.extraEnv" (dict "root" $ "env" .Values.api.env) | nindent 12 }}
           securityContext:
             {{- toYaml .Values.containerSecurityContext | nindent 12 }}
           resources:

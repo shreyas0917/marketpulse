@@ -38,7 +38,7 @@ spec:
             {{- include "mp.commonEnv" . | nindent 12 }}
             - name: WORKER_PORT
               value: {{ .Values.worker.port | quote }}
-            {{- include "mp.extraEnv" .Values.worker.env | nindent 12 }}
+            {{- include "mp.extraEnv" (dict "root" $ "env" .Values.worker.env) | nindent 12 }}
           securityContext:
             {{- toYaml .Values.containerSecurityContext | nindent 12 }}
           resources:
@@ -92,7 +92,7 @@ spec:
               value: {{ .Values.producer.rate | quote }}
             - name: PRODUCER_SYMBOLS
               value: {{ .Values.producerSymbols | quote }}
-            {{- include "mp.extraEnv" .Values.producer.env | nindent 12 }}
+            {{- include "mp.extraEnv" (dict "root" $ "env" .Values.producer.env) | nindent 12 }}
           securityContext:
             {{- toYaml .Values.containerSecurityContext | nindent 12 }}
           resources:
