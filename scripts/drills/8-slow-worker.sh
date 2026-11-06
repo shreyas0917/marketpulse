@@ -1,8 +1,10 @@
 #!/usr/bin/env bash
 # Drill 8: slow worker (FAULT_WORKER_EXTRA_LATENCY_MS=500).
 # Expected: the backlog grows, ingestion lag exceeds 1 s and IngestionLagFastBurn pages within
-# the target of 5 minutes. Restoring is done by re-enabling Argo CD auto-sync, which reverts the
-# out-of-band env change (self-heal); the backlog then drains.
+# the target of 5 minutes. Restore: re-enable Argo CD auto-sync and wait for self-heal to put the
+# worker env back to the value Git declares (FAULT_* are declared in the chart, F13). Only what is
+# observed is logged: if Argo CD has not reverted the env within REVERT_TIMEOUT seconds, the drill
+# restores it with its own cleanup and records that instead (F14).
 # shellcheck source=scripts/drills/lib.sh
 source "$(dirname "$0")/lib.sh"
 drill_start 8 "slow worker"
@@ -12,7 +14,17 @@ pause_autosync
 NAME=drill8
 LATENCY_MS="${LATENCY_MS:-500}"
 FAULT_SECONDS="${FAULT_SECONDS:-300}"
-on_exit "kubectl -n $NS set env deploy/marketpulse-worker FAULT_WORKER_EXTRA_LATENCY_MS- >/dev/null 2>&1 || true"
+REVERT_TIMEOUT="${REVERT_TIMEOUT:-300}"
+DRAIN_TIMEOUT="${DRAIN_TIMEOUT:-900}"
+# The drill's own cleanup: set the env back to the neutral value the chart declares (values.yaml
+# faults:), so the result matches Git whether or not Argo CD reverted it first.
+restore_env() { kubectl -n "$NS" set env deploy/marketpulse-worker FAULT_WORKER_EXTRA_LATENCY_MS=0 >/dev/null; }
+on_exit "restore_env 2>/dev/null || true"
+# Current value of the fault env on the worker pod template ("" when the name is absent).
+worker_fault() {
+  kubectl -n "$NS" get deploy marketpulse-worker \
+    -o jsonpath='{.spec.template.spec.containers[0].env[?(@.name=="FAULT_WORKER_EXTRA_LATENCY_MS")].value}'
+}
 
 log "baseline lag p99: $(prom_value 'histogram_quantile(0.99, sum by (le) (rate(ingestion_lag_seconds_bucket[1m])))')"
 kubectl -n "$NS" set env deploy/marketpulse-worker "FAULT_WORKER_EXTRA_LATENCY_MS=$LATENCY_MS" >/dev/null
@@ -34,32 +46,60 @@ peak_depth=$(prom_value 'max(max_over_time(queue_depth[10m]))')
 log "peak queue depth: $peak_depth; lag p99 now: $(prom_value 'histogram_quantile(0.99, sum by (le) (rate(ingestion_lag_seconds_bucket[1m])))')"
 
 T1=$(epoch)
-log "restoring: re-enabling Argo CD auto-sync (self-heal reverts the env change)"
+log "restoring: re-enabling Argo CD auto-sync and waiting up to ${REVERT_TIMEOUT}s for self-heal"
 kubectl -n argocd patch application marketpulse --type merge \
   -p '{"spec":{"syncPolicy":{"automated":{"prune":true,"selfHeal":true}}}}' >/dev/null
 kubectl -n argocd annotate application marketpulse argocd.argoproj.io/refresh=normal --overwrite >/dev/null
-for _ in $(seq 1 120); do
-  kubectl -n "$NS" get deploy marketpulse-worker -o jsonpath='{.spec.template.spec.containers[0].env[*].name}' \
-    | grep -q FAULT_WORKER_EXTRA_LATENCY_MS || break
+reverted_by="" T_REVERT="" saw_out_of_sync=false
+while (( $(epoch) - T1 < REVERT_TIMEOUT )); do
+  [[ "$(kubectl -n argocd get application marketpulse -o jsonpath='{.status.sync.status}')" == "OutOfSync" ]] \
+    && saw_out_of_sync=true
+  v="$(worker_fault)"
+  if [[ -z "$v" || "$v" == "0" ]]; then reverted_by=argocd; T_REVERT=$(epoch); break; fi
   sleep 2
 done
-T_REVERT=$(epoch)
-log "Argo CD reverted the worker env after $(( T_REVERT - T1 ))s"
-kubectl -n "$NS" rollout status deploy/marketpulse-worker --timeout=180s >/dev/null
+if [[ "$reverted_by" == "argocd" ]]; then
+  log "Argo CD self-heal reverted the worker env after $(( T_REVERT - T1 ))s (OutOfSync seen: $saw_out_of_sync)"
+else
+  log "Argo CD did NOT revert the worker env within ${REVERT_TIMEOUT}s (value still '$(worker_fault)', OutOfSync seen: $saw_out_of_sync); restoring with the drill cleanup"
+  restore_env
+  reverted_by=drill_cleanup
+  T_REVERT=$(epoch)
+fi
+if kubectl -n "$NS" rollout status deploy/marketpulse-worker --timeout=180s >/dev/null; then
+  log "worker rollout complete $(( $(epoch) - T1 ))s after restore started"
+else
+  log "worker rollout NOT complete within 180 s"
+fi
 drained=""
-for _ in $(seq 1 120); do
+while (( $(epoch) - T1 < DRAIN_TIMEOUT )); do
   d=$(prom_value 'max(queue_depth)')
   if [[ "$d" != "none" ]] && (( $(printf '%.0f' "$d") <= 20 )); then drained=$(epoch); break; fi
   sleep 5
 done
-log "backlog drained $(( ${drained:-$(epoch)} - T1 ))s after restore started"
-"${ALERTS[@]}" wait --alert IngestionLagFastBurn --state resolved --timeout 1800 | tee "$EVIDENCE/$NAME-lagburn-resolved.json" || true
-"${ALERTS[@]}" wait --alert IngestionStalled --state resolved --timeout 900 | tee "$EVIDENCE/$NAME-stalled-resolved.json" || true
+if [[ -n "$drained" ]]; then
+  log "backlog drained (queue depth <= 20) $(( drained - T1 ))s after restore started"
+else
+  log "backlog NOT drained within ${DRAIN_TIMEOUT}s of restore (queue depth now $(prom_value 'max(queue_depth)'))"
+fi
+resolved=true
+"${ALERTS[@]}" wait --alert IngestionLagFastBurn --state resolved --timeout 1800 | tee "$EVIDENCE/$NAME-lagburn-resolved.json" || resolved=false
+"${ALERTS[@]}" wait --alert IngestionStalled --state resolved --timeout 900 | tee "$EVIDENCE/$NAME-stalled-resolved.json" || resolved=false
 T_RESOLVED=$(epoch)
+$resolved || log "an ingestion alert did NOT resolve within its timeout"
+
+# Seconds since restore started, or null for anything that was not observed.
+since_restore() { if [[ -n "$1" ]]; then echo "$(( $1 - T1 ))"; else echo null; fi; }
+argocd_revert=null
+[[ "$reverted_by" == "argocd" ]] && argocd_revert=$(( T_REVERT - T1 ))
+resolved_at=""
+$resolved && resolved_at=$T_RESOLVED
 cat > "$EVIDENCE/$NAME-result.json" <<EOF
 {"latency_ms": $LATENCY_MS, "seconds_to_lag_burn_alert": ${T_DETECT:+$(( T_DETECT - T0 ))}${T_DETECT:-null}, "fault_seconds": $(( T1 - T0 )),
- "peak_queue_depth": "$peak_depth", "seconds_argocd_revert": $(( T_REVERT - T1 )),
- "seconds_to_drain_after_restore": $(( ${drained:-$T_RESOLVED} - T1 )), "seconds_to_alert_resolved_after_restore": $(( T_RESOLVED - T1 ))}
+ "peak_queue_depth": "$peak_depth", "reverted_by": "$reverted_by", "argocd_out_of_sync_seen": $saw_out_of_sync,
+ "seconds_argocd_revert": $argocd_revert, "seconds_to_restore": $(( T_REVERT - T1 )),
+ "seconds_to_drain_after_restore": $(since_restore "$drained"),
+ "seconds_to_alert_resolved_after_restore": $(since_restore "$resolved_at")}
 EOF
 export_evidence "$NAME" \
   --expr 'histogram_quantile(0.99, sum by (le) (rate(ingestion_lag_seconds_bucket[1m])))' \
