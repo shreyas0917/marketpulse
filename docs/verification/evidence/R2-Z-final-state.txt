@@ -1,0 +1,10 @@
+## run2 final state 2026-11-06T13:28:20Z
+available 1.96 GB | vmmemWSL 8904 MB
+available 1.99 GB | vmmemWSL 8910 MB
+available 2.03 GB | vmmemWSL 8906 MB
+docker VM MemTotal: 10244255744  (.wslconfig present: no)
+marketpulse-control-plane   Ready   control-plane   24m   v1.37.0
+marketpulse-worker          Ready   <none>          24m   v1.37.0
+marketpulse-worker2         Ready   <none>          24m   v1.37.0
+pods: 24 total, not ready: 0
+k6=0 kubectl=0

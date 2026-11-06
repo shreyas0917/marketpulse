@@ -1,0 +1,22 @@
+# id: F1-chart-lint
+# command: make chart-lint
+# start: 2026-11-06T12:16:46Z
+diff -r --strip-trailing-cr observability/prometheus/rules deploy/helm/marketpulse/files/rules
+diff -r --strip-trailing-cr observability/grafana/dashboards deploy/helm/marketpulse/files/dashboards
+helm lint --strict deploy/helm/marketpulse -f deploy/helm/marketpulse/values-kind.yaml --set api.rollout.enabled=false
+==> Linting deploy/helm/marketpulse
+[INFO] Chart.yaml: icon is recommended
+
+1 chart(s) linted, 0 chart(s) failed
+helm lint --strict deploy/helm/marketpulse -f deploy/helm/marketpulse/values-kind.yaml --set api.rollout.enabled=true
+==> Linting deploy/helm/marketpulse
+[INFO] Chart.yaml: icon is recommended
+
+1 chart(s) linted, 0 chart(s) failed
+helm template mp deploy/helm/marketpulse -f deploy/helm/marketpulse/values-kind.yaml --set api.rollout.enabled=false | kubeconform -strict -summary -schema-location default 	-schema-location 'https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/{{.Group}}/{{.ResourceKind}}_{{.ResourceAPIVersion}}.json'
+Summary: 29 resources found parsing stdin - Valid: 29, Invalid: 0, Errors: 0, Skipped: 0
+helm template mp deploy/helm/marketpulse -f deploy/helm/marketpulse/values-kind.yaml --set api.rollout.enabled=true | kubeconform -strict -summary -schema-location default 	-schema-location 'https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/{{.Group}}/{{.ResourceKind}}_{{.ResourceAPIVersion}}.json'
+Summary: 31 resources found parsing stdin - Valid: 31, Invalid: 0, Errors: 0, Skipped: 0
+# end: 2026-11-06T12:19:00Z
+# exit: 0
+# seconds: 134

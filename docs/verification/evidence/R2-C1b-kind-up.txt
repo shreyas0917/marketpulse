@@ -1,0 +1,58 @@
+# id: R2-C1b-kind-up
+# command: make kind-up
+# start: 2026-11-06T13:03:21Z
+scripts/kind-up.sh
+13:03:22 creating cluster marketpulse
+Creating cluster "marketpulse" ...
+ • Ensuring node image (kindest/node:v1.37.0) 🖼️  ...
+ ✓ Ensuring node image (kindest/node:v1.37.0) 🖼️
+ • Preparing nodes 📦 📦 📦   ...
+ ✓ Preparing nodes 📦 📦 📦 
+ • Writing configuration 📜  ...
+ ✓ Writing configuration 📜
+ • Starting control-plane 🕹️  ...
+ ✓ Starting control-plane 🕹️
+ • Installing StorageClass 💾  ...
+ ✓ Installing StorageClass 💾
+ • Joining worker nodes 🚜  ...
+ ✓ Joining worker nodes 🚜
+Set kubectl context to "kind-marketpulse"
+You can now use your cluster with:
+
+kubectl cluster-info --context kind-marketpulse
+
+Have a question, bug, or feature request? Let us know! https://kind.sigs.k8s.io/#community 🙂
+13:04:06 installing Calico v3.33.0
+Waiting for daemon set "calico-node" rollout to finish: 0 of 3 updated pods are available...
+Waiting for daemon set "calico-node" rollout to finish: 1 of 3 updated pods are available...
+Waiting for daemon set "calico-node" rollout to finish: 2 of 3 updated pods are available...
+daemon set "calico-node" successfully rolled out
+Waiting for deployment "calico-kube-controllers" rollout to finish: 0 of 1 updated replicas are available...
+deployment "calico-kube-controllers" successfully rolled out
+node/marketpulse-control-plane condition met
+node/marketpulse-worker condition met
+node/marketpulse-worker2 condition met
+13:09:05 installing metrics-server 3.14.0
+13:12:54 preloading ingress-nginx images
+13:13:51   preloaded registry.k8s.io/ingress-nginx/controller:v1.15.1@sha256:594ceea76b01c592858f803f9ff4d2cb40542cae2060410b2c95f75907d659e1
+13:13:51 installing ingress-nginx 4.15.1
+13:14:09 preloading kube-prometheus-stack images
+13:15:32   preloaded docker.io/bats/bats:1.14.0
+13:19:43   preloaded docker.io/grafana/grafana:13.2.4-distroless
+13:20:43   preloaded ghcr.io/jkroepke/kube-webhook-certgen:1.11.0
+13:21:14   could not preload quay.io/kiwigrid/k8s-sidecar:2.14.1 (kubelet will pull it)
+13:21:25   preloaded quay.io/prometheus-operator/prometheus-config-reloader:v0.94.1
+13:21:48   preloaded quay.io/prometheus-operator/prometheus-operator:v0.94.1
+13:22:06   preloaded quay.io/prometheus/alertmanager:v0.34.1
+13:22:47   preloaded quay.io/prometheus/node-exporter:v1.12.1-distroless
+13:24:11   preloaded quay.io/prometheus/prometheus:v3.15.0-distroless
+13:24:27   preloaded registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.20.0
+13:24:27 installing kube-prometheus-stack 92.13.1
+NAME                        STATUS   ROLES           AGE   VERSION   INTERNAL-IP   EXTERNAL-IP   OS-IMAGE                       KERNEL-VERSION                              CONTAINER-RUNTIME
+marketpulse-control-plane   Ready    control-plane   24m   v1.37.0   172.30.0.3    <none>        Debian GNU/Linux 13 (trixie)   6.18.54.1-microsoft-standard-WSL2 (amd64)   containerd://2.3.4
+marketpulse-worker          Ready    <none>          23m   v1.37.0   172.30.0.4    <none>        Debian GNU/Linux 13 (trixie)   6.18.54.1-microsoft-standard-WSL2 (amd64)   containerd://2.3.4
+marketpulse-worker2         Ready    <none>          23m   v1.37.0   172.30.0.2    <none>        Debian GNU/Linux 13 (trixie)   6.18.54.1-microsoft-standard-WSL2 (amd64)   containerd://2.3.4
+13:28:01 platform ready. Next: make deploy-local
+# end: 2026-11-06T13:28:01Z
+# exit: 0
+# seconds: 1480

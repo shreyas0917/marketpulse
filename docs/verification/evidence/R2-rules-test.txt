@@ -1,0 +1,41 @@
+# id: R2-rules-test
+# command: make rules-test
+# start: 2026-11-06T12:25:03Z
+scripts/lib/tool.sh promtool check rules observability/prometheus/rules/*.yml
+Checking observability/prometheus/rules/gap-alerts.yml
+  SUCCESS: 5 rules found
+
+Checking observability/prometheus/rules/slo-alerts.yml
+  SUCCESS: 12 rules found
+
+Checking observability/prometheus/rules/slo-recording.yml
+  SUCCESS: 20 rules found
+
+scripts/lib/tool.sh promtool test rules observability/prometheus/tests/*.yml
+  SUCCESS
+
+  SUCCESS
+
+  SUCCESS
+
+uv run python scripts/check_runbooks.py
+ok  IngestionStalled             docs/runbooks/ingestion-stalled.md
+ok  QuoteTrafficAbsent           docs/runbooks/quote-traffic-absent.md
+ok  QuoteStoreDown               docs/runbooks/quote-store-down.md
+ok  DeadLetterQueueNotEmpty      docs/runbooks/dead-letter-queue.md
+ok  TargetDown                   docs/runbooks/target-down.md
+ok  AvailabilityFastBurn         docs/runbooks/availability-burn.md#fast-burn
+ok  AvailabilityFastBurn         docs/runbooks/availability-burn.md#fast-burn
+ok  AvailabilitySlowBurn         docs/runbooks/availability-burn.md#slow-burn
+ok  LatencyFastBurn              docs/runbooks/latency-burn.md#fast-burn
+ok  LatencyFastBurn              docs/runbooks/latency-burn.md#fast-burn
+ok  LatencySlowBurn              docs/runbooks/latency-burn.md#slow-burn
+ok  FreshnessFastBurn            docs/runbooks/freshness-burn.md#fast-burn
+ok  FreshnessFastBurn            docs/runbooks/freshness-burn.md#fast-burn
+ok  FreshnessSlowBurn            docs/runbooks/freshness-burn.md#slow-burn
+ok  IngestionLagFastBurn         docs/runbooks/ingestion-lag-burn.md#fast-burn
+ok  IngestionLagFastBurn         docs/runbooks/ingestion-lag-burn.md#fast-burn
+ok  IngestionLagSlowBurn         docs/runbooks/ingestion-lag-burn.md#slow-burn
+# end: 2026-11-06T12:25:08Z
+# exit: 0
+# seconds: 5

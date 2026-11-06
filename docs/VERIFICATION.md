@@ -15,6 +15,10 @@ first (below the 4 GB bar, so the run stopped); after Edge was closed, 7.8 GB, s
 
 Evidence paths below are relative to `docs/verification/evidence/`.
 
+> **Two runs.** Run 1 (the sections from M1 to Session changes) is unchanged.
+> [Run 2](#run-2--2026-11-06-after-fixes) at the end applies fixes F1, F2, F4, F5, F6, F8 and F9
+> and re-runs Phase C.
+
 ## M1 — Application
 
 | Check | Result | Measured now | PROGRESS.md claim | Command | Evidence |
@@ -144,3 +148,80 @@ F1 and F2, re-run Phases C–E, and decide F4–F6 before the SQS work in M7.
   `docs/experiments/evidence/`. Re-checked with shellcheck; the M3 live check then wrote only to
   `docs/verification/evidence/B4-m3-live/`.
 - This file and `docs/verification/evidence/`.
+
+# Run 2 — 2026-11-06 (after fixes)
+
+Owner request: apply F1, F2, F4, F5, F6, F8, F9; new memory rule **≥ 2 GB available on Windows**
+before and during each phase (finish the current check, clean up, record BLOCKED, stop below it);
+re-run Phases C, D and E and re-check the three known gaps.
+
+**Memory setup.** The owner reported capping WSL at 8 GB via `.wslconfig`. That cap is **not in
+effect**: `C:\Users\Admin\.wslconfig` does not exist and the Docker VM still reports 10 GB
+(`MemTotal 10244255744`). The VM grew to 8.9 GB once the kind platform was up
+(`R2-Z-final-state.txt`).
+
+## Fixes (one commit each, check re-run after)
+
+| Finding | Commit | Change | Check re-run | Result |
+|---|---|---|---|---|
+| F1 | `eb472d8` | `make chart-lint`: first `helm lint` and first kubeconform run use `--set api.rollout.enabled=false` | `make chart-lint` (`F1-chart-lint.txt`) | PASS — Deployment mode 29/29 valid (4 Deployments, no Rollout/AnalysisTemplate); Rollout mode 31/31 |
+| F2 | `eb6bd4b`, `ce6dc03` | `scripts/kind-up.sh`: Helm `--wait --timeout 10m` for ingress-nginx (kube-prometheus-stack already 10m); pre-pull each chart's images before install. The first version (`eb6bd4b`: `docker pull` + `kind load docker-image`, falling back to `crictl pull` in every node) was **too slow**: `kind load` cannot import Docker Desktop's multi-platform images, so each image was re-downloaded per node at about 0.75 MB/s (the ingress controller is 448 MB); aborted after 24 min (`R2-C1-kind-up.txt`). Second version (`ce6dc03`): `docker pull` once, `docker save` once, `ctr import --platform` into every node in parallel, add the `repo@sha256` name for digest-pinned references, verify with `crictl inspecti` | `load_image` unit check, 2 images × 3 nodes (`R2-F2-load-image-check.txt`); clean `make kind-up` (`R2-C1b-kind-up.txt`) | PASS — all 3 nodes resolve both images, including the digest-pinned ingress controller; clean `make kind-up` exit 0 in **1,480 s**; ingress-nginx installed in **18 s** (preload 57 s); 9/10 monitoring images preloaded (k8s-sidecar fell back to a kubelet pull); kube-prometheus-stack installed in 3 m 34 s |
+| F4 | `c2de9ec` | `app/api/main.py`: Redis reachable but no quote → serve the cached quote if age ≤ `STALE_QUOTE_MAX_AGE_SECONDS` (`stale: true`, `source: local_cache`, `quote_store_up` stays 1), else `404 NO_QUOTE`; `docs/slos.md` degraded-mode section updated | 2 new tests: `test_redis_empty_serves_fresh_cached_quote`, `test_redis_empty_with_cache_older_than_max_age_returns_404` | PASS — and the first test fails on the pre-fix code |
+| F5 | `05938a6` | `redis_streams.py`: a delivery count missing from the batch `XPENDING` range is fetched with `XPENDING` for that id; if still unknown, the message is treated as having used `WORKER_MAX_ATTEMPTS − 1` previous deliveries, so **this** delivery is its last and a failure dead-letters it. In code that is `attempts = WORKER_MAX_ATTEMPTS`, because `Message.attempts` counts the current delivery and the worker dead-letters at `attempts >= WORKER_MAX_ATTEMPTS`. The default of 2 is gone. | 2 new tests: per-id lookup used when the batch misses an id (real count 2 returned); unknown count → `attempts == 5` and the next failure is `dead_lettered` | PASS — both fail on the pre-fix code |
+| F6 | `ce0bd24` | no code change; `docs/DECISIONS.md` D33 (SQS DLQ may hold duplicates; consumers dedup on `event_id`) with a TODO for M7 | — | done |
+| F8 | `4e99d79` | `docs/PROGRESS.md`: M2 dashboard queries 29/29; M4 kubeconform 29 (Deployment) / 31 (Rollout) | — | done |
+| F9 | `58026fc` | `.gitattributes`: `*.json text eol=lf` | `make chart-assets` then `git status` | PASS — 0 changed files |
+
+After the fixes: `make lint` PASS (ruff clean, 67 files formatted, mypy clean, shellcheck clean,
+kubeconform 29/29 and 31/31), `make test` PASS (**76 passed**, coverage **92 %**),
+`make rules-test` PASS (37 rules, 17/17 runbooks): `R2-lint.txt`, `R2-test.txt`, `R2-rules-test.txt`.
+
+## Phase C (run 2)
+
+| Check | Result | Measured now | Run 1 | Command | Evidence |
+|---|---|---|---|---|---|
+| `make kind-up` (attempt 1, first F2 version) | FAIL (aborted) | ingress preload still running after 24 min | — | `make kind-up` | `R2-C1-kind-up.txt` |
+| `make kind-up` (clean, refined F2) | **PASS** | exit 0, 1,480 s; 3 nodes Ready; 24/24 pods Ready | FAIL (ingress 5 m wait) | `make kind-down && make kind-up` | `R2-C1b-kind-up.txt`, `R2-Z-final-state.txt` |
+| `make deploy-local`, all pods Ready | BLOCKED (low memory) | — | — | — | — |
+| `make smoke TARGET=kind` | BLOCKED (low memory) | — | BLOCKED | — | — |
+| `scripts/m4-checks.sh all` (security, netpol, pod-delete, HPA) | BLOCKED (low memory) | — | BLOCKED | — | — |
+| kube-prometheus-stack: 37 rules, 4 dashboards with data | BLOCKED (low memory) | — | BLOCKED | — | — |
+
+**Why blocked.** Available RAM was 3.05 GB at the start of the clean kind-up and fell below the
+2 GB line while kube-prometheus-stack was installing: **1.89 / 1.93 / 1.90 GB** at
+13:25:26–13:27:31Z (`R2-ram-timeline.txt`), then 1.96–2.03 GB after the install finished, with the
+Docker VM at 8.9 GB. Per the rule, the in-flight check (`make kind-up`) was allowed to finish
+(PASS), the RAM sampler and background jobs were stopped, and everything after it is BLOCKED.
+
+## Phases D and E (run 2)
+
+All BLOCKED (low memory): Argo CD sync and drift, good / bad / no-traffic canaries, drills 1–6 and 8,
+the interrupted-drill test, and the three known gaps (drill 8 burn alert, drill 1 edge resets,
+drill 5 cold-cache 503s). **None was re-checked.** No canary commits were pushed; `main` is
+unchanged at `a8f65b0`. The link check (PASS, 0 broken) and the postmortem count (FAIL, 2 of ≥ 3)
+are static and stand from run 1.
+
+## Findings status after run 2
+
+| # | Status | Note |
+|---|---|---|
+| F1 | **Fixed** (`eb472d8`) | Deployment mode validated: 29/29 |
+| F2 | **Fixed** (`eb6bd4b`, `ce6dc03`) | clean `make kind-up` passes; see F11 for the first attempt |
+| F3 | **Open — blocking** | the 8 GB WSL cap is not in effect; the full platform pushes Windows below 2 GB |
+| F4 | **Fixed** (`c2de9ec`) | unit-tested; live behaviour (drill 4) not re-checked |
+| F5 | **Fixed** (`05938a6`) | unit-tested; live behaviour (drill 6) not re-checked |
+| F6 | **Accepted** (`ce0bd24`, D33) | TODO for M7 |
+| F7 | Open | 2 of ≥ 3 postmortems (not written, as instructed) |
+| F8 | **Fixed** (`4e99d79`) | |
+| F9 | **Fixed** (`58026fc`) | |
+| F10 | Open — not re-checked | known gaps 1–3 |
+| F11 (new) | **Fixed** in `ce6dc03` | the first F2 pre-pull (`kind load` + per-node `crictl pull`) re-downloaded every multi-platform image once per node; replaced by one `docker save` imported into all nodes |
+
+## Ready for M7? (run 2)
+
+**NO — not yet.** The code and tooling fixes are in and tested (76 tests, all lint and rule checks
+green), and the kind platform now comes up reliably on a cold machine. But M4–M6 still have not
+been independently re-verified: deploy, NetworkPolicy, HPA, GitOps, canary rollback and every drill
+are BLOCKED because the host drops below 2 GB with the platform running (F3). Path to YES: make the
+WSL cap take effect (create `C:\Users\Admin\.wslconfig` with `[wsl2]` and `memory=8GB`, run
+`wsl --shutdown`, restart Docker Desktop), or close VS Code during the run, then re-run Phases C–E.

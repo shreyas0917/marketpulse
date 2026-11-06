@@ -13,3 +13,5 @@
 2026-11-06T12:01:52 phase-C(mid kind-up) available 2.63 GB | vmmemWSL 7776 MB
 2026-11-06T12:02:09 phase-C(mid kind-up) available 2.68 GB | vmmemWSL 7780 MB
 2026-11-06T12:02:26 phase-C(mid kind-up) available 2.65 GB | vmmemWSL 7777 MB
+2026-11-06T12:25:22 run2 phase-C available 6.11 GB | docker VM 10244255744
+2026-11-06T13:03:14 run2 phase-C(retry) available 3.05 GB
