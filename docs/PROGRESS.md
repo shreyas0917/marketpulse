@@ -30,7 +30,7 @@ Machine: Windows 11, Docker Desktop 29.6.1 (8 CPU, 10 GB), Git Bash.
 | `make up` brings every container to healthy within 2 minutes | ✅ 49 s (7/7 healthy) | 2026-10-26 | `time make up` (`docker compose up --wait --wait-timeout 120`). An earlier run took 154 s while an unrelated 7 GB process left the host with 0.8 GB free RAM; re-measured once memory was available. |
 | `make smoke` passes (health 200, produced event served within 5 s, `/metrics` reachable) | ✅ 10 passed | 2026-10-26 | `make smoke` |
 | Every Prometheus target `up == 1` (Prometheus HTTP API) | ✅ 5/5 targets up | 2026-10-26 | `make verify-stack` (`/api/v1/targets`, `up == 0` query) |
-| Grafana API lists API and Ingestion dashboards; their queries return data | ✅ 2 dashboards, 30/30 queries with data | 2026-10-26 | `make verify-stack` (`/api/search`, `/api/dashboards/uid/*`, `/api/v1/query`) |
+| Grafana API lists API and Ingestion dashboards; their queries return data | ✅ 2 dashboards, 29/29 queries with data (13 API + 16 Ingestion; corrected 2026-11-06, previously miscounted as 30/30) | 2026-10-26 | `make verify-stack` (`/api/search`, `/api/dashboards/uid/*`, `/api/v1/query`) |
 | `make down` removes everything; second `make up` works | ✅ 0 containers/networks/volumes left; second up healthy, smoke passed | 2026-10-26 | `make down && docker ps -a --filter name=marketpulse-`, `make up && make smoke` |
 
 ## M3 — SLOs and alerting ✅ (tag `m3-done`)
@@ -53,7 +53,7 @@ modelled, numbers come from the kind drills in M6.
 
 | Check | Status | Date | Verified with |
 |---|---|---|---|
-| `helm lint` and `helm template \| kubeconform -strict` pass | ✅ 29 resources valid (30 with the Rollout variant) | 2026-10-26 | `make chart-lint` (part of `make lint`) |
+| `helm lint` and `helm template \| kubeconform -strict` pass | ✅ 29 resources valid in Deployment mode, 31 in Rollout mode (re-measured 2026-11-06 after the chart-lint fix; the earlier "29 (30 with Rollout)" predates M5 enabling the Rollout in `values-kind.yaml`) | 2026-10-26 | `make chart-lint` (part of `make lint`) |
 | `make kind-up && make deploy-local` deploys everything; all pods Ready | ✅ 3 nodes Ready, 30/30 pods Ready across all namespaces | 2026-10-26 | `make kind-up` (1098 s, mostly first-time image pulls), `make deploy-local`, `kubectl get pods -A` |
 | `make smoke` passes against the kind ingress | ✅ 10 passed | 2026-10-26 | `make smoke TARGET=kind` (API via 127.0.0.1:18080 + Host header; worker/producer via port-forward) |
 | Containers non-root with requests and limits | ✅ uid 10001 (redis 999), `runAsNonRoot`, read-only root FS, requests + limits on every container | 2026-10-26 | `scripts/m4-checks.sh security` (`kubectl get pod -o jsonpath`) |
