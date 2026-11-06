@@ -91,6 +91,34 @@ The long window gives significance; the short window makes the alert resolve soo
 fixed. Every alert has a runbook in [runbooks/](runbooks/). Rules are unit-tested with
 `promtool test rules` (`make rules-test`), with must-fire and must-not-fire cases for each SLI.
 
+### 30-day compliance and error budget
+
+The burn-rate windows say how fast the budget is going; these rules say how much of it is left.
+
+| Rule | Meaning |
+|---|---|
+| `sli:<sli>:good_rate5m`, `sli:<sli>:total_rate5m` | good and valid event rates (the SLI's numerator and denominator), every minute |
+| `sli:<sli>:error_ratio_30d` | `1 - sum_over_time(good_rate5m[30d]) / sum_over_time(total_rate5m[30d])` |
+| `slo:<sli>:compliance_30d` | `1 - error_ratio_30d`: the number to compare with the target |
+| `slo:<sli>:error_budget_remaining_30d` | `1 - error_ratio_30d / (1 - target)`: 1 = untouched, 0 = spent, < 0 = overspent |
+
+- **Weighted by events, not by time.** Summing the rates and dividing gives every event the same
+  weight. Averaging short-window ratios would count a quiet minute with one failed request the
+  same as a busy minute with thousands of good ones. `observability/prometheus/tests/error-budget.yml`
+  checks this: one hour at 10 % errors on light traffic plus one hour at 0 % on ten times the
+  traffic gives about 0.0095, not the 0.05 a time average would.
+- **Evaluated every 5 minutes** (rule group `interval: 5m`), because a 30-day `sum_over_time` is
+  the most expensive query here and the number moves slowly.
+- **Only as long as retention.** Prometheus keeps 7 days on Docker Compose and 2 days on kind, so
+  locally the "30d" rules cover the retained history, and a freshly started stack covers minutes.
+  One drill can then spend the whole budget. The AWS deployment needs retention of at least 31 days
+  (or remote storage) for these numbers to mean a real 30-day window.
+- **Ticket at 25 % left.** `<Sli>ErrorBudgetLow` (severity `ticket`, for 15 m) fires when
+  `error_budget_remaining_30d < 0.25`, the point where the policy below freezes feature releases.
+  Runbook: [error-budget.md](runbooks/error-budget.md).
+
+Grafana's SLO overview shows both numbers per SLI next to the selected-range versions.
+
 ### Gaps a ratio cannot see
 
 | Gap | Alert |

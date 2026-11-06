@@ -493,6 +493,39 @@ def slo_dashboard() -> dict[str, Any]:
         p.append(
             lay.place(
                 stat(
+                    "30-day compliance",
+                    f"slo:{sli}:compliance_30d",
+                    "percentunit",
+                    [(target, "green")],
+                    base_color="red",
+                    decimals=3,
+                    description="Recording rule slo:<sli>:compliance_30d: good / valid events over "
+                    "the last 30 days, weighted by traffic. Covers only the history Prometheus "
+                    "keeps (7 d on compose, 2 d on kind).",
+                ),
+                6,
+                6,
+            )
+        )
+        p.append(
+            lay.place(
+                stat(
+                    "30-day error budget remaining",
+                    f"slo:{sli}:error_budget_remaining_30d",
+                    "percentunit",
+                    [(0.25, "orange"), (0.5, "green")],
+                    base_color="red",
+                    decimals=1,
+                    description="1 - (30-day error ratio / budget). Below 25 % the error-budget "
+                    "policy freezes feature releases; below 0 the budget is overspent.",
+                ),
+                6,
+                6,
+            )
+        )
+        p.append(
+            lay.place(
+                stat(
                     "SLI over selected range",
                     f"{good} / {total}",
                     "percentunit",
@@ -535,8 +568,8 @@ def slo_dashboard() -> dict[str, Any]:
                     description="1 = budget used exactly by the end of 30 days; "
                     "14.4 and 6 are the paging thresholds.",
                 ),
-                12,
-                6,
+                24,
+                7,
             )
         )
     return dashboard("marketpulse-slo", "MarketPulse / SLO overview", p, ["slo"])
