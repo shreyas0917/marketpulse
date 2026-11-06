@@ -1,0 +1,46 @@
+# promtool unit tests: FaultInjectionActive (a fault switch left on for longer than any drill).
+rule_files:
+  - ../rules/gap-alerts.yml
+evaluation_interval: 1m
+
+tests:
+  # FAULT LEFT ON: one worker reports a fault from t=0. Silent while it could still be a drill
+  # (20 min), firing once it has been on for more than 30 min (31 min).
+  - interval: 1m
+    input_series:
+      - series: 'fault_injection_active{type="worker_extra_latency", pod="marketpulse-worker-a"}'
+        values: '1x40'
+      - series: 'fault_injection_active{type="api_error_rate", pod="marketpulse-api-a"}'
+        values: '0x40'
+    alert_rule_test:
+      - eval_time: 20m
+        alertname: FaultInjectionActive
+        exp_alerts: []
+      - eval_time: 31m
+        alertname: FaultInjectionActive
+        exp_alerts:
+          - exp_labels: {severity: ticket}
+            exp_annotations:
+              summary: "A fault-injection switch has been on for more than 30 minutes"
+              description: "Some MarketPulse pod reports fault_injection_active == 1. No drill runs this long, so the fault was probably left on. Query fault_injection_active == 1 to see which switch and which pod."
+              runbook_url: https://github.com/shreyas0917/marketpulse/blob/main/docs/runbooks/fault-injection-active.md#left-on
+
+  # NO FAULT: every switch is off for 40 min, so the alert never fires.
+  - interval: 1m
+    input_series:
+      - series: 'fault_injection_active{type="worker_extra_latency", pod="marketpulse-worker-a"}'
+        values: '0x40'
+    alert_rule_test:
+      - eval_time: 31m
+        alertname: FaultInjectionActive
+        exp_alerts: []
+
+  # A DRILL: the fault is on for 15 min and then cleared, so the alert never fires.
+  - interval: 1m
+    input_series:
+      - series: 'fault_injection_active{type="worker_extra_latency", pod="marketpulse-worker-a"}'
+        values: '1x15 0x25'
+    alert_rule_test:
+      - eval_time: 31m
+        alertname: FaultInjectionActive
+        exp_alerts: []
